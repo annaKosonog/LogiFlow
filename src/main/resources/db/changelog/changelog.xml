@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <changeSet id="1-drop_table" author="student">
+        <sqlFile path="migration/drop_table.sql" relativeToChangelogFile="false" splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <!-- Wczytanie struktury tabel -->
+    <changeSet id="2-create-truck" author="student">
+        <sqlFile path="migration/create_table_truck.sql" relativeToChangelogFile="false" splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="3-create-cargo_space" author="student">
+        <sqlFile path="migration/create_table_cargo_space.sql" relativeToChangelogFile="false"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+
+    <changeSet id="4-create-package" author="student">
+        <sqlFile path="migration/create_table_package.sql" relativeToChangelogFile="false" splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="5-insert_into_table_truck" author="student">
+        <sqlFile path="migration/insert_into_table_truck.sql" relativeToChangelogFile="false" splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="6-insert_into_table" author="student">
+        <sqlFile path="migration/insert_into_table.sql" relativeToChangelogFile="false" splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+</databaseChangeLog>
