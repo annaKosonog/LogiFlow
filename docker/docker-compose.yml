@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  myDb:
+    image: postgres:16
+    container_name: logistic_flow
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: root
+      POSTGRES_DB: delivery_management_db
+    ports:
+      - 1001:5432

@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS packages (
+                          package_id SERIAL PRIMARY KEY,
+                          tracking_number VARCHAR(50) NOT NULL UNIQUE,
+
+    -- Wymiary paczki
+                          width INT NOT NULL,
+                          height INT NOT NULL,
+                          depth INT NOT NULL,
+                          weight DECIMAL(10, 2) NOT NULL,
+
+    -- Współrzędne położenia paczki (wewnątrz ciężarówki)
+                          coord_x INT DEFAULT NULL,
+                          coord_y INT DEFAULT NULL,
+                          coord_z INT DEFAULT NULL,
+
+    -- NOWE POLA I RELACJE:
+                          truck_id BIGINT DEFAULT NULL, -- Link do tabeli trucks (odpowiednik Twojego TruckId)
+
+    -- Definicja klucza obcego spiętego z tabelą trucks
+                          CONSTRAINT fk_packages_truck FOREIGN KEY (truck_id)
+                              REFERENCES trucks(truck_id) ON DELETE SET NULL
+);
