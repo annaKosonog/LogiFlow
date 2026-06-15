@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -28,6 +29,11 @@ public class PackageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPackage);
     }
 
+    @PatchMapping("/packages/{packId}")
+    public ResponseEntity<Package> updateDimensions(@PathVariable Long packId, @RequestBody Map<String, Object> fields) {
+        Package updated = packingService.updatePackageFields(packId, fields);
+        return ResponseEntity.ok(updated);
+    }
 
     @PostMapping("/truck/{truckId}")
     public ResponseEntity<String> packPackages(

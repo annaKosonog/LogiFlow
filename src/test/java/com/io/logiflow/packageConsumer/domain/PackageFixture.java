@@ -2,7 +2,7 @@ package com.io.logiflow.packageConsumer.domain;
 
 import java.math.BigDecimal;
 
-public class BoxFixture {
+public class PackageFixture {
 
     public static Package small() {
         return new Package(1, 1, 1, new BigDecimal("10"));  // objętość = 1
@@ -38,6 +38,31 @@ public class BoxFixture {
 
     public static Package boxThatFitsExactly(CargoSpace cargoSpace) {
         return new Package(cargoSpace.getWidth(), cargoSpace.getHeight(), cargoSpace.getDepth(), new BigDecimal("10"));
+    }
+
+    public static Package firstBoxPackToTruck() {
+        Package p1 = small();
+        p1.setPackageId(1L);
+        p1.setTrackingNumber("TRK-2026-A001");
+        return p1;
+    }
+
+    public static Package secondBoxPackToTruck() {
+        Package p1 = large();
+        p1.setPackageId(2L);
+        p1.setTrackingNumber("TRK-2026-A002");
+        return p1;
+    }
+
+    public static Package updatePackage() {
+        Package updatedPackage = new Package();
+        updatedPackage.setPackageId(5L);
+        updatedPackage.setTrackingNumber("TRK-2026-ORIGINAL"); // Numer bez zmian!
+        updatedPackage.setWidth(45);                          // Zmieniona szerokość
+        updatedPackage.setHeight(10);                          // Bez zmian
+        updatedPackage.setDepth(10);                          // Bez zmian
+        updatedPackage.setWeight(new BigDecimal("12.95"));  //Zmieniona waga
+        return updatedPackage;
     }
 
 

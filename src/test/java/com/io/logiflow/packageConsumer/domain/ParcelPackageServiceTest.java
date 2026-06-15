@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.io.logiflow.packageConsumer.domain.BoxFixture.*;
+import static com.io.logiflow.packageConsumer.domain.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.TruckFixture.createBox;
 import static com.io.logiflow.packageConsumer.domain.TruckFixture.createLoadedTruck;
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,8 +91,8 @@ public class ParcelPackageServiceTest {
     @Test
     void shouldSortBoxesWithSameVolumeByWeightDescending() {
         List<Package> localPackages = new ArrayList<>();
-        Package lightPackage = BoxFixture.lightBox();
-        Package heavyPackage = BoxFixture.heavyBox();
+        Package lightPackage = PackageFixture.lightBox();
+        Package heavyPackage = PackageFixture.heavyBox();
         localPackages.add(lightPackage);
         localPackages.add(heavyPackage);
 
@@ -103,7 +103,7 @@ public class ParcelPackageServiceTest {
 
     @Test
     void shouldPackBoxWhenItFitsExactlyInSpace() {
-        aPackages.add(BoxFixture.boxThatFitsExactly(SpaceFixture.largeSpace()));
+        aPackages.add(PackageFixture.boxThatFitsExactly(SpaceFixture.largeSpace()));
 
         parcelPackingService.pack(aPackages, truck);
         assertEquals(3, truck.getPackedPackages().size());
@@ -122,7 +122,7 @@ public class ParcelPackageServiceTest {
     @Test
     void shouldNotPackBoxWhenTooTall() {
         Package heightPackage = heightBox();
-        aPackages.add(BoxFixture.heightBox());
+        aPackages.add(PackageFixture.heightBox());
 
         parcelPackingService.pack(aPackages, truck);
         assertEquals(2, truck.getPackedPackages().size());
