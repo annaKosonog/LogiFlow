@@ -1,8 +1,8 @@
 package com.io.logiflow.packageConsumer;
 
-import com.io.logiflow.packageConsumer.domain.Package;
-import com.io.logiflow.packageConsumer.domain.Truck;
-import com.io.logiflow.packageConsumer.infrastructure.ParcelPackingService;
+import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

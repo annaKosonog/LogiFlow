@@ -1,6 +1,10 @@
 package com.io.logiflow.packageConsumer.domain;
 
-import com.io.logiflow.packageConsumer.infrastructure.ParcelPackingService;
+import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.PackageFixture;
+import com.io.logiflow.packageConsumer.domain.dao.SpaceFixture;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.io.logiflow.packageConsumer.domain.PackageFixture.*;
-import static com.io.logiflow.packageConsumer.domain.TruckFixture.createBox;
-import static com.io.logiflow.packageConsumer.domain.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createBox;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -18,7 +22,7 @@ public class ParcelPackageServiceTest {
 
     private ParcelPackingService parcelPackingService;
     private Truck truck;
-    private List<Package> aPackages;
+    private List<com.io.logiflow.packageConsumer.domain.dao.Package> aPackages;
 
     @BeforeEach
     void setUp() {
@@ -72,10 +76,10 @@ public class ParcelPackageServiceTest {
 
     @Test
     void shouldSortBoxesByVolumeAscendingBeforePacking() {
-        List<Package> localPackages = new ArrayList<>();
-        Package large = large();
-        Package small = small();
-        Package medium = medium();
+        List<com.io.logiflow.packageConsumer.domain.dao.Package> localPackages = new ArrayList<>();
+        com.io.logiflow.packageConsumer.domain.dao.Package large = large();
+        com.io.logiflow.packageConsumer.domain.dao.Package small = small();
+        com.io.logiflow.packageConsumer.domain.dao.Package medium = medium();
         localPackages.add(large);
         localPackages.add(small);
         localPackages.add(medium);
@@ -90,9 +94,9 @@ public class ParcelPackageServiceTest {
 
     @Test
     void shouldSortBoxesWithSameVolumeByWeightDescending() {
-        List<Package> localPackages = new ArrayList<>();
-        Package lightPackage = PackageFixture.lightBox();
-        Package heavyPackage = PackageFixture.heavyBox();
+        List<com.io.logiflow.packageConsumer.domain.dao.Package> localPackages = new ArrayList<>();
+        com.io.logiflow.packageConsumer.domain.dao.Package lightPackage = PackageFixture.lightBox();
+        com.io.logiflow.packageConsumer.domain.dao.Package heavyPackage = PackageFixture.heavyBox();
         localPackages.add(lightPackage);
         localPackages.add(heavyPackage);
 
@@ -111,7 +115,7 @@ public class ParcelPackageServiceTest {
 
     @Test
     void shouldNotPackBoxWhenTooWide() {
-        Package largePackage = largeBox();
+        com.io.logiflow.packageConsumer.domain.dao.Package largePackage = largeBox();
         aPackages.add(largePackage);
 
         parcelPackingService.pack(aPackages, truck);
@@ -121,7 +125,7 @@ public class ParcelPackageServiceTest {
 
     @Test
     void shouldNotPackBoxWhenTooTall() {
-        Package heightPackage = heightBox();
+        com.io.logiflow.packageConsumer.domain.dao.Package heightPackage = heightBox();
         aPackages.add(PackageFixture.heightBox());
 
         parcelPackingService.pack(aPackages, truck);

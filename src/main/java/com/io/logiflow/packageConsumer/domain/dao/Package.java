@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain;
+package com.io.logiflow.packageConsumer.domain.dao;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -7,6 +7,7 @@ import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "packages")
@@ -20,6 +21,9 @@ public class Package {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long packageId;
+
+    @Column(unique = true, nullable = false)
+    private UUID uuid = UUID.randomUUID();
 
     @NotNull
     private String trackingNumber;
@@ -71,3 +75,5 @@ public class Package {
         this.z = cargoSpace.getPositionZ();
     }
 }
+
+//todo zrobić warstwe dto

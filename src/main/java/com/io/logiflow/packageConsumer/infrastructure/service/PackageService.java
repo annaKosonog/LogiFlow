@@ -1,15 +1,19 @@
-package com.io.logiflow.packageConsumer.infrastructure;
+package com.io.logiflow.packageConsumer.infrastructure.service;
 
-import com.io.logiflow.packageConsumer.domain.Package;
-import com.io.logiflow.packageConsumer.domain.Truck;
+import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -20,15 +24,17 @@ public class PackageService {
     private final PackageRepository packageRepository;
     private final TruckRepository truckRepository;
     private final ParcelPackingService parcelPackingService;
+    private final PackageMapper packageMapper;
 
 
     @Transactional
-    public Package registerNewPackage(Package pack) {
+    public PackageDTO registerNewPackage(PackageDTO pack) {
         String byTrackingNumber = packageRepository.findByTrackingNumber(pack.getTrackingNumber());
         if (byTrackingNumber != null) {
             throw new RuntimeException("The package with the number " + pack.getTrackingNumber() + " already exist");
         }
-        packageRepository.save(pack);
+        Package entity = packageMapper.toEntity(pack);
+        packageRepository.save(entity);
         return pack;
     }
 
@@ -41,8 +47,10 @@ public class PackageService {
         truckRepository.save(truck);
     }
 
-    public List<Package> getPackages() {
-        return packageRepository.findAll();
+    public Page<PackageDTO> getPackages(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Package> packPage = packageRepository.findAll(pageable);
+        return packPage.map(packageMapper::toDTO);
     }
 
     @Transactional
