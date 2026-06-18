@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS packages (
                           package_id SERIAL PRIMARY KEY,
+                          uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
                           tracking_number VARCHAR(50) NOT NULL UNIQUE,
 
     -- Wymiary paczki

@@ -1,35 +1,35 @@
 -- 1. Paczki, które zostały już ułożone w ciężarówce (posiadają współrzędne X, Y, Z)
 -- Paczka 1: stoi w samym rogu (0,0,0), ma szerokość 30
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-A001', 30, 20, 40, 2.50, 0, 0, 0,1);
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('123e4567-e89b-12d3-a456-426614174000', 'TRK-2026-A001', 30, 20, 40, 2.50, 0, 0, 0,1);
 
 -- Paczka 2: stoi tuż obok Paczki 1 (X przesunięty o 30), ma szerokość 50
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-A002', 50, 20, 40, 5.00, 30, 0, 0,1);
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d','TRK-2026-A002', 50, 20, 40, 5.00, 30, 0, 0,1);
 
--- Paczka 3: postawiona NA Paczce 1 (Y przesunięty w górę o wysokość pierwszej paczki, czyli 20)
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-A003', 30, 30, 40, 1.20, 0, 20, 0,2);
+ --Paczka 3: postawiona NA Paczce 1 (Y przesunięty w górę o wysokość pierwszej paczki, czyli 20)
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('f47ac10b-58cc-4372-a567-0e02b2c3d479','TRK-2026-A003', 30, 30, 40, 1.20, 0, 20, 0,2);
 
 
 -- 2. Paczki nowo zarejestrowane, które dopiero czekają na algorytm pakowania (współrzędne są NULL)
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-B999', 100, 80, 120, 45.00, 0, 0, 0,2);
+INSERT INTO packages (uuid, tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('7c9e0d12-5b1d-407e-8c43-1bc2d3f4a5b6','TRK-2026-B999', 100, 80, 120, 45.00, 0, 0, 0,2);
 
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-C444', 15, 15, 15, 0.50, 0, 0, 0,3);
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('b17a8d83-78b0-4875-ae78-c83d14e17312','TRK-2026-C444', 15, 15, 15, 0.50, 0, 0, 0,3);
 
 -- Paczka zapakowana do ciężarówki o ID = 1, umieszczona na pozycji (0,0,0)
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-XYZ1', 40, 40, 40, 10.50, 0, 0, 0, 1);
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('f4f54dbe-0109-47fe-ba02-b07a2836dab3','TRK-2026-XYZ1', 40, 40, 40, 10.50, 0, 0, 0, 1);
 
 -- Paczka zapakowana do tej samej ciężarówki (ID = 1), stojąca obok (X przesunięty o szerokość poprzedniej paczki, czyli 40)
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-XYZ2', 50, 30, 40, 15.00, 40, 0, 0, 1);
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('e6d49a74-99f7-4e85-b325-3e2cd906d176','TRK-2026-XYZ2', 50, 30, 40, 15.00, 40, 0, 0, 1);
 
 -- Paczka, która leży na magazynie (nie jest przypisana do żadnej ciężarówki -> truck_id oraz współrzędne są NULL)
-INSERT INTO packages (tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
-VALUES ('TRK-2026-MAG9', 20, 20, 20, 1.20, 0, 0, 0, 1);
+INSERT INTO packages (uuid,tracking_number, width, height, depth, weight, coord_x, coord_y, coord_z, truck_id)
+VALUES ('b3eaa788-1c0e-4be8-8591-960d6616e7dc','TRK-2026-MAG9', 20, 20, 20, 1.20, 0, 0, 0, 1);
 
 
 -- 1. Początek: Cała ciężarówka jest pusta.
