@@ -1,8 +1,8 @@
-package com.io.logiflow.packageConsumer.infrastructure;
+package com.io.logiflow.packageConsumer.infrastructure.service;
 
-import com.io.logiflow.packageConsumer.domain.CargoSpace;
-import com.io.logiflow.packageConsumer.domain.Package;
-import com.io.logiflow.packageConsumer.domain.Truck;
+import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
+import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;

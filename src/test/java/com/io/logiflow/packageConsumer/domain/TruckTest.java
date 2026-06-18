@@ -1,5 +1,7 @@
 package com.io.logiflow.packageConsumer.domain;
 
+import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.io.logiflow.packageConsumer.domain.TruckFixture.createBox;
-import static com.io.logiflow.packageConsumer.domain.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createBox;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TruckTest {
@@ -34,8 +36,8 @@ class TruckTest {
     void shouldReturnTrueWhenBoxesLoadToTruck() {
         //GIVEN
 
-        Package packageToBeLoaded = createBox("20");
-        Package nextPackageToBeLoaded = createBox("80");
+        com.io.logiflow.packageConsumer.domain.dao.Package packageToBeLoaded = createBox("20");
+        com.io.logiflow.packageConsumer.domain.dao.Package nextPackageToBeLoaded = createBox("80");
 
         truck.load(packageToBeLoaded);
         truck.load(nextPackageToBeLoaded);
@@ -47,7 +49,7 @@ class TruckTest {
 
     @Test
     void shouldLoadBoxWhenWeightIsExactlyEqualToMaxPayload() {
-        Package maxWeightPackage = createBox("120");
+        com.io.logiflow.packageConsumer.domain.dao.Package maxWeightPackage = createBox("120");
 
         truck.load(maxWeightPackage);
 
@@ -59,7 +61,7 @@ class TruckTest {
     @Test
     void shouldThrowExceptionWhenPayLoadIsExceeded() {
         //GIVEN
-        Package heavyWeight = createBox("125");
+        com.io.logiflow.packageConsumer.domain.dao.Package heavyWeight = createBox("125");
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             truck.load(heavyWeight);
@@ -79,7 +81,7 @@ class TruckTest {
 
     @Test
     void shouldUnloadBoxSuccessfully() {
-        Package packageToUnload = createBox("20");
+        com.io.logiflow.packageConsumer.domain.dao.Package packageToUnload = createBox("20");
         truck.load(packageToUnload);
 
         truck.unload(packageToUnload);

@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain;
+package com.io.logiflow.packageConsumer.domain.dao;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;

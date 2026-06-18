@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain;
+package com.io.logiflow.packageConsumer.domain.dao;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -40,7 +40,6 @@ public class Truck {
     @JsonManagedReference
     @OneToMany(mappedBy = "truck")
     private List<CargoSpace> emptyCargoSpaces = new ArrayList<>();
-
 
     public Truck(int W, int H, int L, BigDecimal maxPayload) {
         this.W = W;

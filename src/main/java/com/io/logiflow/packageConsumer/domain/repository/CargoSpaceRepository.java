@@ -1,6 +1,6 @@
 package com.io.logiflow.packageConsumer.domain.repository;
 
-import com.io.logiflow.packageConsumer.domain.CargoSpace;
+import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

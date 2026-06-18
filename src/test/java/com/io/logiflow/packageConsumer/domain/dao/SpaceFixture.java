@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain;
+package com.io.logiflow.packageConsumer.domain.dao;
 
 public class SpaceFixture {
     public static CargoSpace smallSpace() {
