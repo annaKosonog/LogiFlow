@@ -6,6 +6,7 @@ import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.exception.PackageValidationException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +36,13 @@ public class PackageService {
             throw new RuntimeException("The package with the number " + pack.getTrackingNumber() + " already exist");
         }
         Package entity = packageMapper.toEntity(pack);
-        packageRepository.save(entity);
-        return pack;
+        if (pack.getId() != null) {
+            throw new PackageValidationException("Cannot register a new package: ID must be null. Provided: "
+                    + pack.getId());
+        }
+        entity.setUuid(UUID.randomUUID());
+        Package savedEntity = packageRepository.save(entity);
+        return packageMapper.toDTO(savedEntity);
     }
 
     @Transactional

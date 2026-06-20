@@ -1,6 +1,4 @@
-package com.io.logiflow.packageConsumer.domain;
-
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+package com.io.logiflow.packageConsumer.domain.dto;
 
 import java.util.UUID;
 

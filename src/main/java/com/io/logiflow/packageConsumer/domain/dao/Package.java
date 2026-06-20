@@ -19,13 +19,15 @@ import java.util.UUID;
 public class Package {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long packageId;
 
     @Column(unique = true, nullable = false)
     private UUID uuid = UUID.randomUUID();
 
     @NotNull
+    @Column(name = "tracking_number", unique = true, nullable = false, insertable = false, updatable = false)
+    @org.hibernate.annotations.Generated
     private String trackingNumber;
 
     //wymiary paczki

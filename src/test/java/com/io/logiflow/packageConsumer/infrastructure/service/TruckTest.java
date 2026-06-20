@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain;
+package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;

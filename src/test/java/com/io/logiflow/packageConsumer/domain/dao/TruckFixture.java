@@ -10,7 +10,7 @@ public class TruckFixture {
     private static final int DEFAULT_LENGTH = 600;
 
     // Fabryka dla pudełek (podajesz tylko wagę)
-    public static com.io.logiflow.packageConsumer.domain.dao.Package createBox(String weight) {
+    public static Package createBox(String weight) {
         return new Package(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_LENGTH, new BigDecimal(weight));
     }
 

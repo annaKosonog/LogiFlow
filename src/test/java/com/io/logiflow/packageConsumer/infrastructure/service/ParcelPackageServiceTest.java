@@ -1,10 +1,9 @@
-package com.io.logiflow.packageConsumer.domain;
+package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.PackageFixture;
 import com.io.logiflow.packageConsumer.domain.dao.SpaceFixture;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +77,7 @@ public class ParcelPackageServiceTest {
     void shouldSortBoxesByVolumeAscendingBeforePacking() {
         List<com.io.logiflow.packageConsumer.domain.dao.Package> localPackages = new ArrayList<>();
         com.io.logiflow.packageConsumer.domain.dao.Package large = large();
-        com.io.logiflow.packageConsumer.domain.dao.Package small = small();
+        com.io.logiflow.packageConsumer.domain.dao.Package small = smallDao();
         com.io.logiflow.packageConsumer.domain.dao.Package medium = medium();
         localPackages.add(large);
         localPackages.add(small);

@@ -25,8 +25,8 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.io.logiflow.packageConsumer.domain.PackageFixtureDTO.largeBoxDTO;
-import static com.io.logiflow.packageConsumer.domain.PackageFixtureDTO.smallDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.largeBoxDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,7 +106,7 @@ class PackageControllerTest {
 
     @Test
     public void shouldRegisterNewPackageToSystemSuccessfully() throws Exception {
-        Package registerASmallPackage = small();
+        Package registerASmallPackage = smallDao();
         registerASmallPackage.setPackageId(5L);
         String jsonRequest = objectMapper.writeValueAsString(registerASmallPackage);
 
@@ -139,7 +139,7 @@ class PackageControllerTest {
     @Test
     public void shouldUpdateAPackageToSystemSuccessfully() throws Exception {
         Long packId = 5L;
-        Package existingPackage = small();
+        Package existingPackage = smallDao();
         existingPackage.setTrackingNumber("TRK-2026-ORIGINAL");
 
         when(packageService.updatePackageFields(Mockito.eq(packId), Mockito.anyMap()))

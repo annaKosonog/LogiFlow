@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class PackageFixture {
 
-    public static Package small() {
+    public static Package smallDao() {
         return new Package(1, 1, 1, new BigDecimal("10"));  // objętość = 1
     }
 
@@ -41,7 +41,7 @@ public class PackageFixture {
     }
 
     public static Package firstBoxPackToTruck() {
-        Package p1 = small();
+        Package p1 = smallDao();
         p1.setPackageId(1L);
         p1.setTrackingNumber("TRK-2026-A001");
         return p1;
