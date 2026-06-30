@@ -7,6 +7,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "trucks")
@@ -23,12 +24,15 @@ public class Truck {
     @Column(name = "truck_id")
     private Long truckId;
 
+    @Column(unique = true, nullable = false)
+    private UUID uuid = UUID.randomUUID();
+
     @Column(name = "width_w")
-    private int W; //Szerokość calkowita samochodu os X
+    private int width; //Szerokość calkowita samochodu os X
     @Column(name = "height_h")
-    private int H;  //Wysokosc całkowita samochodu os Y
+    private int height;  //Wysokosc całkowita samochodu os Y
     @Column(name = "length_l")
-    private int L;  //Długość całkowita samochodu os Z
+    private int length;  //Długość całkowita samochodu os Z
     @Column(name = "max_payload")
     private BigDecimal maxPayload;  //Maksymalna ladownosc samochodu
     private BigDecimal currentWeight = BigDecimal.ZERO;
@@ -41,12 +45,12 @@ public class Truck {
     @OneToMany(mappedBy = "truck")
     private List<CargoSpace> emptyCargoSpaces = new ArrayList<>();
 
-    public Truck(int W, int H, int L, BigDecimal maxPayload) {
-        this.W = W;
-        this.H = H;
-        this.L = L;
+    public Truck(int width, int height, int length, BigDecimal maxPayload) {
+        this.width = width;
+        this.height = height;
+        this.length = length;
         this.maxPayload = maxPayload;
-        this.emptyCargoSpaces.add(new CargoSpace(0, 0, 0, W, H, L, this));
+        this.emptyCargoSpaces.add(new CargoSpace(0, 0, 0, width, height, length, this));
     }
 
     public void load(Package b) {
@@ -58,7 +62,8 @@ public class Truck {
     }
 
     private boolean canPayloadHold(Package b) {
-        return currentWeight.add(b.getWeight()).compareTo(maxPayload) <= 0;
+        BigDecimal newTotalWeight = this.currentWeight.add(b.getWeight());
+        return newTotalWeight.compareTo(this.maxPayload) <= 0;
     }
 
 

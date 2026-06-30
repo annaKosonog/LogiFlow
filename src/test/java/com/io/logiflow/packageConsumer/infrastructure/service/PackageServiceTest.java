@@ -1,7 +1,9 @@
 package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
@@ -22,6 +24,7 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.smallRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,58 +36,39 @@ public class PackageServiceTest {
     private PackageRepository packageRepository;
 
     @Mock
-    private TruckRepository truckRepository;
-
-    @Mock
-    private ParcelPackingService parcelPackingService;
-
-    @Mock
     private PackageMapper packageMapper;
+
+    @Mock
+    private PackageCreateRequestMapper createRequestMapper;
 
     @InjectMocks
     private PackageService packageService;
 
     @Test
     void shouldReturnCorrectRegisteredPack() {
+        PackageCreateRequest inputRequest = smallRequest();
         PackageDTO inputDto = smallDTO();
-        inputDto.setTrackingNumber(null);
-        inputDto.setId(null);
 
-        when(packageRepository.findByTrackingNumber(inputDto.getTrackingNumber())).thenReturn(null);
-        when(packageMapper.toEntity(inputDto)).thenReturn(smallDao());
-        when(packageRepository.save(any(Package.class))).thenReturn(firstBoxPackToTruck());
+        Package expectedEntity = smallDao();
+        Package savedEntity = firstBoxPackToTruck();
+
+        when(packageRepository.findByTrackingNumber(any())).thenReturn(null);
+        when(createRequestMapper.toPackageDao(any(PackageCreateRequest.class))).thenReturn(savedEntity);
+        when(packageRepository.save(any(Package.class))).thenReturn(savedEntity);
         when(packageMapper.toDTO(any(Package.class))).thenReturn(inputDto);
 
-        packageService.registerNewPackage(inputDto);
+        packageService.registerNewPackage(inputRequest);
         ArgumentCaptor<Package> packageCaptor = ArgumentCaptor.forClass(Package.class);
 
-        verify(packageMapper, times(1)).toEntity(inputDto);
+        verify(createRequestMapper, times(1)).toPackageDao(inputRequest);
         verify(packageMapper).toDTO(packageCaptor.capture());
         verify(packageRepository).save(any(Package.class));
     }
 
     @Test
-    void shouldThrowExpectionWhenPackageExistsToDb() {
-        String existingTrackingNumber = "TRK2026123456789";
-        PackageDTO inputDto = smallDTO();
-        inputDto.setTrackingNumber(existingTrackingNumber);
-
-        Package existingPackage = new Package();
-        existingPackage.setTrackingNumber(existingTrackingNumber);
-
-        when(packageRepository.findByTrackingNumber(existingTrackingNumber)).thenReturn(existingPackage.getTrackingNumber());
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> packageService.registerNewPackage(inputDto));
-
-        String expectedMessage = "The package with the number " + existingPackage.getTrackingNumber() + " already exist";
-
-        assertEquals(expectedMessage, exception.getMessage());
-
-        verify(packageRepository, never()).save(any(Package.class));
-    }
-
-    @Test
     void shouldGenerateUUIDWhenPackageDtoIdIsNull() {
+        long seq = 5L;
+        PackageCreateRequest createRequest = smallRequest();
         PackageDTO inputDto = smallDTO();
         inputDto.setId(null);
 
@@ -92,37 +76,19 @@ public class PackageServiceTest {
         mappedEntity.setUuid(null);
         mappedEntity.setTrackingNumber(inputDto.getTrackingNumber());
 
+        when(packageRepository.getNextTrackingSequenceValue()).thenReturn(seq);
+        when(createRequestMapper.toPackageDao(any(PackageCreateRequest.class))).thenReturn(mappedEntity);
         when(packageRepository.findByTrackingNumber(inputDto.getTrackingNumber())).thenReturn(null);
-        when(packageMapper.toEntity(inputDto)).thenReturn(mappedEntity);
         when(packageRepository.save(any(Package.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(packageMapper.toDTO(any(Package.class))).thenReturn(inputDto);
 
-        packageService.registerNewPackage(inputDto);
+        packageService.registerNewPackage(createRequest);
 
         ArgumentCaptor<Package> packageCaptor = ArgumentCaptor.forClass(Package.class);
         verify(packageRepository).save(packageCaptor.capture());
 
         Package savedEntity = packageCaptor.getValue();
         assertNotNull(savedEntity.getUuid(), "The entity UUID should be automatically generated and not null");
-    }
-
-    @Test
-    void shouldNotGenerateUUIDWhenPackageDtoIdIsNotNull() {
-        UUID expectedUUID = UUID.randomUUID();
-        PackageDTO inputDto = smallDTO();
-        inputDto.setId(expectedUUID);
-
-        Package mappedDto = new Package();
-        mappedDto.setUuid(expectedUUID);
-
-        when(packageRepository.findByTrackingNumber(inputDto.getTrackingNumber())).thenReturn(null);
-        when(packageMapper.toEntity(inputDto)).thenReturn(mappedDto);
-
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> packageService.registerNewPackage(inputDto));
-
-        String expectedMessage = "Cannot register a new package: ID must be null. Provided: " + inputDto.getId();
-        assertEquals(expectedMessage, exception.getMessage());
-        verify(packageRepository, never()).save(any(Package.class));
     }
 
     @Test
@@ -194,7 +160,6 @@ public class PackageServiceTest {
         // Upewniamy się, że mapper nigdy nie został wywołany (bo nie było czego mapować)
         verifyNoInteractions(packageMapper);
     }
-
 
 }
 

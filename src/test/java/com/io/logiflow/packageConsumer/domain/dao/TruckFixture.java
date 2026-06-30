@@ -24,6 +24,7 @@ public class TruckFixture {
     public static Truck createLoadedTruck() {
         // Tworzymy ciężarówkę z limitem 200.00
         Truck truck = createTruckWithPayload("200.00");
+        truck.setTruckId(1L);
 
         // Ładujemy paczki
         truck.load(createBox("30.00"));

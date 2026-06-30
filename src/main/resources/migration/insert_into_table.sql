@@ -34,27 +34,27 @@ VALUES ('b3eaa788-1c0e-4be8-8591-960d6616e7dc','TRK-2026-MAG9', 20, 20, 20, 1.20
 
 -- 1. Początek: Cała ciężarówka jest pusta.
 -- Zaczynamy od punktu (0,0,0). Ciężarówka ma wymiary: szerokość 240cm, wysokość 260cm, głębokość 600cm.
-INSERT INTO cargo_spaces (position_x, position_y, position_z, width, height, depth, truck_id)
-VALUES (0, 0, 0, 240, 260, 600,1);
+INSERT INTO cargo_spaces (uuid, position_x, position_y, position_z, width, height, depth, truck_id)
+VALUES ('a636c79e-96cb-4bfa-83db-af248e7eb617', 0, 0, 0, 240, 260, 600, 1);
 
 
 -- 2. Stan po wrzuceniu pierwszej paczki w róg (0,0,0) o wymiarach 50x50x50.
 -- Algorytm stworzył nowe, mniejsze "wolne przestrzenie" wokół tej paczki:
 
 -- Wolna przestrzeń PO PRAWEJ STRONIE paczki (X rusza od 50, szerokość mniejsza o 50)
-INSERT INTO cargo_spaces (position_x, position_y, position_z, width, height, depth, truck_id)
-VALUES (50, 0, 0, 190, 260, 600,1);
+INSERT INTO cargo_spaces (uuid, position_x, position_y, position_z, width, height, depth, truck_id)
+VALUES ('db3ae263-33ca-415a-ae83-bbf07a170a17', 50, 0, 0, 190, 260, 600, 1);
 
--- Wolna przestrzeń NAD paczką (Y rusza od 50, wysokość mniejsza o 50)
-INSERT INTO cargo_spaces (position_x, position_y, position_z, width, height, depth, truck_id)
-VALUES (0, 50, 0, 50, 210, 600,1);
+-- Wolna przestrzeń NAD paczką (Y rusza od 50, wysokość mniejsza o 50, X i Z dla całej szerokości/głębokości ciężarówki)
+INSERT INTO cargo_spaces (uuid, position_x, position_y, position_z, width, height, depth, truck_id)
+VALUES ('72c07fee-2e02-4475-b1d6-8fa3775d9886', 0, 50, 0, 240, 210, 600, 1);
 
 -- Wolna przestrzeń ZA paczką (Z rusza od 50, głębokość mniejsza o 50)
-INSERT INTO cargo_spaces (position_x, position_y, position_z, width, height, depth, truck_id)
-VALUES (0, 0, 50, 50, 50, 550,2);
+INSERT INTO cargo_spaces (uuid, position_x, position_y, position_z, width, height, depth, truck_id)
+VALUES ('853a8468-97ea-444e-b9ff-c8c8709742f8', 0, 0, 50, 240, 260, 550, 1);
 
 
 -- 3. Mała, wąska szczelina ("półka"), która została gdzieś wysoko pod sufitem ciężarówki
 -- Np. na samym końcu paki (Z=500), wysoko (Y=200), szeroka na 100cm, wysoka na 60cm, głęboka na 100cm.
-INSERT INTO cargo_spaces (position_x, position_y, position_z, width, height, depth, truck_id)
-VALUES (100, 200, 500, 100, 60, 100,2);
+INSERT INTO cargo_spaces (uuid, position_x, position_y, position_z, width, height, depth, truck_id)
+VALUES ('23f018ef-44d4-473b-8f36-2a892f635098', 100, 200, 500, 100, 60, 100, 2);

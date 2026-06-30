@@ -3,22 +3,45 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.exception.PackageValidationException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class ParcelPackingService {
 
-    public void pack(List<Package> boxesToPack, Truck truck) {
-        sortedPack(boxesToPack);
-        List<CargoSpace> emptyCargoSpaces = truck.getEmptyCargoSpaces();
+    private final PackageRepository packageRepository;
 
-        for (Package aPackage : boxesToPack) {
+    public void pack(List<PackageDTO> boxesToPack, Truck entityTruck) {
+        if (boxesToPack == null || boxesToPack.isEmpty()) {
+            throw new PackageValidationException("The list of packages to be loaded cannot be empty!");
+        }
+        List<UUID> uuids = boxesToPack.stream()
+                .map(PackageDTO::getId)
+                .toList();
+
+        List<Package> existingPackages = packageRepository.findAllByUuidIn(uuids);
+
+        if (existingPackages.size() != uuids.size()) {
+            throw new PackageValidationException("Unable to load: One or more packages do not exist in the database!");
+        }
+
+        validatePackagesAreNotAlreadyLoaded(existingPackages);
+
+        sortedPack(existingPackages);
+        List<CargoSpace> emptyCargoSpaces = entityTruck.getEmptyCargoSpaces();
+
+        for (Package aPackage : existingPackages) {
             //Sprawdzamy wagę
             // BRAMKARZ: Jeśli ciężarówka nie udźwignie tej paczki, odrzucamy ją OD RAZU!
-            truck.load(aPackage); // Próba sprawdzenia wagi
+            entityTruck.load(aPackage); // Próba sprawdzenia wagi
 
             boolean packed = false;
 
@@ -32,9 +55,12 @@ public class ParcelPackingService {
                 }
             }
             if (!packed) {
-                truck.unload(aPackage);
+                entityTruck.unload(aPackage);
             }
         }
+        entityTruck.setTruckId(entityTruck.getTruckId());
+        existingPackages.forEach(pkg -> pkg.setTruck(entityTruck));
+        packageRepository.saveAll(existingPackages);
     }
 
 
@@ -69,5 +95,16 @@ public class ParcelPackingService {
             cargoSpaces.add(0, new CargoSpace(s.getPositionX(), s.getPositionY(), s.getPositionZ() + b.getDepth(), s.getWidth(), s.getHeight(), s.getDepth() - b.getDepth()));
         }
 
+    }
+
+    private void validatePackagesAreNotAlreadyLoaded(List<Package> packages) {
+        packages.stream()
+                .filter(pkg -> pkg.getTruck() != null)
+                .findFirst()
+                .ifPresent(pkg -> {
+                    throw new PackageValidationException("The package with the number " + pkg.getTrackingNumber()
+                            + " has already been loaded onto the truck with ID: " + pkg.getTruck().getTruckId()
+                    );
+                });
     }
 }

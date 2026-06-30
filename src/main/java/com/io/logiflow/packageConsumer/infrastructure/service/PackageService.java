@@ -1,12 +1,11 @@
 package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
-import com.io.logiflow.packageConsumer.exception.PackageValidationException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,34 +22,24 @@ import java.util.UUID;
 public class PackageService {
 
     private final PackageRepository packageRepository;
-    private final TruckRepository truckRepository;
-    private final ParcelPackingService parcelPackingService;
     private final PackageMapper packageMapper;
+    private final PackageCreateRequestMapper createRequestMapper;
 
 
     @Transactional
-    public PackageDTO registerNewPackage(PackageDTO pack) {
-        String byTrackingNumber = packageRepository.findByTrackingNumber(pack.getTrackingNumber());
-        if (byTrackingNumber != null) {
-            throw new RuntimeException("The package with the number " + pack.getTrackingNumber() + " already exist");
+    public PackageDTO registerNewPackage(PackageCreateRequest pack) {
+        long nextSeq = packageRepository.getNextTrackingSequenceValue();
+        Package entity = createRequestMapper.toPackageDao(pack);
+        String generatedTrackingNumber = entity.generateTrackingNumberAutomatically(nextSeq);
+        String checkTrackingNumber = packageRepository.findByTrackingNumber(generatedTrackingNumber);
+        if (checkTrackingNumber != null) {
+            throw new RuntimeException("The package with the number " + generatedTrackingNumber + " already exist");
         }
-        Package entity = packageMapper.toEntity(pack);
-        if (pack.getId() != null) {
-            throw new PackageValidationException("Cannot register a new package: ID must be null. Provided: "
-                    + pack.getId());
-        }
+
         entity.setUuid(UUID.randomUUID());
+        entity.setTrackingNumber(generatedTrackingNumber);
         Package savedEntity = packageRepository.save(entity);
         return packageMapper.toDTO(savedEntity);
-    }
-
-    @Transactional
-    public void addPackagesToTruck(List<Package> packages, Long truckId) {
-        Truck truck = truckRepository.findById(truckId)
-                .orElseThrow(() -> new RuntimeException("The truck with the id " + truckId + " does not exist"));
-
-        parcelPackingService.pack(packages, truck);
-        truckRepository.save(truck);
     }
 
     public Page<PackageDTO> getPackages(int page, int size) {
@@ -61,7 +49,7 @@ public class PackageService {
     }
 
     @Transactional
-    public Package updatePackageFields(Long packId, Map<String, Object> fields) { //waga, wymiary, adres dostawy
+    public PackageDTO updatePackageFields(Long packId, Map<String, Object> fields) { //waga, wymiary, adres dostawy
         Package existingPackage = packageRepository.findById(packId)
                 .orElseThrow(() -> new ResourceNotFoundException("Package not found"));
 
@@ -79,6 +67,8 @@ public class PackageService {
             Object weightValue = fields.get("weight");
             existingPackage.setWeight(new java.math.BigDecimal(weightValue.toString()));
         }
-        return packageRepository.save(existingPackage);
+        Package saved = packageRepository.save(existingPackage);
+        return packageMapper.toDTO(saved);
+
     }
 }

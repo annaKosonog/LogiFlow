@@ -1,10 +1,10 @@
 -- 1. Tworzymy sekwencję, która będzie odliczać numery paczek
-CREATE SEQUENCE IF NOT EXISTS tracking_number_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS tracking_number_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE IF NOT EXISTS packages (
                           package_id BIGSERIAL PRIMARY KEY,
                           uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
-    tracking_number VARCHAR(50) NOT NULL UNIQUE DEFAULT ('TRK' || to_char(now(), 'YYYY') || lpad(nextval('tracking_number_seq')::text, 9, '0')),
+    tracking_number VARCHAR(50) NOT NULL UNIQUE,
 
     -- Wymiary paczki
                           width INT NOT NULL,

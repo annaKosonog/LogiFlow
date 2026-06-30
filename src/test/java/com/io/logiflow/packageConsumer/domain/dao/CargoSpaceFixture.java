@@ -1,6 +1,6 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
-public class SpaceFixture {
+public class CargoSpaceFixture {
     public static CargoSpace smallSpace() {
         return new CargoSpace(0, 0, 0, 0, 2, 2);  // pozycja (0,0,0), wymiary 2x2x2
     }

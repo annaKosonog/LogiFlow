@@ -1,6 +1,6 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,6 +17,7 @@ import java.util.Map;
 public class PackageController {
 
     private final PackageService packingService;
+// todo dodać filtracje
 
     @GetMapping("/packages")
     ResponseEntity<Page<PackageDTO>> getAllPackages(
@@ -28,23 +28,17 @@ public class PackageController {
         return ResponseEntity.ok(packPage);
     }
 
-   @PostMapping("/packages")
-    public ResponseEntity<PackageDTO> registerPackage(@RequestBody PackageDTO pack) {
-        PackageDTO savedPackage = packingService.registerNewPackage(pack);
+    @PostMapping("/packages")
+    public ResponseEntity<PackageDTO> registerPackage(@RequestBody PackageCreateRequest createRequest) {
+        PackageDTO savedPackage = packingService.registerNewPackage(createRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPackage);
     }
 
     @PatchMapping("/packages/{packId}")
-    public ResponseEntity<Package> updateDimensions(@PathVariable Long packId, @RequestBody Map<String, Object> fields) {
-        Package updated = packingService.updatePackageFields(packId, fields);
+    public ResponseEntity<PackageDTO> updateDimensions(@PathVariable Long packId, @RequestBody Map<String, Object> fields) {
+        PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity.ok(updated);
     }
 
-    @PostMapping("/truck/{truckId}")
-    public ResponseEntity<String> packPackages(
-            @PathVariable Long truckId,
-            @RequestBody List<Package> packages) {
-        packingService.addPackagesToTruck(packages, truckId);
-        return ResponseEntity.ok("The packing process has been successfully completed for the truck with ID " + truckId);
-    }
+
 }

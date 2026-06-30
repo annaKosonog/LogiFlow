@@ -12,6 +12,5 @@ import java.math.BigDecimal;
 public class DimensionsDTO {
     private int width; //szerokośc
     private int height; //wysokość
-    private int depth; //głębokość
-    private BigDecimal weight; //cieżar
+    private int depth_length; //głębokość, długość
 }

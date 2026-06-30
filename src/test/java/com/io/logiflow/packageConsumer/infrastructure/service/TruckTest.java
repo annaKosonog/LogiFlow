@@ -36,8 +36,8 @@ class TruckTest {
     void shouldReturnTrueWhenBoxesLoadToTruck() {
         //GIVEN
 
-        com.io.logiflow.packageConsumer.domain.dao.Package packageToBeLoaded = createBox("20");
-        com.io.logiflow.packageConsumer.domain.dao.Package nextPackageToBeLoaded = createBox("80");
+        Package packageToBeLoaded = createBox("20");
+        Package nextPackageToBeLoaded = createBox("80");
 
         truck.load(packageToBeLoaded);
         truck.load(nextPackageToBeLoaded);
@@ -49,7 +49,7 @@ class TruckTest {
 
     @Test
     void shouldLoadBoxWhenWeightIsExactlyEqualToMaxPayload() {
-        com.io.logiflow.packageConsumer.domain.dao.Package maxWeightPackage = createBox("120");
+        Package maxWeightPackage = createBox("120");
 
         truck.load(maxWeightPackage);
 
@@ -61,7 +61,7 @@ class TruckTest {
     @Test
     void shouldThrowExceptionWhenPayLoadIsExceeded() {
         //GIVEN
-        com.io.logiflow.packageConsumer.domain.dao.Package heavyWeight = createBox("125");
+        Package heavyWeight = createBox("125");
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             truck.load(heavyWeight);
@@ -81,7 +81,7 @@ class TruckTest {
 
     @Test
     void shouldUnloadBoxSuccessfully() {
-        com.io.logiflow.packageConsumer.domain.dao.Package packageToUnload = createBox("20");
+        Package packageToUnload = createBox("20");
         truck.load(packageToUnload);
 
         truck.unload(packageToUnload);
@@ -102,6 +102,4 @@ class TruckTest {
         BigDecimal expectedWeight = new BigDecimal("80.00");
         assertEquals(0, expectedWeight.compareTo(truck.getCurrentWeight()));
     }
-
-
 }

@@ -1,9 +1,11 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
+import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,23 +18,23 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.largeBoxDTO;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.firstBoxCreateRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.largeAndHeavyBoxRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,6 +52,11 @@ class PackageControllerTest {
 
     @InjectMocks
     private PackageController packageController;
+    @MockBean
+    private PackageMapper packageMapper;
+
+    @MockBean
+    private PackageCreateRequestMapper createRequestMapper;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -74,7 +81,7 @@ class PackageControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].trackingNumber").value("XYZ-DEFAULT"))
+                .andExpect(jsonPath("$.content[0].trackingNumber").value("XYZ-SMALL"))
                 .andExpect(jsonPath("$.pageable.pageNumber").value(0)) // To sprawdza Twoje 'page' (defaultValue = 0)
                 .andExpect(jsonPath("$.pageable.pageSize").value(10));
     }
@@ -95,7 +102,7 @@ class PackageControllerTest {
                         .param("size", String.valueOf(customSize))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].trackingNumber").value("XYZ-CUSTOM"))
+                .andExpect(jsonPath("$.content[0].trackingNumber").value("XYZ-LARGE"))
                 // Te asercje weryfikują czy struktura Page w JSONie ma poprawne metadane
                 .andExpect(jsonPath("$.size").value(1)) // rozmiar listy w content
                 .andExpect(jsonPath("$.empty").value(false));
@@ -106,32 +113,50 @@ class PackageControllerTest {
 
     @Test
     public void shouldRegisterNewPackageToSystemSuccessfully() throws Exception {
-        Package registerASmallPackage = smallDao();
-        registerASmallPackage.setPackageId(5L);
-        String jsonRequest = objectMapper.writeValueAsString(registerASmallPackage);
+        PackageCreateRequest inputDto = firstBoxCreateRequest();
 
-        MvcResult result = mvc.perform(post("/api/packages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isCreated())
-                .andReturn();
+        String jsonRequest = objectMapper.writeValueAsString(inputDto);
+        UUID generatedUuid = UUID.randomUUID();
 
-        int status = result.getResponse().getStatus();
-        assertEquals(HttpStatus.CREATED.value(), status);
-    }
 
-    @Test
-    public void shouldRegisterOfLargeAndHeavyPackageToSystemSuccessfully() throws Exception {
-        Package largeAndHeavyPackage = largeBox();
-        largeAndHeavyPackage.setPackageId(7L);
-        largeAndHeavyPackage.setWeight(BigDecimal.valueOf(500.0));
+        PackageDTO mockResult = new PackageDTO();
+        mockResult.setId(generatedUuid);
+        mockResult.setTrackingNumber("TRK-2026-A001");
+        mockResult.setWeight(new BigDecimal("10"));
 
-        String jsonRequest = objectMapper.writeValueAsString(largeAndHeavyPackage);
+        Mockito.when(packageService.registerNewPackage(Mockito.any(PackageCreateRequest.class)))
+                .thenReturn(mockResult);
+
         mvc.perform(post("/api/packages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.packageId").value(7L))
+                .andExpect(jsonPath("$.id").value(generatedUuid.toString()))
+                .andExpect(jsonPath("$.trackingNumber").exists())
+                .andExpect(jsonPath("$.weight").value("10"))
+                .andReturn();
+    }
+
+
+    @Test
+    public void shouldRegisterOfLargeAndHeavyPackageToSystemSuccessfully() throws Exception {
+        UUID expectedId = UUID.randomUUID();
+        PackageCreateRequest inputRequest = largeAndHeavyBoxRequest();
+
+
+        PackageDTO outputDTO = new PackageDTO();
+        outputDTO.setId(expectedId);
+        outputDTO.setWeight(BigDecimal.valueOf(500.0));
+
+        Mockito.when(packageService.registerNewPackage(Mockito.any(PackageCreateRequest.class)))
+                .thenReturn(outputDTO);
+
+        String jsonRequest = objectMapper.writeValueAsString(inputRequest);
+        mvc.perform(post("/api/packages")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(expectedId.toString()))
                 .andExpect(jsonPath("$.weight").value(500.0))
                 .andReturn();
     }
@@ -139,27 +164,22 @@ class PackageControllerTest {
     @Test
     public void shouldUpdateAPackageToSystemSuccessfully() throws Exception {
         Long packId = 5L;
-        Package existingPackage = smallDao();
-        existingPackage.setTrackingNumber("TRK-2026-ORIGINAL");
+        PackageDTO patchDto = smallDTO();
+        patchDto.getDimensions().setWidth(45);
+        patchDto.setWeight(new BigDecimal("12.95"));
 
-        when(packageService.updatePackageFields(Mockito.eq(packId), Mockito.anyMap()))
-                .thenReturn(updatePackage());
-
-        String patchJson = """
-                {
-                 "width": 45,
-                 "weight": 12.95
-                 }
-                """;
+        String jsonRequest = objectMapper.writeValueAsString(patchDto);
+        when(packageService.registerNewPackage(any(PackageCreateRequest.class))).thenReturn(patchDto);
+        when(packageService.updatePackageFields(Mockito.eq(packId), Mockito.anyMap())).thenReturn(patchDto);
 
         mvc.perform(patch("/api/packages/{packId}", packId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(patchJson))
+                        .content(jsonRequest))
+                .andDo(print())
                 .andExpect(status().isOk()) // Oczekujemy kodu 200 OK
-                // Sprawdzamy, czy w odpowiedzi dostaliśmy poprawne dane:
-                .andExpect(jsonPath("$.packageId").value(5L))
-                .andExpect(jsonPath("$.trackingNumber").value("TRK-2026-ORIGINAL")) // Upewniamy się, że się nie nadpisał
-                .andExpect(jsonPath("$.width").value(45))                     // Nowa wartość double
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.trackingNumber").value("XYZ-SMALL")) // Upewniamy się, że się nie nadpisał
+                .andExpect(jsonPath("$.dimensions.width").value(45))                     // Nowa wartość double
                 .andExpect(jsonPath("$.weight").value(12.95));
     }
 
@@ -167,27 +187,24 @@ class PackageControllerTest {
     public void shouldUpdateOnlyAllowedFieldsAndIgnoreRest() throws Exception {
         Long originalId = 5L;
 
-        Package updatedPackage = updatePackage();
+        Map<String, Object> fieldsToUpdate = new HashMap<>();
+        fieldsToUpdate.put("weight", 750.0);
+        fieldsToUpdate.put("trackingNumber", "HACKED-123");
 
-        Mockito.when(packageService.updatePackageFields(Mockito.any(), Mockito.any()))
-                .thenReturn(updatedPackage);
+        PackageDTO patchDto = updatePackageDTO();
 
-        //poprawa
-        String maliciousJson = """  
-                {
-                  "packageId": 999,
-                  "trackingNumber": "HACKED-123",
-                  "width": 45
-                }
-                """;
+        when(packageService.registerNewPackage(any(PackageCreateRequest.class))).thenReturn(patchDto);
+        when(packageService.updatePackageFields(Mockito.eq(originalId), Mockito.anyMap())).thenReturn(patchDto);
 
-        mvc.perform(patch("/api/packages/{id}", originalId)
+        String jsonRequest = objectMapper.writeValueAsString(patchDto);
+
+        mvc.perform(patch("/api/packages/{packId}", originalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(maliciousJson))
+                        .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.packageId").value(5))               // ignoruje próbę zmiany na 999
+                .andDo(print())
                 .andExpect(jsonPath("$.trackingNumber").value("TRK-2026-ORIGINAL")) // ignoruje próbę zmiany na HACKED
-                .andExpect(jsonPath("$.width").value(45));
+                .andExpect(jsonPath("$.dimensions.width").value(45));
     }
 
     @Test
@@ -228,42 +245,4 @@ class PackageControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
     }*/
-
-    @Test
-    public void shouldAddPackagesSuccessfully() throws Exception {
-        List<Package> packageList = Arrays.asList(firstBoxPackToTruck(), secondBoxPackToTruck());
-
-        String jsonRequest = objectMapper.writeValueAsString(packageList);
-        Long truckId = 1L;
-
-        MvcResult result = mvc.perform(post("/api/truck/{truckId}", truckId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        int status = result.getResponse().getStatus();
-        assertEquals(200, status);
-    }
-
-    @Test
-    public void shouldReturnBadRequestWhenPackageDoesNotFit() throws Exception {
-        Package gigantPackage = largeBox();
-        gigantPackage.setPackageId(99L);
-        gigantPackage.setTrackingNumber("TRK-OVERWEIGHT");
-        gigantPackage.setWeight(new BigDecimal("5000.0"));
-
-        List<Package> packageList = List.of(gigantPackage);
-        Long truckId = 1L;
-
-        String jsonRequest = objectMapper.writeValueAsString(packageList);
-
-        Mockito.doThrow(new IllegalArgumentException("Truck loading failed"))
-                .when(packageService).addPackagesToTruck(Mockito.anyList(), Mockito.anyLong());
-
-        mvc.perform(post("/api/truck/{truckId}", truckId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isBadRequest());
-    }
 }

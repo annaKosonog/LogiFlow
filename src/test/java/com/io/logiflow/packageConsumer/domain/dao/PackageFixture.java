@@ -1,6 +1,10 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 
 public class PackageFixture {
 
@@ -8,12 +12,19 @@ public class PackageFixture {
         return new Package(1, 1, 1, new BigDecimal("10"));  // objętość = 1
     }
 
-    public static Package large() {
-        return new Package(5, 5, 5, new BigDecimal("10"));  // objętość = 125
+    public static Package smallDaoSaved() {
+        Package p1 = smallDao();
+        p1.setTruck(createLoadedTruck());
+        return p1;
     }
 
-    public static Package medium() {
-        return new Package(2, 2, 2, new BigDecimal("10")); // objętość = 8
+
+    public static Package largeDao() {
+        return new Package(5, 5, 5, new BigDecimal("30"));  // objętość = 125
+    }
+
+    public static Package mediumDao() {
+        return new Package(2, 2, 2, new BigDecimal("20")); // objętość = 8
     }
 
     public static Package largeBox() {
@@ -24,16 +35,20 @@ public class PackageFixture {
         return new Package(10, 221, 10, new BigDecimal("50")); // objętość = 1000
     }
 
-    public static Package deepthBox() {
+    public static Package depthBox() {
         return new Package(10, 10, 601, new BigDecimal("50")); // objętość = 1000
     }
 
     public static Package lightBox() {
-        return new Package(2, 2, 2, new BigDecimal("5"));
+        return new Package(2, 2, 1, new BigDecimal("5"));
+    }
+
+    public static Package exact() {
+        return new Package(10, 10, 10, new BigDecimal("5"));
     }
 
     public static Package heavyBox() {
-        return new Package(2, 2, 2, new BigDecimal("20"));
+        return new Package(4, 1, 1, new BigDecimal("20"));
     }
 
     public static Package boxThatFitsExactly(CargoSpace cargoSpace) {
@@ -48,7 +63,7 @@ public class PackageFixture {
     }
 
     public static Package secondBoxPackToTruck() {
-        Package p1 = large();
+        Package p1 = largeDao();
         p1.setPackageId(2L);
         p1.setTrackingNumber("TRK-2026-A002");
         return p1;
@@ -63,6 +78,32 @@ public class PackageFixture {
         updatedPackage.setDepth(10);                          // Bez zmian
         updatedPackage.setWeight(new BigDecimal("12.95"));  //Zmieniona waga
         return updatedPackage;
+    }
+
+    public static List<Package> sortedPackages() {
+        List<Package> localPackages = new ArrayList<>();
+        Package small = smallDao();
+        small.setTrackingNumber("XYZ-SMALL");
+        Package medium = mediumDao();
+        medium.setTrackingNumber("XYZ-MEDIUM");
+        Package large = largeDao();
+        large.setTrackingNumber("XYZ-LARGE");
+        localPackages.add(large);
+        localPackages.add(small);
+        localPackages.add(medium);
+        return localPackages;
+    }
+
+    public static List<Package> sortedPackagesDaoByWeightDescending() {
+        List<Package> localPackages = new ArrayList<>();
+        Package heavyPackage = heavyBox();
+        heavyPackage.setTrackingNumber("XYZ-HEAVY");
+        localPackages.add(heavyPackage);
+
+        Package lightPackage = lightBox();
+        lightBox().setTrackingNumber("XYZ-LIGHT");
+        localPackages.add(lightPackage);
+        return localPackages;
     }
 
 

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "cargo_spaces")
 @Getter
@@ -20,6 +22,9 @@ public class CargoSpace {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "cargo_space_id")
     private Long cargoSpaceId;
+
+    @Column(unique = true, nullable = false)
+    private UUID uuid = UUID.randomUUID();
 
     //Punkt początkowy wolnej przestrzeni
     @Column(name = "position_x", nullable = false)
@@ -65,5 +70,11 @@ public class CargoSpace {
         this.height = height;
         this.depth = depth;
         this.truck = truck;
+    }
+
+    public CargoSpace(int width, int height, int depth) {
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
     }
 }

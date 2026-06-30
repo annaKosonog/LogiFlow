@@ -7,6 +7,8 @@ import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Entity
@@ -26,8 +28,7 @@ public class Package {
     private UUID uuid = UUID.randomUUID();
 
     @NotNull
-    @Column(name = "tracking_number", unique = true, nullable = false, insertable = false, updatable = false)
-    @org.hibernate.annotations.Generated
+    @Column(name = "tracking_number", unique = true, nullable = false, updatable = false)
     private String trackingNumber;
 
     //wymiary paczki
@@ -58,9 +59,9 @@ public class Package {
         this.weight = weight;
     }
 
-    public Package(Long packageId, String trackingNumber, int width, int height, int depth, BigDecimal weight, Truck truck, int x, int y, int z) {
+    public Package(Long packageId, long nextSequenceValue, int width, int height, int depth, BigDecimal weight, Truck truck, int x, int y, int z) {
         this.packageId = packageId;
-        this.trackingNumber = trackingNumber;
+        this.trackingNumber = generateTrackingNumberAutomatically(nextSequenceValue);
         this.width = width;
         this.height = height;
         this.depth = depth;
@@ -76,6 +77,14 @@ public class Package {
         this.y = cargoSpace.getPositionY();
         this.z = cargoSpace.getPositionZ();
     }
-}
 
-//todo zrobić warstwe dto
+    public String generateTrackingNumberAutomatically(long nextSequenceValue) {
+        if (this.trackingNumber != null) {
+            return this.trackingNumber;
+        }
+        LocalDateTime createdAt = LocalDateTime.now();
+        String year = createdAt.format(DateTimeFormatter.ofPattern("yyyy"));
+        String paddedSequence = String.format("%09d", nextSequenceValue);
+        return "TRK" + year + paddedSequence;
+    }
+}

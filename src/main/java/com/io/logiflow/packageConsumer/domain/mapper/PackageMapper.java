@@ -9,10 +9,12 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring")
+import java.util.List;
+
+@Mapper(componentModel = "spring", uses = CommonMapper.class)
 public interface PackageMapper {
-
 
     @Mapping(source = "uuid", target = "id")
     @Mapping(source = "truck", target = "truckID")
@@ -20,30 +22,6 @@ public interface PackageMapper {
     @Mapping(source = "pack", target = "coordinates")
     PackageDTO toDTO(Package pack);
 
-    default DimensionsDTO mapDimensionsDTO(Package pack) {
-        if (pack == null) {
-            return null;
-        }
-
-        return new DimensionsDTO(
-                pack.getWidth(),
-                pack.getHeight(),
-                pack.getDepth(),
-                pack.getWeight()
-        );
-    }
-
-    default CoordinatesDTO mapCoordinatesDTO(Package pack) {
-        if (pack == null) {
-            return null;
-        }
-
-        return new CoordinatesDTO(
-                pack.getX(),
-                pack.getY(),
-                pack.getZ()
-        );
-    }
 
     @Mapping(source = "id", target = "uuid")
     @Mapping(source = "truckID", target = "truck")
@@ -70,8 +48,8 @@ public interface PackageMapper {
         if (dto.getDimensions() != null) {
             entity.setWidth(dto.getDimensions().getWidth());
             entity.setHeight(dto.getDimensions().getHeight());
-            entity.setDepth(dto.getDimensions().getDepth());
-            entity.setWeight(dto.getDimensions().getWeight());
+            entity.setDepth(dto.getDimensions().getDepth_length());
+            entity.setWeight(dto.getWeight());
         }
 
         if (dto.getCoordinates() != null) {
@@ -80,4 +58,6 @@ public interface PackageMapper {
             entity.setZ(dto.getCoordinates().getZ());
         }
     }
+
+    List<Package> toEntityList(List<PackageDTO> dtoList);
 }
