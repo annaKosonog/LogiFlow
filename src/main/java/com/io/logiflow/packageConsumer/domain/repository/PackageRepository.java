@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -19,4 +20,8 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
     long getNextTrackingSequenceValue();
 
     List<Package> findAllByUuidIn(List<UUID> packageId);
+
+    Optional<Package> findPackageByTrackingNumber(String trackingNumber);
+
+    Optional<Package> findPackageByUuid(UUID uuid);
 }

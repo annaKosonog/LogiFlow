@@ -69,6 +69,14 @@ public class PackageFixture {
         return p1;
     }
 
+    public static Package filterPack() {
+        Package p1 = largeDao();
+        p1.setPackageId(2L);
+        p1.setTrackingNumber("TRK2026000000002");
+        return p1;
+    }
+
+
     public static Package updatePackage() {
         Package updatedPackage = new Package();
         updatedPackage.setPackageId(5L);

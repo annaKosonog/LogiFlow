@@ -59,6 +59,10 @@ public class PackageFixtureDTO {
         return new PackageDTO(UUID.randomUUID(), "TRK-2026-A002", null, new BigDecimal("50.0"), firstCoordinate(), null);
     }
 
+    public static PackageDTO filterBoxPackDto() {
+        return new PackageDTO(UUID.randomUUID(), "TRK2026000000002", null, new BigDecimal("50.0"), firstCoordinate(), null);
+    }
+
 
     public static PackageDTO boxThatFitsExactlyDto() {
         return new PackageDTO(UUID.randomUUID(), "TRK-2026-A001", null, new BigDecimal("20"), firstCoordinate(), null);

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,10 +66,44 @@ public class PackageService {
         }
         if (fields.containsKey("weight")) {
             Object weightValue = fields.get("weight");
-            existingPackage.setWeight(new java.math.BigDecimal(weightValue.toString()));
+            existingPackage.setWeight(new BigDecimal(weightValue.toString()));
         }
         Package saved = packageRepository.save(existingPackage);
         return packageMapper.toDTO(saved);
+    }
 
+    public PackageDTO getPackagesByFilter(UUID uuid, String trackingNumber) {
+        validateFilters(uuid, trackingNumber);
+
+        if (uuid != null) {
+            return packageRepository.findPackageByUuid(uuid)
+                    .map(packageMapper::toDTO)
+                    .orElseThrow(() -> new ResourceNotFoundException("Package with UUID number " + uuid +
+                            " not found"));
+        }
+
+        validateTrackingNumber(trackingNumber);
+        if (trackingNumber != null) {
+            return packageRepository.findPackageByTrackingNumber(trackingNumber)
+                    .map(packageMapper::toDTO)
+                    .orElseThrow(() -> new ResourceNotFoundException("Package with tracking number " + trackingNumber +
+                            " not found"));
+        }
+
+        throw new IllegalArgumentException("UUID or tracking number must be provided.");
+    }
+
+
+    private void validateFilters(UUID uuid, String trackingNumber) {
+        if (uuid == null && (trackingNumber == null || trackingNumber.isBlank())) {
+            throw new IllegalArgumentException("Provide either uuid or tracking number.");
+        }
+    }
+
+    private void validateTrackingNumber(String trackingNumber) {
+        String TRACKING_NUMBER_REGEX = "^TRK20\\d{2}\\d{9}$";
+        if (!trackingNumber.matches(TRACKING_NUMBER_REGEX)) {
+            throw new IllegalArgumentException("Invalid tracking number format.");
+        }
     }
 }

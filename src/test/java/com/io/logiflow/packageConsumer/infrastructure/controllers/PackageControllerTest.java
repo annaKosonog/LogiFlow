@@ -210,15 +210,14 @@ class PackageControllerTest {
     @Test
     public void shouldReturn404WhenPackageDoesNotExist() throws Exception {
         Long nonExistingId = 999L;
+        String weight = "12.5";
+        PackageDTO packageDTO = new PackageDTO();
+        packageDTO.setWeight(new BigDecimal("12.5"));
 
         when(packageService.updatePackageFields(any(), any()))
                 .thenThrow(new ResourceNotFoundException("Package not found"));
 
-        String patchJson = """
-                {
-                  "weight": 12.5
-                }
-                """;
+        String patchJson = objectMapper.writeValueAsString(packageDTO);
 
         mvc.perform(patch("/api/packages/{id}", nonExistingId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -227,22 +226,31 @@ class PackageControllerTest {
                 .andReturn();
     }
 
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectTrackNumber() throws Exception {
+        String trackNumber = "TRK2026000000002";
 
-  /*  @Test
-    public void shouldRegisterNewPackageToSystemFailure() throws Exception {
-        Package registerASmallPackage = small();
-        registerASmallPackage.setPackageId(5L);
-        registerASmallPackage.setTrackingNumber("TRK-2026-A002");
+        when(packageService.getPackagesByFilter(null, trackNumber)).thenReturn(filterBoxPackDto());
 
-        String jsonRequest = objectMapper.writeValueAsString(registerASmallPackage);
+        mvc.perform(get("/api/packages/search")
+                        .param("trackingNumber", trackNumber))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weight").value(new BigDecimal("50.0")))
+                .andExpect(jsonPath("$.trackingNumber").exists())
+                .andExpect(jsonPath("$.id").isString());
+    }
 
-        Mockito.doThrow(new IllegalArgumentException("The package with the number " + registerASmallPackage.getTrackingNumber() + " already exist"))
-                .when(packageService).registerNewPackage(Mockito.mock(Package.class));
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectUUID() throws Exception {
+        UUID uuid = filterBoxPackDto().getId();
 
-        mvc.perform(post("/api/packages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isCreated())
-                .andReturn();
-    }*/
+        when(packageService.getPackagesByFilter(uuid, null)).thenReturn(filterBoxPackDto());
+
+        mvc.perform(get("/api/packages/search")
+                        .param("uuid", String.valueOf(uuid)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.trackingNumber").value("TRK2026000000002"));
+    }
 }

@@ -6,8 +6,7 @@ import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
-import com.io.logiflow.packageConsumer.exception.PackageValidationException;
+import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,12 +18,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.smallRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.filterBoxPackDto;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -161,6 +162,82 @@ public class PackageServiceTest {
         verifyNoInteractions(packageMapper);
     }
 
+    @Test
+    void shouldReturnTrackNumberIfUserProvidedCorrectDate() {
+        String trackingNumber = "TRK2026000000002";
+
+        when(packageRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.of(filterPack()));
+        when(packageMapper.toDTO(any(Package.class))).thenReturn(filterBoxPackDto());
+
+        PackageDTO packagesByFilter = packageService.getPackagesByFilter(null, trackingNumber);
+
+        assertEquals(trackingNumber, packagesByFilter.getTrackingNumber());
+        assertEquals(new BigDecimal("50.0"), packagesByFilter.getWeight());
+        verify(packageMapper, times(1)).toDTO(any(Package.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberFormatIsShort() {
+        String trackingNumber = "TRK20260000002";
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByFilter(null, trackingNumber));
+
+        assertEquals("Invalid tracking number format.", exception.getMessage());
+        verify(packageRepository, never()).findByTrackingNumber(trackingNumber);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberFormatIsNotStartedTRK() {
+        String trackingNumber = "KRT20260000002";
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByFilter(null, trackingNumber));
+
+        assertEquals("Invalid tracking number format.", exception.getMessage());
+        verify(packageRepository, never()).findByTrackingNumber(trackingNumber);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberNotFound() {
+        String trackingNumber = "TRK2026000000000";
+
+        when(packageRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByFilter(null, trackingNumber));
+
+        assertEquals("Package with tracking number " + trackingNumber + " not found", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnUUIDIfUserProvidedCorrectDate() {
+        UUID uuid = filterBoxPackDto().getId();
+
+        when(packageRepository.findPackageByUuid(any())).thenReturn(Optional.of(filterPack()));
+        when(packageMapper.toDTO(any(Package.class))).thenReturn(filterBoxPackDto());
+
+        PackageDTO packagesByFilter = packageService.getPackagesByFilter(uuid, null);
+
+        assertNotNull(uuid);
+        assertEquals("TRK2026000000002", packagesByFilter.getTrackingNumber());
+
+        verify(packageRepository, times(1)).findPackageByUuid(uuid);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWeDoNotProvidedTrackingNumberOrUUID() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByFilter(null, null));
+        assertEquals("Provide either uuid or tracking number.", exception.getMessage());
+        verify(packageRepository, never()).findPackageByUuid(null);
+        verify(packageRepository, never()).findPackageByTrackingNumber(null);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUUIDNotFound() {
+        UUID uuid = filterBoxPackDto().getId();
+        when(packageRepository.findPackageByUuid(any())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByFilter(uuid, null));
+
+        assertEquals("Package with UUID number " + uuid + " not found", exception.getMessage());
+    }
 }
 
 

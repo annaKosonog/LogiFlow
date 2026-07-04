@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -17,7 +18,6 @@ import java.util.Map;
 public class PackageController {
 
     private final PackageService packingService;
-// todo dodać filtracje
 
     @GetMapping("/packages")
     ResponseEntity<Page<PackageDTO>> getAllPackages(
@@ -26,6 +26,14 @@ public class PackageController {
     ) {
         Page<PackageDTO> packPage = packingService.getPackages(page, size);
         return ResponseEntity.ok(packPage);
+    }
+
+    @GetMapping("/packages/search")
+    ResponseEntity<PackageDTO> getPackagesByFilter(
+            @RequestParam(required = false) String trackingNumber,
+            @RequestParam(required = false) UUID uuid) {
+        PackageDTO filter = packingService.getPackagesByFilter(uuid, trackingNumber);
+        return ResponseEntity.ok(filter);
     }
 
     @PostMapping("/packages")
@@ -39,6 +47,4 @@ public class PackageController {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity.ok(updated);
     }
-
-
 }
