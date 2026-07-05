@@ -230,10 +230,9 @@ class PackageControllerTest {
     public void shouldReturnPackageDTOWhenProvidedCorrectTrackNumber() throws Exception {
         String trackNumber = "TRK2026000000002";
 
-        when(packageService.getPackagesByFilter(null, trackNumber)).thenReturn(filterBoxPackDto());
+        when(packageService.getPackagesByTrackingNumber(trackNumber)).thenReturn(filterBoxPackDto());
 
-        mvc.perform(get("/api/packages/search")
-                        .param("trackingNumber", trackNumber))
+        mvc.perform(get("/api/packages/tracking/{trackingNumber}", trackNumber))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weight").value(new BigDecimal("50.0")))
@@ -245,10 +244,9 @@ class PackageControllerTest {
     public void shouldReturnPackageDTOWhenProvidedCorrectUUID() throws Exception {
         UUID uuid = filterBoxPackDto().getId();
 
-        when(packageService.getPackagesByFilter(uuid, null)).thenReturn(filterBoxPackDto());
+        when(packageService.getPackagesByUUID(uuid)).thenReturn(filterBoxPackDto());
 
-        mvc.perform(get("/api/packages/search")
-                        .param("uuid", String.valueOf(uuid)))
+        mvc.perform(get("/api/packages/{uuid}", uuid))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.trackingNumber").value("TRK2026000000002"));

@@ -72,36 +72,35 @@ public class PackageService {
         return packageMapper.toDTO(saved);
     }
 
-    public PackageDTO getPackagesByFilter(UUID uuid, String trackingNumber) {
-        validateFilters(uuid, trackingNumber);
+    public PackageDTO getPackagesByUUID(UUID uuid) {
+        validateFilters(uuid);
+        return packageRepository.findPackageByUuid(uuid)
+                .map(packageMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Package with UUID number " + uuid +
+                        " not found"));
+    }
 
-        if (uuid != null) {
-            return packageRepository.findPackageByUuid(uuid)
-                    .map(packageMapper::toDTO)
-                    .orElseThrow(() -> new ResourceNotFoundException("Package with UUID number " + uuid +
-                            " not found"));
-        }
-
+    public PackageDTO getPackagesByTrackingNumber(String trackingNumber) {
         validateTrackingNumber(trackingNumber);
-        if (trackingNumber != null) {
-            return packageRepository.findPackageByTrackingNumber(trackingNumber)
-                    .map(packageMapper::toDTO)
-                    .orElseThrow(() -> new ResourceNotFoundException("Package with tracking number " + trackingNumber +
-                            " not found"));
-        }
-
-        throw new IllegalArgumentException("UUID or tracking number must be provided.");
+        return packageRepository.findPackageByTrackingNumber(trackingNumber)
+                .map(packageMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Package with tracking number " + trackingNumber +
+                        " not found"));
     }
 
 
-    private void validateFilters(UUID uuid, String trackingNumber) {
-        if (uuid == null && (trackingNumber == null || trackingNumber.isBlank())) {
-            throw new IllegalArgumentException("Provide either uuid or tracking number.");
+    private void validateFilters(UUID uuid) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("Provide uuid. ");
         }
     }
 
     private void validateTrackingNumber(String trackingNumber) {
         String TRACKING_NUMBER_REGEX = "^TRK20\\d{2}\\d{9}$";
+        if (trackingNumber == null || trackingNumber.isBlank()) {
+            throw new IllegalArgumentException("Tracking number cannot be null or blank.");
+        }
+
         if (!trackingNumber.matches(TRACKING_NUMBER_REGEX)) {
             throw new IllegalArgumentException("Invalid tracking number format.");
         }

@@ -169,7 +169,7 @@ public class PackageServiceTest {
         when(packageRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.of(filterPack()));
         when(packageMapper.toDTO(any(Package.class))).thenReturn(filterBoxPackDto());
 
-        PackageDTO packagesByFilter = packageService.getPackagesByFilter(null, trackingNumber);
+        PackageDTO packagesByFilter = packageService.getPackagesByTrackingNumber(trackingNumber);
 
         assertEquals(trackingNumber, packagesByFilter.getTrackingNumber());
         assertEquals(new BigDecimal("50.0"), packagesByFilter.getWeight());
@@ -180,7 +180,7 @@ public class PackageServiceTest {
     void shouldThrowExceptionWhenTrackingNumberFormatIsShort() {
         String trackingNumber = "TRK20260000002";
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByFilter(null, trackingNumber));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
 
         assertEquals("Invalid tracking number format.", exception.getMessage());
         verify(packageRepository, never()).findByTrackingNumber(trackingNumber);
@@ -189,7 +189,7 @@ public class PackageServiceTest {
     @Test
     void shouldThrowExceptionWhenTrackingNumberFormatIsNotStartedTRK() {
         String trackingNumber = "KRT20260000002";
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByFilter(null, trackingNumber));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
 
         assertEquals("Invalid tracking number format.", exception.getMessage());
         verify(packageRepository, never()).findByTrackingNumber(trackingNumber);
@@ -201,7 +201,7 @@ public class PackageServiceTest {
 
         when(packageRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByFilter(null, trackingNumber));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
 
         assertEquals("Package with tracking number " + trackingNumber + " not found", exception.getMessage());
     }
@@ -213,7 +213,7 @@ public class PackageServiceTest {
         when(packageRepository.findPackageByUuid(any())).thenReturn(Optional.of(filterPack()));
         when(packageMapper.toDTO(any(Package.class))).thenReturn(filterBoxPackDto());
 
-        PackageDTO packagesByFilter = packageService.getPackagesByFilter(uuid, null);
+        PackageDTO packagesByFilter = packageService.getPackagesByUUID(uuid);
 
         assertNotNull(uuid);
         assertEquals("TRK2026000000002", packagesByFilter.getTrackingNumber());
@@ -222,9 +222,17 @@ public class PackageServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenWeDoNotProvidedTrackingNumberOrUUID() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByFilter(null, null));
-        assertEquals("Provide either uuid or tracking number.", exception.getMessage());
+    void shouldThrowExceptionWhenWeDoNotProvidedUUID() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByUUID(null));
+        assertEquals("Provide uuid. ", exception.getMessage());
+        verify(packageRepository, never()).findPackageByUuid(null);
+        verify(packageRepository, never()).findPackageByTrackingNumber(null);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWeDoNotProvidedTrackingNumber() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(null));
+        assertEquals("Tracking number cannot be null or blank.", exception.getMessage());
         verify(packageRepository, never()).findPackageByUuid(null);
         verify(packageRepository, never()).findPackageByTrackingNumber(null);
     }
@@ -234,7 +242,7 @@ public class PackageServiceTest {
         UUID uuid = filterBoxPackDto().getId();
         when(packageRepository.findPackageByUuid(any())).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByFilter(uuid, null));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByUUID(uuid));
 
         assertEquals("Package with UUID number " + uuid + " not found", exception.getMessage());
     }

@@ -28,11 +28,15 @@ public class PackageController {
         return ResponseEntity.ok(packPage);
     }
 
-    @GetMapping("/packages/search")
-    ResponseEntity<PackageDTO> getPackagesByFilter(
-            @RequestParam(required = false) String trackingNumber,
-            @RequestParam(required = false) UUID uuid) {
-        PackageDTO filter = packingService.getPackagesByFilter(uuid, trackingNumber);
+    @GetMapping("/packages/{uuid}")
+    ResponseEntity<PackageDTO> getPackagesByFilterUuid(@PathVariable UUID uuid) {
+        PackageDTO filter = packingService.getPackagesByUUID(uuid);
+        return ResponseEntity.ok(filter);
+    }
+
+    @GetMapping("/packages/tracking/{trackingNumber}")
+    ResponseEntity<PackageDTO> getPackagesByFilterTrackingNumber(@PathVariable String trackingNumber) {
+        PackageDTO filter = packingService.getPackagesByTrackingNumber(trackingNumber);
         return ResponseEntity.ok(filter);
     }
 
