@@ -103,7 +103,7 @@ public class TruckControllerTest {
         String jsonRequest = objectMapper.writeValueAsString(packageList);
         Long truckId = 1L;
 
-        MvcResult result = mvc.perform(post("/api/truck/{truckId}", truckId)
+        MvcResult result = mvc.perform(post("/api/trucks/{truckId}", truckId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isOk())
@@ -129,7 +129,7 @@ public class TruckControllerTest {
         Mockito.doThrow(new IllegalArgumentException("Truck loading failed"))
                 .when(truckService).addPackagesToTruck(Mockito.anyList(), Mockito.anyLong());
 
-        mvc.perform(post("/api/truck/{truckId}", truckId)
+        mvc.perform(post("/api/trucks/{truckId}", truckId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isBadRequest());

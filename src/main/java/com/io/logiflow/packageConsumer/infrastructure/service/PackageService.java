@@ -39,6 +39,10 @@ public class PackageService {
 
         entity.setUuid(UUID.randomUUID());
         entity.setTrackingNumber(generatedTrackingNumber);
+        entity.setCoordX(0);
+        entity.setCoordY(0);
+        entity.setCoordZ(0);
+
         Package savedEntity = packageRepository.save(entity);
         return packageMapper.toDTO(savedEntity);
     }

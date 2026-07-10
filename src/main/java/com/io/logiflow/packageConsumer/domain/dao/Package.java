@@ -1,9 +1,9 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.math.BigDecimal;
@@ -13,9 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "packages")
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 public class Package {
 
@@ -39,16 +37,14 @@ public class Package {
 
     //współrzedne paczki
     @Column(name = "coord_x", nullable = false)
-    private int x;
+    private int coordX;
     @Column(name = "coord_y", nullable = false)
-    private int y;
+    private int coordY;
     @Column(name = "coord_z", nullable = false)
-    private int z;
+    private int coordZ;
 
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
-    @EqualsAndHashCode.Exclude
     private Truck truck;
 
 
@@ -59,23 +55,23 @@ public class Package {
         this.weight = weight;
     }
 
-    public Package(Long packageId, long nextSequenceValue, int width, int height, int depth, BigDecimal weight, Truck truck, int x, int y, int z) {
+    public Package(Long packageId, long nextSequenceValue, int width, int height, int depth, BigDecimal weight, Truck truck, int coordX, int coordY, int coordZ) {
         this.packageId = packageId;
         this.trackingNumber = generateTrackingNumberAutomatically(nextSequenceValue);
         this.width = width;
         this.height = height;
         this.depth = depth;
         this.weight = weight;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.coordX = coordX;
+        this.coordY = coordY;
+        this.coordZ = coordZ;
         this.truck = truck;
     }
 
     public void placeInSpace(CargoSpace cargoSpace) {
-        this.x = cargoSpace.getPositionX();
-        this.y = cargoSpace.getPositionY();
-        this.z = cargoSpace.getPositionZ();
+        this.coordX = cargoSpace.getPositionX();
+        this.coordY = cargoSpace.getPositionY();
+        this.coordZ = cargoSpace.getPositionZ();
     }
 
     public String generateTrackingNumberAutomatically(long nextSequenceValue) {

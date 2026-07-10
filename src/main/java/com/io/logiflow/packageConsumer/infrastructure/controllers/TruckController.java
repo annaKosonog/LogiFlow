@@ -12,13 +12,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/trucks")
 @RequiredArgsConstructor
 public class TruckController {
 
     private final TruckService truckService;
 
-    @GetMapping("/trucks")
+    @GetMapping
     public ResponseEntity<Page<TruckDTO>> getAllTrucks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -27,7 +27,7 @@ public class TruckController {
         return ResponseEntity.ok(trucks);
     }
 
-    @GetMapping("/trucks/search")
+    @GetMapping("/search")
     public ResponseEntity<List<TruckDTO>> getTrucksByFilterLengthAndWeight(
             @RequestParam(required = false, defaultValue = "-1") int length,
             @RequestParam(required = false) BigDecimal weight) {
@@ -35,13 +35,11 @@ public class TruckController {
         return ResponseEntity.ok(filter);
     }
 
-    @PostMapping("/truck/{truckId}")
+    @PostMapping("/{truckId}")
     public ResponseEntity<String> packPackages(
             @PathVariable Long truckId,
             @RequestBody List<PackageDTO> packages) {
         truckService.addPackagesToTruck(packages, truckId);
         return ResponseEntity.ok("The packing process has been successfully completed for the truck with ID " + truckId);
     }
-
-
 }

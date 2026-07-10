@@ -1,8 +1,9 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,9 +14,7 @@ import java.util.UUID;
 @Table(name = "trucks")
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class Truck {
 
     @Id
@@ -36,15 +35,10 @@ public class Truck {
     private BigDecimal maxPayload;  //Maksymalna ladownosc samochodu
     private BigDecimal currentWeight = BigDecimal.ZERO;
 
-    @JsonManagedReference
     @OneToMany(mappedBy = "truck")
-    @EqualsAndHashCode.Exclude
     private List<Package> packedPackages = new ArrayList<>();
 
-    @JsonManagedReference
     @OneToMany(mappedBy = "truck")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private List<CargoSpace> emptyCargoSpaces = new ArrayList<>();
 
     public Truck(int width, int height, int length, BigDecimal maxPayload) {
@@ -67,7 +61,6 @@ public class Truck {
         BigDecimal newTotalWeight = this.currentWeight.add(b.getWeight());
         return newTotalWeight.compareTo(this.maxPayload) <= 0;
     }
-
 
     public void unload(Package b) {
         if (!packedPackages.contains(b)) {

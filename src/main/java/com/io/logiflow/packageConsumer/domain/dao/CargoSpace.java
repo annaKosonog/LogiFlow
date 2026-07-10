@@ -3,18 +3,13 @@ package com.io.logiflow.packageConsumer.domain.dao;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "cargo_spaces")
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 @ToString
 public class CargoSpace {
 
@@ -42,11 +37,8 @@ public class CargoSpace {
     @Column(name = "depth", nullable = false)
     private int depth; //Glebokosc
 
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "truck_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Truck truck;
 
     // Konstruktor wymagany przez JPA

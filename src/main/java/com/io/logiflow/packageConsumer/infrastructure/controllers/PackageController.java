@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/packages")
 @RequiredArgsConstructor
 public class PackageController {
 
     private final PackageService packingService;
 
-    @GetMapping("/packages")
+    @GetMapping
     ResponseEntity<Page<PackageDTO>> getAllPackages(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -28,25 +28,25 @@ public class PackageController {
         return ResponseEntity.ok(packPage);
     }
 
-    @GetMapping("/packages/{uuid}")
+    @GetMapping("/{uuid}")
     ResponseEntity<PackageDTO> getPackagesByFilterUuid(@PathVariable UUID uuid) {
         PackageDTO filter = packingService.getPackagesByUUID(uuid);
         return ResponseEntity.ok(filter);
     }
 
-    @GetMapping("/packages/tracking/{trackingNumber}")
+    @GetMapping("/tracking/{trackingNumber}")
     ResponseEntity<PackageDTO> getPackagesByFilterTrackingNumber(@PathVariable String trackingNumber) {
         PackageDTO filter = packingService.getPackagesByTrackingNumber(trackingNumber);
         return ResponseEntity.ok(filter);
     }
 
-    @PostMapping("/packages")
+    @PostMapping
     public ResponseEntity<PackageDTO> registerPackage(@RequestBody PackageCreateRequest createRequest) {
         PackageDTO savedPackage = packingService.registerNewPackage(createRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPackage);
     }
 
-    @PatchMapping("/packages/{packId}")
+    @PatchMapping("/{packId}")
     public ResponseEntity<PackageDTO> updateDimensions(@PathVariable Long packId, @RequestBody Map<String, Object> fields) {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity.ok(updated);
