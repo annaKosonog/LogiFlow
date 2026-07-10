@@ -1,32 +1,34 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
+import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.CoordinatesDTO;
 import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface CommonMapper {
-    default DimensionsDTO mapDimensionsDTO(DimensionsDTO dimensionsDTO) {
-        if (dimensionsDTO == null) {
+
+    // Mapstruct widzi, skąd wziąć dane dla DimensionsDTO, bo przekazujemy mu całą encję Package
+    default DimensionsDTO toDimensionsDTO(Package pack) {
+        if (pack == null) {
             return null;
         }
-
         return new DimensionsDTO(
-                dimensionsDTO.getWidth(),
-                dimensionsDTO.getHeight(),
-                dimensionsDTO.getDepth_length()
+                pack.getWidth(),
+                pack.getHeight(),
+                pack.getDepth()
         );
     }
 
-    default CoordinatesDTO mapCoordinates(CoordinatesDTO coordinates) {
-        if (coordinates == null) {
+    // Mapujemy płaskie pola X, Y, Z z encji na obiekt CoordinatesDTO
+    default CoordinatesDTO toCoordinatesDTO(Package pack) {
+        if (pack == null) {
             return null;
         }
-
         return new CoordinatesDTO(
-                coordinates.getX(),
-                coordinates.getY(),
-                coordinates.getZ()
+                pack.getCoordX(),
+                pack.getCoordY(),
+                pack.getCoordZ()
         );
     }
 }
