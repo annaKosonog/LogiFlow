@@ -2,6 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
@@ -20,15 +21,18 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.firstBoxPackDto;
+import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -146,5 +150,89 @@ class TruckServiceTest {
 
         assertEquals(1, truck.getPackedPackages().size());
     }
+
+    @Test
+    void shouldReturnTruckDtoWhenProvidedCorrectDateUUID() {
+        UUID uuid = createLoadedTruck().getUuid();
+
+        when(truckRepository.findTruckByUuid(any())).thenReturn(Optional.of(createLoadedTruck()));
+        when(truckMapper.toDTO(any(Truck.class))).thenReturn(createLoadedTruckDTO());
+
+        TruckDTO truckByFilterUUID = truckService.getTruckByFilterUUID(uuid);
+        assertEquals("528e0004-a6f9-4018-bcba-87e20ad08606", truckByFilterUUID.getIdTruck().toString());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUUIDNotFound() {
+        UUID uuid = createLoadedTruck().getUuid();
+        when(truckRepository.findTruckByUuid(any())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.getTruckByFilterUUID(uuid));
+        assertEquals("Truck with UUID number " + uuid +
+                "not found", exception.getMessage());
+        verify(truckMapper, never()).toDTO(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWeDoNotProvidedUUID() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.getTruckByFilterUUID(null));
+        assertEquals("Provide uuid.", exception.getMessage());
+        verify(truckRepository, never()).findTruckByUuid(any());
+        verify(truckMapper, never()).toDTO(any(Truck.class));
+    }
+
+    @Test
+    void shouldReturnListTruckWhenProvidedCorrectDateLength() {
+        int length = 600;
+        List<Truck> truck = new ArrayList<>();
+        truck.add(createLoadedTruck());
+        truck.add(createLoadedSecondTruck());
+
+        when(truckRepository.findTruckByLength(length)).thenReturn(truck);
+        lenient().when(truckMapper.toDTO(any(Truck.class)))
+                .thenAnswer(invocation -> {
+                    DimensionsDTO dimensionsDTO = new DimensionsDTO();
+                    dimensionsDTO.setDepth_length(600);
+                    Truck truck1 = invocation.getArgument(0);
+
+                    TruckDTO dto = new TruckDTO();
+                    dto.setIdTruck(truck1.getUuid());
+                    dto.setDimensionsDTO(dimensionsDTO);
+
+                    return dto;
+                });
+        lenient().when(truckMapper.toDTO(any(Truck.class)))
+                .thenAnswer(invocation -> {
+                    DimensionsDTO dimensionsDTO = new DimensionsDTO();
+                    dimensionsDTO.setDepth_length(600);
+                    Truck truck1 = invocation.getArgument(0);
+
+                    TruckDTO dto = new TruckDTO();
+                    dto.setIdTruck(truck1.getUuid());
+                    dto.setDimensionsDTO(dimensionsDTO);
+
+                    return dto;
+                });
+        List<TruckDTO> trucksLength = truckService.getTrucksByLengthAndWeight(length, null);
+
+        assertEquals(2, trucksLength.size());
+        assertEquals(truck.get(0).getUuid().toString(), trucksLength.get(0).getIdTruck().toString());
+        assertEquals(truck.get(1).getUuid().toString(), trucksLength.get(1).getIdTruck().toString());
+    }
+
+    @Test
+    void shouldReturnTruckWhenProvidedCorrectDataMaxPayload() {
+        BigDecimal maxPayload = new BigDecimal("3.500");
+
+
+    }
+
+
+    @Test
+    void shouldThrowExceptionWhenWeDoNotProvidedAnyArgument() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.getTrucksByLengthAndWeight(-1, null));
+        assertEquals("Provide at least one filter.", exception.getMessage());
+    }
+
 
 }

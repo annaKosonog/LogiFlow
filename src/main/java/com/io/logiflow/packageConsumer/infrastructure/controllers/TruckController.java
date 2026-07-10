@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -26,6 +27,14 @@ public class TruckController {
         return ResponseEntity.ok(trucks);
     }
 
+    @GetMapping("/trucks/search")
+    public ResponseEntity<List<TruckDTO>> getTrucksByFilterLengthAndWeight(
+            @RequestParam(required = false, defaultValue = "-1") int length,
+            @RequestParam(required = false) BigDecimal weight) {
+        List<TruckDTO> filter = truckService.getTrucksByLengthAndWeight(length, weight);
+        return ResponseEntity.ok(filter);
+    }
+
     @PostMapping("/truck/{truckId}")
     public ResponseEntity<String> packPackages(
             @PathVariable Long truckId,
@@ -33,4 +42,6 @@ public class TruckController {
         truckService.addPackagesToTruck(packages, truckId);
         return ResponseEntity.ok("The packing process has been successfully completed for the truck with ID " + truckId);
     }
+
+
 }

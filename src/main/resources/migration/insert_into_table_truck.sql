@@ -5,7 +5,7 @@ VALUES ('493afc07-d433-4cfa-8947-0c6100c127df',240, 260, 600, 3500.00, 0.00);
 -- 1. Mały kurierski Bus / Van (np. Mercedes Sprinter)
 -- Wymiary: szer: 170cm, wys: 190cm, dł: 430cm | Ładowność: 1200kg
 INSERT INTO trucks (uuid,width_w, height_h, length_l, max_payload, current_weight)
-VALUES ('2b8ecd55-c636-4ba0-8192-42c9e8a14355',170, 190, 430, 1200.00, 0.00);
+VALUES ('2b8ecd55-c636-4ba0-8192-42c9e8a14355',170, 190, 600, 1200.00, 0.00);
 
 
 -- 2. Samochód ciężarowy typu "Solówka" z windą (często spotykany w dystrybucji lokalnej)

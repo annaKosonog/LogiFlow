@@ -42,5 +42,9 @@ public class DimensionsDTOFixture {
         return new DimensionsDTO(250, 220, 600);
     }
 
+    public static DimensionsDTO dimensionSecondTruck() {
+        return new DimensionsDTO(170, 190, 600);
+    }
+
 
 }

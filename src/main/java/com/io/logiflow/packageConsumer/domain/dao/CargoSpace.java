@@ -45,6 +45,8 @@ public class CargoSpace {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "truck_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Truck truck;
 
     // Konstruktor wymagany przez JPA

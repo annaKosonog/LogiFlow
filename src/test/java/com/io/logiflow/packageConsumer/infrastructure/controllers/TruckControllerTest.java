@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
-import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,7 +48,7 @@ public class TruckControllerTest {
 
     @Test
     void shouldReturnDefaultPageableWhenNoParamsProvided() throws Exception {
-        TruckDTO mockPackDto = createLoadedTruck();
+        TruckDTO mockPackDto = createLoadedTruckDTO();
 
         Page<TruckDTO> page = new PageImpl<>(
                 List.of(mockPackDto),
@@ -74,7 +74,7 @@ public class TruckControllerTest {
         int customPage = 2;
         int customSize = 5;
 
-        TruckDTO mockPackDto = createLoadedTruck();
+        TruckDTO mockPackDto = createLoadedTruckDTO();
 
         Page<TruckDTO> page = new PageImpl<>(
                 List.of(mockPackDto));

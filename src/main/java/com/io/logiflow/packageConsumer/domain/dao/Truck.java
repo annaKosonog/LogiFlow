@@ -16,7 +16,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode
-@ToString
 public class Truck {
 
     @Id
@@ -39,10 +38,13 @@ public class Truck {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "truck")
+    @EqualsAndHashCode.Exclude
     private List<Package> packedPackages = new ArrayList<>();
 
     @JsonManagedReference
     @OneToMany(mappedBy = "truck")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<CargoSpace> emptyCargoSpaces = new ArrayList<>();
 
     public Truck(int width, int height, int length, BigDecimal maxPayload) {

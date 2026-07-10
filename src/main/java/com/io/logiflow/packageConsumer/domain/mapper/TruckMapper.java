@@ -10,6 +10,8 @@ public interface TruckMapper {
 
 
     @Mapping(source = "uuid", target = "idTruck")
+    @Mapping(source = "length", target = "dimensionsDTO.depth_length")
+    @Mapping(source = "truck", target = "dimensionsDTO")
     TruckDTO toDTO(Truck truck);
 
     @Mapping(source = "idTruck", target = "uuid")

@@ -16,7 +16,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode
-@ToString
 @NoArgsConstructor
 public class Package {
 
@@ -49,6 +48,7 @@ public class Package {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
+    @EqualsAndHashCode.Exclude
     private Truck truck;
 
 

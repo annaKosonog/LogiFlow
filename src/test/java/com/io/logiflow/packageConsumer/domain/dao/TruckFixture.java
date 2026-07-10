@@ -1,6 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public class TruckFixture {
 
@@ -28,6 +29,19 @@ public class TruckFixture {
 
         // Ładujemy paczki
         truck.load(createBox("30.00"));
+        truck.load(createBox("50.00"));
+
+        return truck;
+    }
+
+    public static Truck createLoadedSecondTruck() {
+        // Tworzymy ciężarówkę z limitem 200.00
+        Truck truck = createTruckWithPayload("200.00");
+        truck.setTruckId(2L);
+
+
+        // Ładujemy paczki
+        truck.load(createBox("40.00"));
         truck.load(createBox("50.00"));
 
         return truck;
