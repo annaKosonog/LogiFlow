@@ -10,10 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class
+GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException exception) {
-        // Zwraca status 400 Bad Request i wiadomość z błędu (np. "Truck loading failed")
         return ResponseEntity.badRequest().body(exception.getMessage());
     }
 
