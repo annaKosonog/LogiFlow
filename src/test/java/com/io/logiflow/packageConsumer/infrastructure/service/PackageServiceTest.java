@@ -50,7 +50,6 @@ public class PackageServiceTest {
         PackageCreateRequest inputRequest = smallRequest();
         PackageDTO inputDto = smallDTO();
 
-        Package expectedEntity = smallDao();
         Package savedEntity = firstBoxPackToTruck();
 
         when(packageRepository.findByTrackingNumber(any())).thenReturn(null);

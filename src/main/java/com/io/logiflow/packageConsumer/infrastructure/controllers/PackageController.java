@@ -47,7 +47,7 @@ public class PackageController {
     }
 
     @PatchMapping("/{packId}")
-    public ResponseEntity<PackageDTO> updateDimensions(@PathVariable Long packId, @RequestBody Map<String, Object> fields) {
+    public ResponseEntity<PackageDTO> updateDimensions(@PathVariable UUID packId, @RequestBody Map<String, Object> fields) {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity.ok(updated);
     }

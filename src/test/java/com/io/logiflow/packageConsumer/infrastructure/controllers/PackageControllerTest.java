@@ -1,7 +1,6 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
@@ -52,6 +51,7 @@ class PackageControllerTest {
 
     @InjectMocks
     private PackageController packageController;
+
     @MockBean
     private PackageMapper packageMapper;
 
@@ -60,8 +60,7 @@ class PackageControllerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        Truck loadedTruck = createLoadedTruck();
-        objectMapper.writeValueAsString(loadedTruck);
+        createLoadedTruck();
     }
 
     @Test
@@ -163,7 +162,7 @@ class PackageControllerTest {
 
     @Test
     public void shouldUpdateAPackageToSystemSuccessfully() throws Exception {
-        Long packId = 5L;
+        UUID packId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         PackageDTO patchDto = smallDTO();
         patchDto.getDimensions().setWidth(45);
         patchDto.setWeight(new BigDecimal("12.95"));
@@ -185,7 +184,7 @@ class PackageControllerTest {
 
     @Test
     public void shouldUpdateOnlyAllowedFieldsAndIgnoreRest() throws Exception {
-        Long originalId = 5L;
+        UUID originalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
         Map<String, Object> fieldsToUpdate = new HashMap<>();
         fieldsToUpdate.put("weight", 750.0);
@@ -209,12 +208,11 @@ class PackageControllerTest {
 
     @Test
     public void shouldReturn404WhenPackageDoesNotExist() throws Exception {
-        Long nonExistingId = 999L;
-        String weight = "12.5";
+        UUID nonExistingId = UUID.randomUUID();
         PackageDTO packageDTO = new PackageDTO();
         packageDTO.setWeight(new BigDecimal("12.5"));
 
-        when(packageService.updatePackageFields(any(), any()))
+        when(packageService.updatePackageFields(any(UUID.class), any()))
                 .thenThrow(new ResourceNotFoundException("Package not found"));
 
         String patchJson = objectMapper.writeValueAsString(packageDTO);

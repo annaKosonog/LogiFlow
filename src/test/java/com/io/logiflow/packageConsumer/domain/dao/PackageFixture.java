@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.domain.dao;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 

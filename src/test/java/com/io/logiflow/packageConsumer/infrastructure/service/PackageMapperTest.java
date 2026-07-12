@@ -2,35 +2,36 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.mapper.CommonMapper;
+import com.io.logiflow.packageConsumer.domain.mapper.CommonMapperImpl;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
-import org.junit.jupiter.api.BeforeEach;
+import com.io.logiflow.packageConsumer.domain.mapper.PackageMapperImpl;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.mediumDTO;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {
+        PackageMapperImpl.class,
+        CommonMapperImpl.class
+})
 public class PackageMapperTest {
 
-    private PackageMapper packageMapper;
-    private CommonMapper commonMapper;
-
-    @BeforeEach
-    void setUp() {
-        packageMapper = Mappers.getMapper(PackageMapper.class);
-        commonMapper = Mockito.mock(CommonMapper.class);
-        ReflectionTestUtils.setField(packageMapper, "commonMapper", commonMapper);
-    }
-
+    @Autowired
+    private PackageMapper packageMapper = Mappers.getMapper(PackageMapper.class);
 
     @Test
     void shouldMapDtoToEntity() {
@@ -38,7 +39,6 @@ public class PackageMapperTest {
         dto.setTruckID(123L);
 
         Package entity = packageMapper.toEntity(dto);
-        commonMapper.toCoordinatesDTO(entity);
 
         assertThat(entity.getTruck().getTruckId()).isEqualTo(123L);
         assertThat(entity.getHeight()).isEqualTo(1);
@@ -49,8 +49,6 @@ public class PackageMapperTest {
     void shouldMapEntityToDto() {
         Package dao = smallDao();
 
-        Mockito.when(commonMapper.toDimensionsDTO(any(Package.class))).thenReturn(smallDTO().getDimensions());
-        Mockito.when(commonMapper.toCoordinatesDTO(any(Package.class))).thenReturn(smallDTO().getCoordinates());
         PackageDTO dto = packageMapper.toDTO(dao);
 
         assertThat(dto.getDimensions().getHeight()).isEqualTo(1);
@@ -59,5 +57,24 @@ public class PackageMapperTest {
         assertEquals(1, dto.getDimensions().getHeight());
         assertEquals(1, dto.getDimensions().getWidth());
         assertEquals(new BigDecimal("10"), dto.getWeight());
+    }
+
+    @Test
+    void shouldMapDtoListToEntityList() {
+        List<PackageDTO> packageDTOList = new ArrayList<>();
+        packageDTOList.add(smallDTO());
+        packageDTOList.add(mediumDTO());
+
+        List<Package> result = packageMapper.toEntityList(packageDTOList);
+
+        assertThat(result)
+                .isNotNull()
+                .hasSize(2);
+
+        assertThat(result.get(0).getUuid().toString()).isNotBlank();
+        assertThat(result.get(0).getTrackingNumber()).isEqualTo(smallDTO().getTrackingNumber());
+
+        assertThat(result.get(1).getUuid().toString()).isNotBlank();
+        assertThat(result.get(1).getTrackingNumber()).isEqualTo(mediumDTO().getTrackingNumber());
     }
 }

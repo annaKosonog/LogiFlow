@@ -96,5 +96,11 @@ public class PackageFixtureDTO {
         return localPackages;
     }
 
+    public static PackageDTO packageSavedToDb() {
+        return new PackageDTO(UUID.fromString("289f8206-b30a-4c18-9740-8c3c77c236e6"), "TRK2026000000001",
+                new DimensionsDTO(1, 1, 1), new BigDecimal("10.0"),
+                new CoordinatesDTO(0, 0, 0), null);
+    }
+
 
 }
