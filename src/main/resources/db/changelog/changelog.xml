@@ -39,4 +39,12 @@
                  stripComments="true"/>
     </changeSet>
 
+    <changeSet id="sync-tracking-sequence" author="student">
+        <sql>
+            SELECT setval('tracking_number_seq',
+                          (SELECT COALESCE(MAX(CAST(SUBSTRING(tracking_number FROM 8) AS BIGINT)), 0) FROM packages),
+                          true);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
