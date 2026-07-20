@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/trucks")
@@ -35,11 +36,11 @@ public class TruckController {
         return ResponseEntity.ok(filter);
     }
 
-    @PostMapping("/{truckId}")
+    @PostMapping("/{idTruck}")
     public ResponseEntity<String> packPackages(
-            @PathVariable Long truckId,
+            @PathVariable UUID idTruck,
             @RequestBody List<PackageDTO> packages) {
-        truckService.addPackagesToTruck(packages, truckId);
-        return ResponseEntity.ok("The packing process has been successfully completed for the truck with ID " + truckId);
+        truckService.addPackagesToTruck(packages, idTruck);
+        return ResponseEntity.ok("The packing process has been successfully completed for the truck with ID " + idTruck);
     }
 }

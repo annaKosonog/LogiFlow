@@ -60,7 +60,7 @@ class TruckServiceTest {
     @BeforeEach
     void setUp() {
         truck = createLoadedTruck();
-        lenient().when(truckRepository.findById(1L)).thenReturn(Optional.of(truck));
+        lenient().when(truckRepository.findTruckByUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))).thenReturn(Optional.of(truck));
         aPackages = new ArrayList<>();
     }
 
@@ -129,9 +129,9 @@ class TruckServiceTest {
 
     @Test
     void shouldThrowExceptionWhenTruckIdNotExists() {
-        Long truckId = 5L;
+        UUID truckId = UUID.randomUUID();
 
-        when(truckRepository.findById(truckId)).thenReturn(Optional.empty());
+        when(truckRepository.findTruckByUuid(truckId)).thenReturn(Optional.empty());
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.addPackagesToTruck(aPackages, truckId));
 
         assertEquals("The truck with the id " + truckId + " does not exist", exception.getMessage());
@@ -139,7 +139,7 @@ class TruckServiceTest {
 
     @Test
     void shouldReturnPackagesWhichAddToTruck() {
-        Long truckId = 1L;
+        UUID truckId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         List<Package> uuidList = new ArrayList<>();
         uuidList.add(firstBoxPackToTruck());
         aPackages.add(firstBoxPackDto());

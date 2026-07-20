@@ -34,7 +34,6 @@ public class Package {
     private int depth; //głębokość
     private BigDecimal weight; //cieżar
 
-
     //współrzedne paczki
     @Column(name = "coord_x", nullable = false)
     private int coordX;
@@ -46,7 +45,6 @@ public class Package {
     @ManyToOne
     @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
     private Truck truck;
-
 
     public Package(int width, int height, int depth, BigDecimal weight) {
         this.width = width;

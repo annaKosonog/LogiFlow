@@ -31,8 +31,8 @@ public class TruckService {
     }
 
     @Transactional
-    public void addPackagesToTruck(List<PackageDTO> packages, Long truckId) {
-        Truck truck = truckRepository.findById(truckId)
+    public void addPackagesToTruck(List<PackageDTO> packages, UUID truckId) {
+        Truck truck = truckRepository.findTruckByUuid(truckId)
                 .orElseThrow(() -> new ResourceNotFoundException("The truck with the id " + truckId + " does not exist"));
         parcelPackingService.pack(packages, truck);
         truckRepository.save(truck);
@@ -46,10 +46,9 @@ public class TruckService {
                         "not found"));
     }
 
-
     public List<TruckDTO> getTrucksByLengthAndWeight(int length, BigDecimal maxPayload) {
-        validateFilterByDimension(length, maxPayload);
         if (length != -1) {
+            validateLength(length);
             return truckRepository.findTruckByLength(length)
                     .stream()
                     .map(truckMapper::toDTO)
@@ -57,6 +56,7 @@ public class TruckService {
         }
 
         if (maxPayload != null) {
+            validateWeight(maxPayload);
             return truckRepository.findTruckByMaxPayload(maxPayload)
                     .stream()
                     .map(truckMapper::toDTO)
@@ -71,9 +71,18 @@ public class TruckService {
         }
     }
 
-    private void validateFilterByDimension(int length, BigDecimal maxPayload) {
-        if (length == 0 && (maxPayload == null || maxPayload.compareTo(BigDecimal.ZERO) <= 0)) {
-            throw new IllegalArgumentException("Length or weight cannot be equals -1 or null.");
+    public void validateWeight(BigDecimal maxPayload) {
+        if (maxPayload == null || maxPayload.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Weight cannot be null or negative.");
+        }
+    }
+
+    public void validateLength(int length) {
+        if (length == -1) {
+            return;
+        }
+        if (length <= 0) {
+            throw new IllegalArgumentException("Length must be greater than 0.");
         }
     }
 }

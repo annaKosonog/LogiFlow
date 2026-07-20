@@ -96,9 +96,21 @@ public class PackageFixtureDTO {
         return localPackages;
     }
 
-    public static PackageDTO packageSavedToDb() {
-        return new PackageDTO(UUID.fromString("289f8206-b30a-4c18-9740-8c3c77c236e6"), "TRK2026000000001",
-                new DimensionsDTO(1, 1, 1), new BigDecimal("10.0"),
+    public static PackageDTO firstPackageToPack() {
+        return new PackageDTO(UUID.fromString("7c9e0d12-5b1d-407e-8c43-1bc2d3f4a5b6"), "TRK2026000000004",
+                new DimensionsDTO(100, 80, 120), new BigDecimal("45"),
+                new CoordinatesDTO(0, 0, 0), null);
+    }
+
+    public static PackageDTO secondPackageToPack() {
+        return new PackageDTO(UUID.fromString("b17a8d83-78b0-4875-ae78-c83d14e17312"), "TRK2026000000005",
+                new DimensionsDTO(14, 146, 15), new BigDecimal("120"),
+                new CoordinatesDTO(0, 0, 0), null);
+    }
+
+    public static PackageDTO thirdPackageToPack() {
+        return new PackageDTO(UUID.fromString("e6d49a74-99f7-4e85-b325-3e2cd906d176"), "TRK2026000000007",
+                new DimensionsDTO(50, 30, 40), new BigDecimal("15"),
                 new CoordinatesDTO(0, 0, 0), null);
     }
 

@@ -1,10 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,8 +11,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "trucks")
 @NoArgsConstructor
-@AllArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class Truck {
 
     @Id
@@ -56,6 +55,7 @@ public class Truck {
         }
         packedPackages.add(b);
         this.currentWeight = this.currentWeight.add(b.getWeight());
+        System.out.println("AFTER LOAD - currentWeight: " + this.currentWeight + " | added package weight: " + b.getWeight());
     }
 
     private boolean canPayloadHold(Package b) {

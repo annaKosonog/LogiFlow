@@ -14,7 +14,7 @@ import java.util.UUID;
 public class CargoSpace {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cargo_space_id")
     private Long cargoSpaceId;
 

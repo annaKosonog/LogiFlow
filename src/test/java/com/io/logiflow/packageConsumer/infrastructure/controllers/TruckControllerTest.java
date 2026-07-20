@@ -5,7 +5,6 @@ import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,6 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
@@ -39,9 +39,6 @@ public class TruckControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
-
-    @InjectMocks
-    private TruckController truckController;
 
     @MockBean
     private TruckService truckService;
@@ -101,7 +98,7 @@ public class TruckControllerTest {
         List<Package> packageList = Arrays.asList(firstBoxPackToTruck(), secondBoxPackToTruck());
 
         String jsonRequest = objectMapper.writeValueAsString(packageList);
-        Long truckId = 1L;
+        UUID truckId = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
 
         MvcResult result = mvc.perform(post("/api/trucks/{truckId}", truckId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,7 +124,7 @@ public class TruckControllerTest {
         String jsonRequest = objectMapper.writeValueAsString(packageList);
 
         Mockito.doThrow(new IllegalArgumentException("Truck loading failed"))
-                .when(truckService).addPackagesToTruck(Mockito.anyList(), Mockito.anyLong());
+                .when(truckService).addPackagesToTruck(Mockito.anyList(), Mockito.any(UUID.class));
 
         mvc.perform(post("/api/trucks/{truckId}", truckId)
                         .contentType(MediaType.APPLICATION_JSON)

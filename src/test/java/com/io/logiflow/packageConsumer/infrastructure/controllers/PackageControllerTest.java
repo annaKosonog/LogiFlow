@@ -3,7 +3,6 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
@@ -54,9 +53,6 @@ class PackageControllerTest {
 
     @MockBean
     private PackageMapper packageMapper;
-
-    @MockBean
-    private PackageCreateRequestMapper createRequestMapper;
 
     @BeforeEach
     public void setUp() throws Exception {

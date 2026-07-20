@@ -1,6 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.CoordinatesDTO;
 import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
 import org.mapstruct.Mapper;
@@ -19,6 +20,18 @@ public interface CommonMapper {
                 pack.getDepth()
         );
     }
+
+    default DimensionsDTO toDimensionsDTO(Truck truck) {
+        if (truck == null) {
+            return null;
+        }
+        return new DimensionsDTO(
+                truck.getWidth(),
+                truck.getHeight(),
+                truck.getLength()
+        );
+    }
+
 
     // Mapujemy płaskie pola X, Y, Z z encji na obiekt CoordinatesDTO
     default CoordinatesDTO toCoordinatesDTO(Package pack) {

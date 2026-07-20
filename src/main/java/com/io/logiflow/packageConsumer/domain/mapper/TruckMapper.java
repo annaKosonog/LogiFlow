@@ -5,12 +5,11 @@ import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {PackageMapper.class, CargoSpaceMapper.class})
+@Mapper(componentModel = "spring", uses = {PackageMapper.class, CargoSpaceMapper.class, CommonMapper.class})
 public interface TruckMapper {
 
 
     @Mapping(source = "uuid", target = "idTruck")
-    @Mapping(source = "length", target = "dimensionsDTO.depth_length")
     @Mapping(source = "truck", target = "dimensionsDTO")
     TruckDTO toDTO(Truck truck);
 

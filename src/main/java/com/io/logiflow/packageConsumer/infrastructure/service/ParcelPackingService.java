@@ -8,6 +8,7 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.PackageValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,6 +20,7 @@ public class ParcelPackingService {
 
     private final PackageRepository packageRepository;
 
+    @Transactional
     public void pack(List<PackageDTO> boxesToPack, Truck entityTruck) {
         if (boxesToPack == null || boxesToPack.isEmpty()) {
             throw new PackageValidationException("The list of packages to be loaded cannot be empty!");
@@ -28,28 +30,27 @@ public class ParcelPackingService {
                 .toList();
 
         List<Package> existingPackages = packageRepository.findAllByUuidIn(uuids);
-
         if (existingPackages.size() != uuids.size()) {
             throw new PackageValidationException("Unable to load: One or more packages do not exist in the database!");
         }
 
         validatePackagesAreNotAlreadyLoaded(existingPackages);
-
         sortedPack(existingPackages);
-        List<CargoSpace> emptyCargoSpaces = entityTruck.getEmptyCargoSpaces();
+        List<CargoSpace> finalCargoSpaces = entityTruck.getEmptyCargoSpaces();
+        entityTruck.setEmptyCargoSpaces(finalCargoSpaces);
 
         for (Package aPackage : existingPackages) {
-            //Sprawdzamy wagę
-            // BRAMKARZ: Jeśli ciężarówka nie udźwignie tej paczki, odrzucamy ją OD RAZU!
+            //Sprawdzamy wagę // BRAMKARZ: Jeśli ciężarówka nie udźwignie tej paczki, odrzucamy ją OD RAZU!
             entityTruck.load(aPackage); // Próba sprawdzenia wagi
 
             boolean packed = false;
 
-            for (int i = 0; i < emptyCargoSpaces.size(); i++) {
-                CargoSpace cargoSpace = emptyCargoSpaces.get(i);
+            for (int i = 0; i < finalCargoSpaces.size(); i++) {
+                CargoSpace cargoSpace = finalCargoSpaces.get(i);
                 if (checksThatThePackageFits(aPackage, cargoSpace)) {
+                    cargoSpace.setTruck(entityTruck);
                     aPackage.placeInSpace(cargoSpace); //Paczka trafia do cieżarówki i następuje przypisanie współrzędnych paczce
-                    splitSpace(cargoSpace, aPackage, emptyCargoSpaces);
+                    splitSpace(cargoSpace, aPackage, finalCargoSpaces);
                     packed = true;
                     break;
                 }
