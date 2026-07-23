@@ -2,6 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
+import com.io.logiflow.packageConsumer.exception.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,19 +29,20 @@ public class TruckController {
         return ResponseEntity.ok(trucks);
     }
 
+    //todo dodać paginacja endoint po wszystkich co się da + paginacja + połączyc z getAllTrucks
     @GetMapping("/search")
-    public ResponseEntity<List<TruckDTO>> getTrucksByFilterLengthAndWeight(
+    public ResponseEntity<ApiResponse<List<TruckDTO>>> getTrucksByFilterLengthAndWeight(
             @RequestParam(required = false, defaultValue = "-1") int length,
             @RequestParam(required = false) BigDecimal weight) {
         List<TruckDTO> filter = truckService.getTrucksByLengthAndWeight(length, weight);
-        return ResponseEntity.ok(filter);
+        return ResponseEntity.ok(ApiResponse.success(filter));
     }
 
     @PostMapping("/{idTruck}")
-    public ResponseEntity<String> packPackages(
+    public ResponseEntity<ApiResponse<Void>> packPackages(
             @PathVariable UUID idTruck,
             @RequestBody List<PackageDTO> packages) {
         truckService.addPackagesToTruck(packages, idTruck);
-        return ResponseEntity.ok("The packing process has been successfully completed for the truck with ID " + idTruck);
+        return ResponseEntity.ok(ApiResponse.success(null, "The packing process has been successfully completed for the truck with ID " + idTruck));
     }
 }

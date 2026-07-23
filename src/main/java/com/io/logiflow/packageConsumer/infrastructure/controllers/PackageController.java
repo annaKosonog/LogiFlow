@@ -2,6 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.exception.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,26 +30,29 @@ public class PackageController {
     }
 
     @GetMapping("/{uuid}")
-    ResponseEntity<PackageDTO> getPackagesByFilterUuid(@PathVariable UUID uuid) {
+    ResponseEntity<ApiResponse<PackageDTO>> getPackagesByFilterUuid(@PathVariable UUID uuid) {
         PackageDTO filter = packingService.getPackagesByUUID(uuid);
-        return ResponseEntity.ok(filter);
+        return ResponseEntity.ok(ApiResponse.success(filter));
     }
 
     @GetMapping("/tracking/{trackingNumber}")
-    ResponseEntity<PackageDTO> getPackagesByFilterTrackingNumber(@PathVariable String trackingNumber) {
+    ResponseEntity<ApiResponse<PackageDTO>> getPackagesByFilterTrackingNumber(@PathVariable String trackingNumber) {
         PackageDTO filter = packingService.getPackagesByTrackingNumber(trackingNumber);
-        return ResponseEntity.ok(filter);
+        return ResponseEntity.ok(ApiResponse.success(filter));
     }
 
     @PostMapping
-    public ResponseEntity<PackageDTO> registerPackage(@RequestBody PackageCreateRequest createRequest) {
+    public ResponseEntity<ApiResponse<PackageDTO>> registerPackage(@RequestBody PackageCreateRequest createRequest) {
         PackageDTO savedPackage = packingService.registerNewPackage(createRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPackage);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(savedPackage, "The package was successfully created"));
     }
 
     @PatchMapping("/{packId}")
-    public ResponseEntity<PackageDTO> updateDimensions(@PathVariable UUID packId, @RequestBody Map<String, Object> fields) {
+    public ResponseEntity<ApiResponse<PackageDTO>> updateDimensions(@PathVariable UUID packId, @RequestBody Map<String, Object> fields) {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity
+                .ok(ApiResponse.success(updated));
     }
 }
