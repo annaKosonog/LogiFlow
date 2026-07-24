@@ -8,8 +8,8 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.PackageValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -19,84 +19,159 @@ import java.util.UUID;
 public class ParcelPackingService {
 
     private final PackageRepository packageRepository;
+    private static final boolean[] ALLOWED_ROTATIONS = {false, true};
 
-    @Transactional
-    public void pack(List<PackageDTO> boxesToPack, Truck entityTruck) {
+
+    public void pack(List<PackageDTO> boxesToPack, Truck truck) {
+        List<Package> existingPackages = resolveAndValidatePackages(boxesToPack);
+        sortedPack(existingPackages);
+        List<CargoSpace> finalCargoSpaces = new ArrayList<>(truck.getEmptyCargoSpaces().stream()
+                .filter(zone -> zoneFitsWithinTruck(zone, truck))
+                .toList());
+
+        if (finalCargoSpaces.isEmpty()) {
+            throw new PackageValidationException("Truck ID: " + truck.getTruckId() + " has no valid available CargoSpaces!");
+        }
+
+        List<Package> alreadyLoaded = new ArrayList<>(packageRepository.findAllByTruck(truck));
+        List<UUID> unpacked = new ArrayList<>();
+
+        //Pętla pakowania paczek
+        for (Package aPackage : existingPackages) {
+            boolean success = packSinglePackage(aPackage, truck, finalCargoSpaces, alreadyLoaded);
+            if (!success) {
+                unpacked.add(aPackage.getUuid());
+            }
+        }
+        packageRepository.saveAll(existingPackages);
+        // JEŚLI SĄ NIESPAKOWANE PACZKI -> RZUCAMY WYJĄTEK
+        if (!unpacked.isEmpty()) {
+            throw new PackageValidationException(
+                    "Packing incomplete! The following " + unpacked.size() + " package(s) could not fit: " + unpacked
+            );
+        }
+    }
+
+    private boolean zoneFitsWithinTruck(CargoSpace zone, Truck truck) {
+        boolean fits = zone.getPositionX() >= 0 && zone.getPositionY() >= 0 && zone.getPositionZ() >= 0
+                && zone.getPositionX() + zone.getWidth() <= truck.getWidth()
+                && zone.getPositionY() + zone.getHeight() <= truck.getHeight()
+                && zone.getPositionZ() + zone.getDepth() <= truck.getLength();
+
+        if (!fits) {
+            System.out.printf("ZONE REJECTED! Zone (WxHxD): %dx%dx%d vs Truck (WxHxL): %dx%dx%d%n",
+                    zone.getWidth(), zone.getHeight(), zone.getDepth(),
+                    truck.getWidth(), truck.getHeight(), truck.getLength());
+        }
+        return fits;
+    }
+
+    private List<Package> resolveAndValidatePackages(List<PackageDTO> boxesToPack) {
         if (boxesToPack == null || boxesToPack.isEmpty()) {
             throw new PackageValidationException("The list of packages to be loaded cannot be empty!");
         }
         List<UUID> uuids = boxesToPack.stream()
                 .map(PackageDTO::getId)
                 .toList();
-
         List<Package> existingPackages = packageRepository.findAllByUuidIn(uuids);
+
         if (existingPackages.size() != uuids.size()) {
             throw new PackageValidationException("Unable to load: One or more packages do not exist in the database!");
         }
-
         validatePackagesAreNotAlreadyLoaded(existingPackages);
-        sortedPack(existingPackages);
-        List<CargoSpace> finalCargoSpaces = entityTruck.getEmptyCargoSpaces();
-        entityTruck.setEmptyCargoSpaces(finalCargoSpaces);
-
-        for (Package aPackage : existingPackages) {
-            //Sprawdzamy wagę // BRAMKARZ: Jeśli ciężarówka nie udźwignie tej paczki, odrzucamy ją OD RAZU!
-            entityTruck.load(aPackage); // Próba sprawdzenia wagi
-
-            boolean packed = false;
-
-            for (int i = 0; i < finalCargoSpaces.size(); i++) {
-                CargoSpace cargoSpace = finalCargoSpaces.get(i);
-                if (checksThatThePackageFits(aPackage, cargoSpace)) {
-                    cargoSpace.setTruck(entityTruck);
-                    aPackage.placeInSpace(cargoSpace); //Paczka trafia do cieżarówki i następuje przypisanie współrzędnych paczce
-                    splitSpace(cargoSpace, aPackage, finalCargoSpaces);
-                    packed = true;
-                    break;
-                }
-            }
-            if (!packed) {
-                entityTruck.unload(aPackage);
-            }
-        }
-        entityTruck.setTruckId(entityTruck.getTruckId());
-        existingPackages.forEach(pkg -> pkg.setTruck(entityTruck));
-        packageRepository.saveAll(existingPackages);
+        return existingPackages;
     }
-
 
     //Sortowanie paczek od najmniejszej do największej a potem bierzemy cięższe paczki
     private void sortedPack(List<Package> boxesToPack) {
         boxesToPack.sort(
                 Comparator.comparingInt((Package b) -> b.getWidth() * b.getHeight() * b.getDepth())
+                        .reversed()
                         .thenComparing(Package::getWeight, Comparator.reverseOrder())
         );
     }
 
-    private boolean checksThatThePackageFits(Package aPackage, CargoSpace cargoSpace) {
-        return aPackage.getWidth() <= cargoSpace.getWidth() &&
-                aPackage.getHeight() <= cargoSpace.getHeight() &&
-                aPackage.getDepth() <= cargoSpace.getDepth();
+    private boolean packSinglePackage(Package aPackage, Truck truck, List<CargoSpace> finalCargoSpaces,
+                                      List<Package> alreadyLoaded) {
+        boolean packed = tryPlacePackage(aPackage, truck, finalCargoSpaces, alreadyLoaded);
+        truck.load(aPackage);
+
+        if (!packed) {
+            truck.unload(aPackage);
+            resetPackageCoordinates(aPackage);
+        }
+        return packed;
     }
 
-    private void splitSpace(CargoSpace s, Package b, List<CargoSpace> cargoSpaces) { // podział przestrzeni (pusta - pełna = nowa)
-        cargoSpaces.remove(s); // Usuniecie starego pudła
+    private boolean tryPlacePackage(Package aPackage, Truck truck,
+                                    List<CargoSpace> finalCargoSpaces, List<Package> alreadyLoaded) {
+        for (CargoSpace cargoSpace : finalCargoSpaces) {
+            List<int[]> candidates = generateCandidatePoints(cargoSpace, truck.getPackedPackages());
+            candidates.sort(
+                    Comparator.<int[]>comparingInt(c -> c[1])   // Y — grawitacja (dół najpierw)
+                            .thenComparingInt(c -> c[2])         // Z — tył
+                            .thenComparingInt(c -> c[0])         // X — bok
+            );
 
-        // Generujemy 3 nowe przestrzenie, które powstały wokół paczki wewnątrz starego bloku 's'
-        // 1. Przestrzeń OBOK paczki (po szerokości, idziemy po X)
-        if (s.getWidth() - b.getWidth() > 0) {
-            cargoSpaces.add(0, new CargoSpace(s.getPositionX() + b.getWidth(), s.getPositionY(), s.getPositionZ(), s.getWidth() - b.getWidth(), s.getHeight(), s.getDepth()));
-        }
-        // 2. Przestrzeń NAD paczką (po wysokości)
-        if (s.getHeight() - b.getHeight() > 0) {
-            cargoSpaces.add(0, new CargoSpace(s.getPositionX(), s.getPositionY() + b.getHeight(), s.getPositionZ(), s.getWidth(), s.getHeight() - b.getHeight(), s.getDepth()));
-        }
-        // 3. Przestrzeń PRZED paczką (po długości/głębokości)
-        if (s.getDepth() - b.getDepth() > 0) {
-            cargoSpaces.add(0, new CargoSpace(s.getPositionX(), s.getPositionY(), s.getPositionZ() + b.getDepth(), s.getWidth(), s.getHeight(), s.getDepth() - b.getDepth()));
+            for (int[] point : candidates) {
+                int x = point[0], y = point[1], z = point[2];
+
+                Boolean bestRotation = pickBestRotation(aPackage, cargoSpace, x, y, z);
+                if (bestRotation == null) {
+                    continue; // żadna orientacja nie pasuje w tym punkcie
+                }
+
+                aPackage.setCoordX(x);
+                aPackage.setCoordY(y);
+                aPackage.setCoordZ(z);
+
+                // Jeśli paczka nachodzi na inne, resetujemy jej pozycję i sprawdzamy KOLEJNĄ przestrzeń
+                if (overlapsWithLoadedPackages(aPackage, alreadyLoaded)) {
+                    resetPackageCoordinates(aPackage);
+                    continue;
+                }
+                aPackage.setTruck(truck);
+                alreadyLoaded.add(aPackage);
+                return true;
+            }
         }
 
+        // Nie znaleziono miejsca w żadnej strefie/orientacji — czyścimy flagę obrotu razem ze współrzędnymi
+        aPackage.setRotated(false);
+        return false;
     }
+
+    //Sprawdzamy czy paczka pasuje do przestrzeni
+// Sprawdza obie orientacje w DANYM punkcie i zwraca tę, która pasuje CIAŚNIEJ
+// (mniej zmarnowanego miejsca w strefie). Zwraca null, jeśli żadna nie pasuje.
+// Przy remisie preferuje orientację NIEobróconą (false) — po co obracać bez korzyści.
+    private Boolean pickBestRotation(Package aPackage, CargoSpace zone, int x, int y, int z) {
+        Boolean best = null;
+        int bestWaste = Integer.MAX_VALUE;
+
+        for (boolean rotated : ALLOWED_ROTATIONS) {
+            aPackage.setRotated(rotated);
+
+            if (!fitsWithinZoneBounds(x, y, z, aPackage, zone)) {
+                continue;
+            }
+
+            int waste = wastedMargin(aPackage, zone);
+            if (waste < bestWaste) {
+                bestWaste = waste;
+                best = rotated;
+            }
+        }
+        return best;
+    }
+
+    // Suma nadmiaru szerokości i głębokości paczki względem strefy — im mniej, tym ciaśniejsze dopasowanie.
+    private int wastedMargin(Package b, CargoSpace zone) {
+        int widthMargin = zone.getWidth() - b.getEffectiveWidth();
+        int depthMargin = zone.getDepth() - b.getEffectiveDepth();
+        return Math.max(widthMargin, depthMargin);
+    }
+
 
     private void validatePackagesAreNotAlreadyLoaded(List<Package> packages) {
         packages.stream()
@@ -107,5 +182,67 @@ public class ParcelPackingService {
                             + " has already been loaded onto the truck with ID: " + pkg.getTruck().getTruckId()
                     );
                 });
+    }
+
+    private List<int[]> generateCandidatePoints(CargoSpace zone, List<Package> loadedPackages) {
+        List<int[]> candidates = new ArrayList<>();
+        candidates.add(new int[]{zone.getPositionX(), zone.getPositionY(), zone.getPositionZ()});
+
+        for (Package p : loadedPackages) {
+            if (!isWithinZone(p, zone)) {
+                continue; // interesują nas tylko paczki leżące w TEJ konkretnej strefie
+            }
+            candidates.add(new int[]{p.getCoordX() + p.getEffectiveWidth(), p.getCoordY(), p.getCoordZ()});
+            candidates.add(new int[]{p.getCoordX(), p.getCoordY() + p.getHeight(), p.getCoordZ()});
+            candidates.add(new int[]{p.getCoordX(), p.getCoordY(), p.getCoordZ() + p.getEffectiveDepth()});
+        }
+        return candidates;
+    }
+
+    private boolean isWithinZone(Package p, CargoSpace zone) {
+        return p.getCoordX() >= zone.getPositionX() && p.getCoordX() < zone.getPositionX() + zone.getWidth()
+                && p.getCoordY() >= zone.getPositionY() && p.getCoordY() < zone.getPositionY() + zone.getHeight()
+                && p.getCoordZ() >= zone.getPositionZ() && p.getCoordZ() < zone.getPositionZ() + zone.getDepth();
+    }
+
+    private boolean fitsWithinZoneBounds(int x, int y, int z, Package b, CargoSpace zone) {
+        return x >= zone.getPositionX()
+                && y >= zone.getPositionY()
+                && z >= zone.getPositionZ()
+                && x + b.getEffectiveWidth() <= zone.getPositionX() + zone.getWidth()
+                && y + b.getHeight() <= zone.getPositionY() + zone.getHeight()
+                && z + b.getEffectiveDepth() <= zone.getPositionZ() + zone.getDepth();
+    }
+
+    private boolean boxesOverlap(Package a, Package b) {
+        boolean separatedOnX = a.getCoordX() + a.getEffectiveWidth() <= b.getCoordX()
+                || b.getCoordX() + b.getEffectiveWidth() <= a.getCoordX();
+
+        boolean separatedOnY = a.getCoordY() + a.getHeight() <= b.getCoordY()
+                || b.getCoordY() + b.getHeight() <= a.getCoordY();
+
+        boolean separatedOnZ = a.getCoordZ() + a.getEffectiveDepth() <= b.getCoordZ()
+                || b.getCoordZ() + b.getEffectiveDepth() <= a.getCoordZ();
+
+        return !(separatedOnX || separatedOnY || separatedOnZ);
+    }
+
+    private boolean overlapsWithLoadedPackages(Package candidate, List<Package> loadedPackages) {
+        for (Package loaded : loadedPackages) {
+            if (loaded.getUuid().equals(candidate.getUuid())) {
+                continue; // nie porównujemy paczki samej ze sobą
+            }
+            if (boxesOverlap(candidate, loaded)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void resetPackageCoordinates(Package pkg) {
+        pkg.setCoordX(-1);
+        pkg.setCoordY(-1);
+        pkg.setCoordZ(-1);
+        pkg.setRotated(false);
     }
 }

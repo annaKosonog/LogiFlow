@@ -1,6 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.repository;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,4 +25,6 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
     Optional<Package> findPackageByTrackingNumber(String trackingNumber);
 
     Optional<Package> findPackageByUuid(UUID uuid);
+
+    List<Package>findAllByTruck(Truck truck);
 }

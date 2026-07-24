@@ -46,6 +46,9 @@ public class Package {
     @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
     private Truck truck;
 
+    @Column(name = "rotated", nullable = false)
+    private boolean rotated;
+
     public Package(int width, int height, int depth, BigDecimal weight) {
         this.width = width;
         this.height = height;
@@ -66,12 +69,6 @@ public class Package {
         this.truck = truck;
     }
 
-    public void placeInSpace(CargoSpace cargoSpace) {
-        this.coordX = cargoSpace.getPositionX();
-        this.coordY = cargoSpace.getPositionY();
-        this.coordZ = cargoSpace.getPositionZ();
-    }
-
     public String generateTrackingNumberAutomatically(long nextSequenceValue) {
         if (this.trackingNumber != null) {
             return this.trackingNumber;
@@ -80,5 +77,13 @@ public class Package {
         String year = createdAt.format(DateTimeFormatter.ofPattern("yyyy"));
         String paddedSequence = String.format("%09d", nextSequenceValue);
         return "TRK" + year + paddedSequence;
+    }
+
+    public int getEffectiveWidth() {
+        return rotated ? this.depth : this.width;
+    }
+
+    public int getEffectiveDepth() {
+        return rotated ? this.width : this.depth;
     }
 }

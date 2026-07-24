@@ -36,4 +36,11 @@ GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Wystąpił nieoczekiwany błąd systemu"));
     }
+
+    @ExceptionHandler(PartialPackingException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePartialPacking(PartialPackingException ex) {
+        return ResponseEntity
+                .status(HttpStatus.MULTI_STATUS) // 207,422 — żądanie poprawne, ale nie w pełni wykonalne
+                .body(ApiResponse.error(ex.getMessage(), ex.getUnpackedPackageUuids()));
+    }
 }

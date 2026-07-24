@@ -38,7 +38,7 @@ public class Truck {
     @OneToMany(mappedBy = "truck")
     private List<Package> packedPackages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "truck")
+    @OneToMany(mappedBy = "truck", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CargoSpace> emptyCargoSpaces = new ArrayList<>();
 
     public Truck(int width, int height, int length, BigDecimal maxPayload) {
@@ -55,7 +55,6 @@ public class Truck {
         }
         packedPackages.add(b);
         this.currentWeight = this.currentWeight.add(b.getWeight());
-        System.out.println("AFTER LOAD - currentWeight: " + this.currentWeight + " | added package weight: " + b.getWeight());
     }
 
     private boolean canPayloadHold(Package b) {

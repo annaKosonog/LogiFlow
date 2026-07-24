@@ -16,11 +16,12 @@ CREATE TABLE IF NOT EXISTS packages (
                           coord_x INT DEFAULT NULL,
                           coord_y INT DEFAULT NULL,
                           coord_z INT DEFAULT NULL,
+                          rotated BOOLEAN NOT NULL DEFAULT false,
 
     -- NOWE POLA I RELACJE:
                           truck_id BIGINT DEFAULT NULL, -- Link do tabeli trucks (odpowiednik Twojego TruckId)
 
     -- Definicja klucza obcego spiętego z tabelą trucks
                           CONSTRAINT fk_packages_truck FOREIGN KEY (truck_id)
-                              REFERENCES trucks(truck_id) ON DELETE SET NULL
+                          REFERENCES trucks(truck_id) ON DELETE SET NULL
 );
