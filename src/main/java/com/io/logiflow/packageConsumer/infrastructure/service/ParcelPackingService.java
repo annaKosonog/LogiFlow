@@ -34,6 +34,9 @@ public class ParcelPackingService {
         }
 
         List<Package> alreadyLoaded = new ArrayList<>(packageRepository.findAllByTruck(truck));
+
+        int currentOrder = startingPackingOrder(alreadyLoaded);
+
         List<UUID> unpacked = new ArrayList<>();
 
         //Pętla pakowania paczek
@@ -41,7 +44,9 @@ public class ParcelPackingService {
             boolean success = packSinglePackage(aPackage, truck, finalCargoSpaces, alreadyLoaded);
             if (!success) {
                 unpacked.add(aPackage.getUuid());
+                aPackage.setPackingOrder(0);
             }
+            aPackage.setPackingOrder(currentOrder++);
         }
         packageRepository.saveAll(existingPackages);
         // JEŚLI SĄ NIESPAKOWANE PACZKI -> RZUCAMY WYJĄTEK
@@ -50,6 +55,14 @@ public class ParcelPackingService {
                     "Packing incomplete! The following " + unpacked.size() + " package(s) could not fit: " + unpacked
             );
         }
+    }
+
+    private static int startingPackingOrder(List<Package> alreadyLoaded) {
+        return alreadyLoaded.stream()
+                .filter(p -> p.getCoordX() >= 0)
+                .mapToInt(Package::getPackingOrder)
+                .max()
+                .orElse(0) + 1;
     }
 
     private boolean zoneFitsWithinTruck(CargoSpace zone, Truck truck) {

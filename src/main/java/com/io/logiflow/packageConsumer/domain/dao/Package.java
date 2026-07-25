@@ -49,6 +49,9 @@ public class Package {
     @Column(name = "rotated", nullable = false)
     private boolean rotated;
 
+    @Column(name = "packing_order")
+    private int packingOrder; //kolejność pakowania
+
     public Package(int width, int height, int depth, BigDecimal weight) {
         this.width = width;
         this.height = height;

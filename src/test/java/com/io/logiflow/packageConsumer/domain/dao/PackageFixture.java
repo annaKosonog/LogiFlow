@@ -5,9 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createBox;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 
 public class PackageFixture {
+
+    public static Package boxAt(int x, int y, int z, String weight) {
+        Package pkg = createBox(weight); // metoda z Twojej klasy testowej pomocniczej (TestDataFactory / TestFixtures)
+        pkg.setCoordX(x);
+        pkg.setCoordY(y);
+        pkg.setCoordZ(z);
+        return pkg;
+    }
 
     public static Package smallDao() {
         return new Package(1, 1, 1, new BigDecimal("10"));  // objętość = 1
@@ -29,7 +38,7 @@ public class PackageFixture {
     }
 
     public static Package largeBox() {
-        return new Package(251, 10, 10, new BigDecimal("50")); // objętość = 1000
+        return new Package(700, 10, 10, new BigDecimal("50")); // objętość = 1000
     }
 
     public static Package heightBox() {

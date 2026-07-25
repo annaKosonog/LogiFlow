@@ -11,7 +11,7 @@ public class DimensionsDTOFixture {
     }
 
     public static DimensionsDTO dimensionLargeDTO() {
-        return new DimensionsDTO(5, 5, 5);
+        return new DimensionsDTO(700, 5, 5);
     }
 
     public static DimensionsDTO dimensionHeavyDTO() {

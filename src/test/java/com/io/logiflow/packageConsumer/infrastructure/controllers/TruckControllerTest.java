@@ -114,12 +114,12 @@ public class TruckControllerTest {
     @Test
     public void shouldReturnBadRequestWhenPackageDoesNotFit() throws Exception {
         Package gigantPackage = largeBox();
-        gigantPackage.setPackageId(99L);
+        gigantPackage.setUuid(UUID.randomUUID());
         gigantPackage.setTrackingNumber("TRK-OVERWEIGHT");
         gigantPackage.setWeight(new BigDecimal("5000.0"));
 
         List<Package> packageList = List.of(gigantPackage);
-        Long truckId = 1L;
+        UUID truckId = UUID.randomUUID();
 
         String jsonRequest = objectMapper.writeValueAsString(packageList);
 

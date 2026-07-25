@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -133,9 +134,9 @@ public class ParcelPackageServiceTest {
                 .filteredOn(p -> p.getTrackingNumber() != null && p.getTrackingNumber().startsWith("XYZ-"))
                 .extracting(Package::getWidth, Package::getWeight)
                 .containsExactly(
-                        tuple(1, new BigDecimal("10")), // 1. SMALL  (szerokość 1, waga 10.0)
+                        tuple(5, new BigDecimal("30")), // 3. LARGE  (szerokość 5, waga 30.0)
                         tuple(2, new BigDecimal("20")), // 2. MEDIUM (szerokość 2, waga 30.0)
-                        tuple(5, new BigDecimal("30"))  // 3. LARGE  (szerokość 5, waga 30.0)
+                        tuple(1, new BigDecimal("10")) // 1. SMALL  (szerokość 1, waga 10.0)
                 );
     }
 
@@ -178,15 +179,14 @@ public class ParcelPackageServiceTest {
     void shouldNotPackBoxWhenTooWide() {
         PackageDTO largeBoxDTO = largeBoxDTO();
         Package largePackage = largeBox();
-        aPackages.add(largeBoxDTO);
         saveEntity.add(largePackage);
 
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
+        aPackages.add(largeBoxDTO);
 
-        parcelPackingService.pack(aPackages, truck);
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
         assertEquals(2, truck.getPackedPackages().size());
-        assertFalse(truck.getPackedPackages().contains(largePackage));
     }
 
     @Test
@@ -199,9 +199,9 @@ public class ParcelPackageServiceTest {
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        parcelPackingService.pack(aPackages, truck);
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
         assertEquals(2, truck.getPackedPackages().size());
-        assertFalse(truck.getPackedPackages().contains(heightPackage));
+        assertThat(exception);
     }
 
     @Test
@@ -214,7 +214,7 @@ public class ParcelPackageServiceTest {
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        parcelPackingService.pack(aPackages, truck);
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
         assertEquals(2, truck.getPackedPackages().size());
         assertFalse(truck.getPackedPackages().contains(deepthPackage));
     }
@@ -254,4 +254,15 @@ public class ParcelPackageServiceTest {
         assertEquals("The package with the number " + smallDao.getTrackingNumber() +
                 " has already been loaded onto the truck with ID: " + smallDao.getTruck().getTruckId(), exception.getMessage());
     }
+
+    @Test
+    void boxesOverlap_shouldReturnFalse_whenBoxesAreSeparatedOnXAxis() {
+        Package a = boxAt(0, 0, 0, "30.00");
+        Package b = boxAt(300, 0, 0, "50.00");
+
+        boolean result = ReflectionTestUtils.invokeMethod(parcelPackingService, "boxesOverlap", a, b);
+
+        assertThat(result).isFalse();
+    }
+
 }

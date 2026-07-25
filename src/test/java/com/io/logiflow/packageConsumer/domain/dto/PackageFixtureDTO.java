@@ -28,7 +28,7 @@ public class PackageFixtureDTO {
     }
 
     public static PackageDTO largeBoxDTO() {
-        return new PackageDTO(UUID.randomUUID(), "XYZ-LARGE", dimensionLargeDTO(), new BigDecimal("30.0"), null, 2L);
+        return new PackageDTO(UUID.randomUUID(), "XYZ-LARGE", dimensionLargeDTO(), new BigDecimal("30.0"), null, null);
     }
 
     public static PackageDTO largeAndHeavyBoxDTO() {

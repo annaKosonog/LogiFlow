@@ -51,9 +51,6 @@ class PackageControllerTest {
     @InjectMocks
     private PackageController packageController;
 
-    @MockBean
-    private PackageMapper packageMapper;
-
     @BeforeEach
     public void setUp() throws Exception {
         createLoadedTruck();
@@ -126,9 +123,9 @@ class PackageControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(generatedUuid.toString()))
-                .andExpect(jsonPath("$.trackingNumber").exists())
-                .andExpect(jsonPath("$.weight").value("10"))
+                .andExpect(jsonPath("$.data.id").value(generatedUuid.toString()))
+                .andExpect(jsonPath("$.data.trackingNumber").exists())
+                .andExpect(jsonPath("$.data.weight").value("10"))
                 .andReturn();
     }
 
@@ -151,8 +148,8 @@ class PackageControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(expectedId.toString()))
-                .andExpect(jsonPath("$.weight").value(500.0))
+                .andExpect(jsonPath("$.data.id").value(expectedId.toString()))
+                .andExpect(jsonPath("$.data.weight").value(500.0))
                 .andReturn();
     }
 
@@ -172,10 +169,10 @@ class PackageControllerTest {
                         .content(jsonRequest))
                 .andDo(print())
                 .andExpect(status().isOk()) // Oczekujemy kodu 200 OK
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.trackingNumber").value("XYZ-SMALL")) // Upewniamy się, że się nie nadpisał
-                .andExpect(jsonPath("$.dimensions.width").value(45))                     // Nowa wartość double
-                .andExpect(jsonPath("$.weight").value(12.95));
+                .andExpect(jsonPath("$.data.id").exists())
+                .andExpect(jsonPath("$.data.trackingNumber").value("XYZ-SMALL")) // Upewniamy się, że się nie nadpisał
+                .andExpect(jsonPath("$.data.dimensions.width").value(45))                     // Nowa wartość double
+                .andExpect(jsonPath("$.data.weight").value(12.95));
     }
 
     @Test
@@ -198,8 +195,8 @@ class PackageControllerTest {
                         .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.trackingNumber").value("TRK-2026-ORIGINAL")) // ignoruje próbę zmiany na HACKED
-                .andExpect(jsonPath("$.dimensions.width").value(45));
+                .andExpect(jsonPath("$.data.trackingNumber").value("TRK-2026-ORIGINAL")) // ignoruje próbę zmiany na HACKED
+                .andExpect(jsonPath("$.data.dimensions.width").value(45));
     }
 
     @Test
@@ -229,9 +226,9 @@ class PackageControllerTest {
         mvc.perform(get("/api/packages/tracking/{trackingNumber}", trackNumber))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.weight").value(new BigDecimal("50.0")))
-                .andExpect(jsonPath("$.trackingNumber").exists())
-                .andExpect(jsonPath("$.id").isString());
+                .andExpect(jsonPath("$.data.weight").value(new BigDecimal("50.0")))
+                .andExpect(jsonPath("$.data.trackingNumber").exists())
+                .andExpect(jsonPath("$.data.id").isString());
     }
 
     @Test
@@ -243,6 +240,6 @@ class PackageControllerTest {
         mvc.perform(get("/api/packages/{uuid}", uuid))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.trackingNumber").value("TRK2026000000002"));
+                .andExpect(jsonPath("$.data.trackingNumber").value("TRK2026000000002"));
     }
 }

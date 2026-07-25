@@ -15,6 +15,7 @@ public class TruckFixture {
         return new Package(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_LENGTH, new BigDecimal(weight));
     }
 
+
     // Fabryka dla ciężarówki - podajesz tylko maksymalną ładowność (maxPayload)
     // Brak setterów, czysty konstruktor!
     public static Truck createTruckWithPayload(String maxPayload) {
