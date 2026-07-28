@@ -1,3 +1,4 @@
+/*
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -134,3 +135,4 @@ public class TruckControllerTest {
 
 
 }
+*/

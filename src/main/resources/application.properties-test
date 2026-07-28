@@ -1,3 +1,11 @@
+# Automatyczne tworzenie i usuwanie struktury tabel (bez domyślnych danych)
 spring.jpa.hibernate.ddl-auto=create-drop
+  
+  # Wyłączenie automatycznego wykonywania skryptów data.sql / schema.sql (jeśli masz takie na produkcji)
+spring.sql.init.mode=never
+  
+  # Wyłączenie Flywaya na czas testów (jeśli tak chcesz)
+spring.flyway.enabled=false
+  
+  # Logowanie zapytań SQL (opcjonalnie)
 spring.jpa.show-sql=true
-testcontainers.reuse.enable=true

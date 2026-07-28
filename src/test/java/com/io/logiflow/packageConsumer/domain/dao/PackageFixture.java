@@ -67,15 +67,17 @@ public class PackageFixture {
 
     public static Package firstBoxPackToTruck() {
         Package p1 = smallDao();
-        p1.setPackageId(1L);
-        p1.setTrackingNumber("TRK-2026-A001");
+      //  p1.setPackageId(1L);
+        p1.setUuid(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
+        p1.setTrackingNumber("TRK2026000000001");
         return p1;
     }
 
     public static Package secondBoxPackToTruck() {
         Package p1 = largeDao();
-        p1.setPackageId(2L);
-        p1.setTrackingNumber("TRK-2026-A002");
+      //  p1.setPackageId(2L);
+        p1.setUuid(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"));
+        p1.setTrackingNumber("TRK2026000000002");
         return p1;
     }
 

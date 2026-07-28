@@ -2,6 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.exception.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +22,13 @@ public class PackageController {
     private final PackageService packingService;
 
     @GetMapping
-    ResponseEntity<Page<PackageDTO>> getAllPackages(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    ResponseEntity<ApiResponse<Page<PackageDTO>>> getAllPackages(
+            @ModelAttribute PackageFilterDTO filter,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size
     ) {
-        Page<PackageDTO> packPage = packingService.getPackages(page, size);
-        return ResponseEntity.ok(packPage);
-    }
-
-    @GetMapping("/{uuid}")
-    ResponseEntity<ApiResponse<PackageDTO>> getPackagesByFilterUuid(@PathVariable UUID uuid) {
-        PackageDTO filter = packingService.getPackagesByUUID(uuid);
-        return ResponseEntity.ok(ApiResponse.success(filter));
-    }
-
-    @GetMapping("/tracking/{trackingNumber}")
-    ResponseEntity<ApiResponse<PackageDTO>> getPackagesByFilterTrackingNumber(@PathVariable String trackingNumber) {
-        PackageDTO filter = packingService.getPackagesByTrackingNumber(trackingNumber);
-        return ResponseEntity.ok(ApiResponse.success(filter));
+        Page<PackageDTO> packPage = packingService.getPackages(filter, page, size);
+        return ResponseEntity.ok(ApiResponse.success(packPage));
     }
 
     @PostMapping
@@ -46,7 +36,7 @@ public class PackageController {
         PackageDTO savedPackage = packingService.registerNewPackage(createRequest);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(savedPackage, "The package was successfully created"));
+                .body(ApiResponse.success(savedPackage));
     }
 
     @PatchMapping("/{packId}")

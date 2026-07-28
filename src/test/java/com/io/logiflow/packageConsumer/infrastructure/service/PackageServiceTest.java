@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +29,7 @@ import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.smallRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.filterBoxPackDto;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -44,6 +47,9 @@ public class PackageServiceTest {
 
     @InjectMocks
     private PackageService packageService;
+
+    Package firstPackage = firstBoxPackToTruck();
+    Package secondPackage = secondBoxPackToTruck();
 
     @Test
     void shouldReturnCorrectRegisteredPack() {
@@ -93,10 +99,11 @@ public class PackageServiceTest {
 
     @Test
     void shouldReturnPaginatedPackages() {
-        int pageNumber = 0;
+        int pageNumber = 1;
         int pageSize = 1;
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        PackageFilterDTO filter = new PackageFilterDTO();
 
         Package packageEntity = new Package();
         List<Package> entityList = List.of(packageEntity);
@@ -104,28 +111,73 @@ public class PackageServiceTest {
 
         PackageDTO packageDto = new PackageDTO();
 
-        when(packageRepository.findAll(pageable)).thenReturn(mockPageFromDb);
-        when(packageMapper.toDTO(packageEntity)).thenReturn(packageDto);
+        when(packageRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(mockPageFromDb);
 
-        Page<PackageDTO> resultPage = packageService.getPackages(pageNumber, pageSize);
+        when(packageMapper.toDTO(packageEntity))
+                .thenReturn(packageDto);
+
+        Page<PackageDTO> result = packageService.getPackages(filter, pageNumber, pageSize);
 
         // 3. THEN (Asercje i weryfikacja)
-        assertNotNull(resultPage);
-        assertEquals(1, resultPage.getTotalElements(), "Total elements in page should be 1");
-        assertEquals(1, resultPage.getContent().size(), "Page content size should match mapped elements count");
-        assertEquals(packageDto, resultPage.getContent().get(0), "The content should contain the mapped DTO");
+        // 3. THEN (Asercje wyniku)
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(packageDto);
+        assertThat(result.getTotalElements()).isEqualTo(2);
 
-        // Sprawdzamy, czy repozytorium zostało wywołane z dokładnie takimi parametrami stronicowania
-        verify(packageRepository).findAll(pageable);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(packageRepository).findAll(any(Specification.class), pageableCaptor.capture());
+
+        Pageable captured = pageableCaptor.getValue();
+        assertThat(captured.getPageNumber()).isEqualTo(pageNumber - 1); // Oczekujemy 1
+        assertThat(captured.getPageSize()).isEqualTo(pageSize);
     }
 
     @Test
-    void shouldThrownExceptionWhenPageSizeIsInvalid() {
-        int pageNumber = 0;
+    void shouldReturnPackageBySpecification() {
+        // 1. GIVEN (Przygotowanie danych i mocków)
+        int inputPage = 1;  // Strona oczekiwana przez użytkownika (1-based)
+        int pageSize = 1;
+
+        // Serwis przelicza page - 1, więc do repozytorium trafi strona 0
+        PageRequest expectedPageable = PageRequest.of(inputPage - 1, pageSize);
+
+        PackageFilterDTO filter = new PackageFilterDTO();
+        filter.setMinWeight(new BigDecimal("10.5"));
+        filter.setMaxWeight(new BigDecimal("50.0"));
+
+        Package packageEntity = new Package();
+        PackageDTO packageDto = new PackageDTO();
+
+        Page<Package> mockPageFromDb = new PageImpl<>(List.of(packageEntity), expectedPageable, 1);
+
+        // Rejestrujemy zachowanie mocków ZANIM wywołamy serwis
+        when(packageRepository.findAll(any(Specification.class), eq(expectedPageable)))
+                .thenReturn(mockPageFromDb);
+        when(packageMapper.toDTO(packageEntity))
+                .thenReturn(packageDto);
+
+        // 2. WHEN (Wywołanie metody serwisu)
+        Page<PackageDTO> result = packageService.getPackages(filter, inputPage, pageSize);
+
+        // 3. THEN (Asercje i weryfikacja)
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(packageDto);
+
+        // Weryfikujemy czy repozytorium zostało wywołane z odpowiednią paginacją
+        verify(packageRepository).findAll(any(Specification.class), eq(expectedPageable));
+    }
+
+
+    @Test
+    void shouldNullFilterDoesNotThrow() {
+        int pageNumber = 1;
         int invalidSize = 0;
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            packageService.getPackages(pageNumber, invalidSize);
+            packageService.getPackages(null, pageNumber, invalidSize);
         });
 
         // Weryfikujemy, czy komunikat błędu jest jasny
@@ -140,16 +192,11 @@ public class PackageServiceTest {
 
         int page = 15;
         int size = 10;
-        Pageable pageable = PageRequest.of(page, size);
+        Page<Package> emptyPageFromDb = Page.empty();
 
-        // Tworzymy całkowicie pustą stronę za pomocą Collections.emptyList()
-        Page<Package> emptyPageFromDb = new PageImpl<>(List.of(), pageable, 0);
-
-        // Konfigurujemy mock repozytorium, by zwrócił pustą stronę
-        when(packageRepository.findAll(pageable)).thenReturn(emptyPageFromDb);
-
-        // When
-        Page<PackageDTO> resultPage = packageService.getPackages(page, size);
+        when(packageRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(emptyPageFromDb);
+        Page<PackageDTO> resultPage = packageService.getPackages(null, page, size);
 
         // Then
         assertNotNull(resultPage);
@@ -157,7 +204,7 @@ public class PackageServiceTest {
         assertEquals(0, resultPage.getTotalElements(), "Total elements should be 0");
         assertEquals(0, resultPage.getContent().size(), "Content list size should be 0");
 
-        // Upewniamy się, że mapper nigdy nie został wywołany (bo nie było czego mapować)
+        // Upewniamy się, że mapper nigdy nie został wywołany
         verifyNoInteractions(packageMapper);
     }
 

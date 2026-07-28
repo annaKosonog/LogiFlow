@@ -14,6 +14,10 @@ public class DimensionsDTOFixture {
         return new DimensionsDTO(700, 5, 5);
     }
 
+    public static DimensionsDTO dimensionLargeDAO() {
+        return new DimensionsDTO(5, 5, 5);
+    }
+
     public static DimensionsDTO dimensionHeavyDTO() {
         return new DimensionsDTO(4, 1, 1);
     }

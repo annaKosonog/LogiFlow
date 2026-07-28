@@ -4,14 +4,17 @@ import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.specification.PackageSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,9 +52,10 @@ public class PackageService {
         return packageMapper.toDTO(savedEntity);
     }
 
-    public Page<PackageDTO> getPackages(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Package> packPage = packageRepository.findAll(pageable);
+    public Page<PackageDTO> getPackages(PackageFilterDTO filter, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Specification<Package> specification = PackageSpecifications.buildSpecification(filter);
+        Page<Package> packPage = packageRepository.findAll(specification, pageable);
         return packPage.map(packageMapper::toDTO);
     }
 
@@ -98,10 +102,6 @@ public class PackageService {
                 .map(packageMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Package with tracking number " + trackingNumber +
                         " not found"));
-    }
-
-    public void deleteAllPackage() {
-        packageRepository.deleteAll();
     }
 
     private void validateFilters(UUID uuid) {

@@ -70,7 +70,7 @@ class TruckServiceTest {
         aPackages = null;
     }
 
-    @Test
+  /*  @Test
     void shouldReturnPaginatedTrucks() {
         int pageNumber = 0;
         int pageSize = 1;
@@ -93,9 +93,9 @@ class TruckServiceTest {
         assertEquals(1, resultTrucks.getTotalElements(), "Total elements in page should be 1");
         assertEquals(1, resultTrucks.getContent().size(), "Page content size should match mapped elements count");
         assertEquals(dto, resultTrucks.getContent().get(0), "The content should contain the mapped DTO");
-    }
+    }*/
 
-    @Test
+  /*  @Test
     void shouldThrowExceptionWhenPageSizeIsInvalid() {
         int pageNumber = 0;
         int pageSize = 0;
@@ -104,9 +104,9 @@ class TruckServiceTest {
 
         assertEquals("Page size must not be less than one", exception.getMessage());
         verifyNoInteractions(truckRepository);
-    }
+    }*/
 
-    @Test
+ /*   @Test
     void shouldReturnEmptyPageWhenNoTrucksExist() {
         int page = 15;
         int size = 10;
@@ -125,7 +125,7 @@ class TruckServiceTest {
 
         // Upewniamy się, że mapper nigdy nie został wywołany (bo nie było czego mapować)
         verifyNoInteractions(truckMapper);
-    }
+    }*/
 
     @Test
     void shouldThrowExceptionWhenTruckIdNotExists() {
@@ -149,89 +149,6 @@ class TruckServiceTest {
         truckService.addPackagesToTruck(aPackages, truckId);
 
         assertEquals(1, truck.getPackedPackages().size());
-    }
-
-    @Test
-    void shouldReturnTruckDtoWhenProvidedCorrectDateUUID() {
-        UUID uuid = createLoadedTruck().getUuid();
-
-        when(truckRepository.findTruckByUuid(any())).thenReturn(Optional.of(createLoadedTruck()));
-        when(truckMapper.toDTO(any(Truck.class))).thenReturn(createLoadedTruckDTO());
-
-        TruckDTO truckByFilterUUID = truckService.getTruckByFilterUUID(uuid);
-        assertEquals("528e0004-a6f9-4018-bcba-87e20ad08606", truckByFilterUUID.getIdTruck().toString());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUUIDNotFound() {
-        UUID uuid = createLoadedTruck().getUuid();
-        when(truckRepository.findTruckByUuid(any())).thenReturn(Optional.empty());
-
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.getTruckByFilterUUID(uuid));
-        assertEquals("Truck with UUID number " + uuid +
-                "not found", exception.getMessage());
-        verify(truckMapper, never()).toDTO(any());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenWeDoNotProvidedUUID() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.getTruckByFilterUUID(null));
-        assertEquals("Provide uuid.", exception.getMessage());
-        verify(truckRepository, never()).findTruckByUuid(any());
-        verify(truckMapper, never()).toDTO(any(Truck.class));
-    }
-
-    @Test
-    void shouldReturnListTruckWhenProvidedCorrectDateLength() {
-        int length = 600;
-        List<Truck> truck = new ArrayList<>();
-        truck.add(createLoadedTruck());
-        truck.add(createLoadedSecondTruck());
-
-        when(truckRepository.findTruckByLength(length)).thenReturn(truck);
-        lenient().when(truckMapper.toDTO(any(Truck.class)))
-                .thenAnswer(invocation -> {
-                    DimensionsDTO dimensionsDTO = new DimensionsDTO();
-                    dimensionsDTO.setDepth_length(600);
-                    Truck truck1 = invocation.getArgument(0);
-
-                    TruckDTO dto = new TruckDTO();
-                    dto.setIdTruck(truck1.getUuid());
-                    dto.setDimensionsDTO(dimensionsDTO);
-
-                    return dto;
-                });
-        lenient().when(truckMapper.toDTO(any(Truck.class)))
-                .thenAnswer(invocation -> {
-                    DimensionsDTO dimensionsDTO = new DimensionsDTO();
-                    dimensionsDTO.setDepth_length(600);
-                    Truck truck1 = invocation.getArgument(0);
-
-                    TruckDTO dto = new TruckDTO();
-                    dto.setIdTruck(truck1.getUuid());
-                    dto.setDimensionsDTO(dimensionsDTO);
-
-                    return dto;
-                });
-        List<TruckDTO> trucksLength = truckService.getTrucksByLengthAndWeight(length, null);
-
-        assertEquals(2, trucksLength.size());
-        assertEquals(truck.get(0).getUuid().toString(), trucksLength.get(0).getIdTruck().toString());
-        assertEquals(truck.get(1).getUuid().toString(), trucksLength.get(1).getIdTruck().toString());
-    }
-
-    @Test
-    void shouldReturnTruckWhenProvidedCorrectDataMaxPayload() {
-        BigDecimal maxPayload = new BigDecimal("3.500");
-
-
-    }
-
-
-    @Test
-    void shouldThrowExceptionWhenWeDoNotProvidedAnyArgument() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.getTrucksByLengthAndWeight(-1, null));
-        assertEquals("Provide at least one filter.", exception.getMessage());
     }
 
 

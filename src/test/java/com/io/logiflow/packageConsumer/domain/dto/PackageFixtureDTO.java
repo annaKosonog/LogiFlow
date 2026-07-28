@@ -60,7 +60,7 @@ public class PackageFixtureDTO {
     }
 
     public static PackageDTO filterBoxPackDto() {
-        return new PackageDTO(UUID.randomUUID(), "TRK2026000000002", null, new BigDecimal("50.0"), firstCoordinate(), null);
+        return new PackageDTO(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"), "TRK2026000000002", dimensionLargeDAO(), new BigDecimal("50.0"), firstCoordinate(), null);
     }
 
 

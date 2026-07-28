@@ -3,7 +3,8 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
+import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.firstBoxCreateRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.largeAndHeavyBoxRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -48,34 +48,36 @@ class PackageControllerTest {
     @MockBean
     private PackageService packageService;
 
+    @MockBean
+    private PackageRepository packageRepository;
+
     @InjectMocks
     private PackageController packageController;
 
+    PackageDTO mockPackDto;
+    PackageDTO secondMockPackDto;
+    Page<PackageDTO> defaultPage;
+
     @BeforeEach
     public void setUp() throws Exception {
-        createLoadedTruck();
+        packageRepository.deleteAll();
+        mockPackDto = firstPackageToPack();
+        secondMockPackDto = secondPackageToPack();
     }
 
     @Test
     void shouldReturnDefaultPageableWhenNoParamsProvided() throws Exception {
-        PackageDTO mockPackDto = smallDTO();
-
-        Page<PackageDTO> page = new PageImpl<>(
-                List.of(mockPackDto),
-                PageRequest.of(0, 10),
-                1
-        );
-
-        //Sprawdzanie czy dla domyślnych wartości (0,10) serwis zostanie wywołany
-        when(packageService.getPackages(0, 10)).thenReturn(page);
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
 
         mvc.perform(get("/api/packages")
                         .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].trackingNumber").value("XYZ-SMALL"))
-                .andExpect(jsonPath("$.pageable.pageNumber").value(0)) // To sprawdza Twoje 'page' (defaultValue = 0)
-                .andExpect(jsonPath("$.pageable.pageSize").value(10));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.pageable.pageNumber").value(1))
+                .andExpect(jsonPath("$.data.pageable.pageSize").value(5));
     }
 
     @Test
@@ -84,23 +86,383 @@ class PackageControllerTest {
         int customSize = 5;
 
         PackageDTO mockPackage = largeBoxDTO();
-        Page<PackageDTO> customPageResult = new PageImpl<>(List.of(mockPackage));
+        Page<PackageDTO> page = new PageImpl<>(List.of(mockPackage));
 
         // Konfigurujemy mock dla niestandardowych wartości 2 i 5
-        Mockito.when(packageService.getPackages(customPage, customSize)).thenReturn(customPageResult);
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(customPage), eq(customSize))).thenReturn(page);
+
 
         mvc.perform(get("/api/packages")
                         .param("page", String.valueOf(customPage))
                         .param("size", String.valueOf(customSize))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].trackingNumber").value("XYZ-LARGE"))
-                // Te asercje weryfikują czy struktura Page w JSONie ma poprawne metadane
-                .andExpect(jsonPath("$.size").value(1)) // rozmiar listy w content
-                .andExpect(jsonPath("$.empty").value(false));
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("XYZ-LARGE"))
+                .andExpect(jsonPath("$.data.size").value(1)) // rozmiar listy w content
+                .andExpect(jsonPath("$.data.empty").value(false));
+    }
 
-        // Dodatkowa weryfikacja: upewniamy się, że serwis został wywołany dokładnie z tymi parametrami
-        Mockito.verify(packageService, Mockito.times(1)).getPackages(customPage, customSize);
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectTrackNumber() throws Exception {
+        String trackNumber = "TRK2026000000002";
+        PackageDTO mockPackage = filterBoxPackDto();
+        Page<PackageDTO> page = new PageImpl<>(List.of(mockPackage));
+
+        when(packageService.getPackagesByTrackingNumber(trackNumber)).thenReturn(filterBoxPackDto());
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(page);
+
+        mvc.perform(get("/api/packages")
+                        .param("trackingNumber", trackNumber)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("50.0")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").exists())
+                .andExpect(jsonPath("$.data.content[0].id").isString());
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedNoCorrectTrackNumber() throws Exception {
+        String trackNumber = "TRK2026000000222";
+        PackageDTO mockPackage = filterBoxPackDto();
+        Page<PackageDTO> page = new PageImpl<>(List.of(mockPackage));
+
+        when(packageService.getPackagesByTrackingNumber(trackNumber)).thenReturn(null);
+
+        when(packageService.getPackagesByTrackingNumber(trackNumber)).thenReturn(filterBoxPackDto());
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(page);
+
+        mvc.perform(get("/api/packages")
+                        .param("trackingNumber", trackNumber)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("50.0")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").exists())
+                .andExpect(jsonPath("$.data.content[0].id").isString());
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectUUID() throws Exception {
+        UUID id = UUID.fromString("7c9e0d12-5b1d-407e-8c43-1bc2d3f4a5b6");
+        defaultPage = new PageImpl<>(List.of(mockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackagesByUUID(id)).thenReturn(mockPackDto);
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("id", String.valueOf(id))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("45")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[0].id").value(id.toString()));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedNoUUID() throws Exception {
+        UUID id = UUID.randomUUID();
+        defaultPage = new PageImpl<>(List.of(), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackagesByUUID(id)).thenReturn(null);
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("id", String.valueOf(id))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isEmpty());
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinAndMaxHeight() throws Exception {
+        BigDecimal minHeight = new BigDecimal("75");
+        BigDecimal maxHeight = new BigDecimal("150");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
+        mvc.perform(get("/api/packages")
+                        .param("minHeight", String.valueOf(minHeight))
+                        .param("maxHeight", String.valueOf(maxHeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("45")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.size").value(5));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinHeight() throws Exception {
+        BigDecimal minHeight = new BigDecimal("100");
+        defaultPage = new PageImpl<>(List.of(secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("minHeight", String.valueOf(minHeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxHeight() throws Exception {
+        BigDecimal maxHeight = new BigDecimal("120");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxHeight", String.valueOf(maxHeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(2));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxHeightLess() throws Exception {
+        BigDecimal maxWeight = new BigDecimal("100");
+        defaultPage = new PageImpl<>(List.of(mockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxWeight", String.valueOf(maxWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[0].weight").value("45"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinAndMaxWeight() throws Exception {
+        BigDecimal minWeight = new BigDecimal("45");
+        BigDecimal maxWeight = new BigDecimal("120");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
+        mvc.perform(get("/api/packages")
+                        .param("minWeight", String.valueOf(minWeight))
+                        .param("maxWeight", String.valueOf(maxWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("45")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.size").value(5));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinWeight() throws Exception {
+        BigDecimal minWeight = new BigDecimal("50");
+        defaultPage = new PageImpl<>(List.of(secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("minWeight", String.valueOf(minWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxWeight() throws Exception {
+        BigDecimal maxWeight = new BigDecimal("120");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxWeight", String.valueOf(maxWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(2));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxWeightLess() throws Exception {
+        BigDecimal maxWeight = new BigDecimal("50");
+        defaultPage = new PageImpl<>(List.of(mockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxWeight", String.valueOf(maxWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[0].weight").value("45"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinAndMaxDepth() throws Exception {
+        BigDecimal minDepth = new BigDecimal("14");
+        BigDecimal maxDepth = new BigDecimal("120");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
+        mvc.perform(get("/api/packages")
+                        .param("minDepth", String.valueOf(minDepth))
+                        .param("maxDepth", String.valueOf(maxDepth))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("45")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.size").value(5));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinDepth() throws Exception {
+        BigDecimal minWeight = new BigDecimal("100");
+        defaultPage = new PageImpl<>(List.of(secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("minDepth", String.valueOf(minWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxDepth() throws Exception {
+        BigDecimal maxWeight = new BigDecimal("120");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxWeight", String.valueOf(maxWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(2));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxDepthLess() throws Exception {
+        BigDecimal maxDepth = new BigDecimal("22");
+        defaultPage = new PageImpl<>(List.of(mockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxDepth", String.valueOf(maxDepth))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[0].weight").value("45"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinAndMaxWidth() throws Exception {
+        BigDecimal minWidth = new BigDecimal("10");
+        BigDecimal maxWidth = new BigDecimal("150");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), eq(1), eq(5))).thenReturn(defaultPage);
+        mvc.perform(get("/api/packages")
+                        .param("minWidth", String.valueOf(minWidth))
+                        .param("maxWidth", String.valueOf(maxWidth))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].weight").value(new BigDecimal("45")))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.size").value(5));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMinWidth() throws Exception {
+        BigDecimal minWidth = new BigDecimal("95");
+        defaultPage = new PageImpl<>(List.of(secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("minWidth", String.valueOf(minWidth))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxWidth() throws Exception {
+        BigDecimal maxWidth = new BigDecimal("120");
+        defaultPage = new PageImpl<>(List.of(mockPackDto, secondMockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxWidth", String.valueOf(maxWidth))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000005"))
+                .andExpect(jsonPath("$.data.content.length()").value(2));
+    }
+
+    @Test
+    public void shouldReturnPackageDTOWhenProvidedCorrectMaxWidthLess() throws Exception {
+        BigDecimal maxWeight = new BigDecimal("100");
+        defaultPage = new PageImpl<>(List.of(mockPackDto), PageRequest.of(1, 5), 2);
+
+        when(packageService.getPackages(any(PackageFilterDTO.class), anyInt(), anyInt()))
+                .thenReturn(defaultPage);
+
+        mvc.perform(get("/api/packages")
+                        .param("maxWeight", String.valueOf(maxWeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000004"))
+                .andExpect(jsonPath("$.data.content[0].weight").value("45"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
     }
 
     @Test
@@ -215,31 +577,5 @@ class PackageControllerTest {
                         .content(patchJson))
                 .andExpect(status().isNotFound())
                 .andReturn();
-    }
-
-    @Test
-    public void shouldReturnPackageDTOWhenProvidedCorrectTrackNumber() throws Exception {
-        String trackNumber = "TRK2026000000002";
-
-        when(packageService.getPackagesByTrackingNumber(trackNumber)).thenReturn(filterBoxPackDto());
-
-        mvc.perform(get("/api/packages/tracking/{trackingNumber}", trackNumber))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.weight").value(new BigDecimal("50.0")))
-                .andExpect(jsonPath("$.data.trackingNumber").exists())
-                .andExpect(jsonPath("$.data.id").isString());
-    }
-
-    @Test
-    public void shouldReturnPackageDTOWhenProvidedCorrectUUID() throws Exception {
-        UUID uuid = filterBoxPackDto().getId();
-
-        when(packageService.getPackagesByUUID(uuid)).thenReturn(filterBoxPackDto());
-
-        mvc.perform(get("/api/packages/{uuid}", uuid))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.trackingNumber").value("TRK2026000000002"));
     }
 }
