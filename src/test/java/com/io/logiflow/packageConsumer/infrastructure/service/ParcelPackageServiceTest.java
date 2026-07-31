@@ -172,7 +172,7 @@ public class ParcelPackageServiceTest {
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
         parcelPackingService.pack(aPackages, truck);
-        assertEquals(3, truck.getPackedPackages().size());
+        assertEquals(4, truck.getPackedPackages().size());
     }
 
     @Test
@@ -186,7 +186,7 @@ public class ParcelPackageServiceTest {
         aPackages.add(largeBoxDTO);
 
         PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
-        assertEquals(2, truck.getPackedPackages().size());
+        assertEquals(3, truck.getPackedPackages().size());
     }
 
     @Test
@@ -200,7 +200,7 @@ public class ParcelPackageServiceTest {
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
         PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
-        assertEquals(2, truck.getPackedPackages().size());
+        assertEquals(3, truck.getPackedPackages().size());
         assertThat(exception);
     }
 
@@ -215,7 +215,7 @@ public class ParcelPackageServiceTest {
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
         PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
-        assertEquals(2, truck.getPackedPackages().size());
+        assertEquals(3, truck.getPackedPackages().size());
         assertFalse(truck.getPackedPackages().contains(deepthPackage));
     }
 

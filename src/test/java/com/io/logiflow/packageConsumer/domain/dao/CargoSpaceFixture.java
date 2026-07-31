@@ -13,7 +13,7 @@ public class CargoSpaceFixture {
         return new CargoSpace(0, 0, 0, 10, 10, 10); // pozycja (0,0,0), wymiary 10x10x10
     }
 
-    public static CargoSpace spaceAtPosition(int x, int y, int z, int w, int h, int d) {
-        return new CargoSpace(x, y, z, w, h, d);  // dowolna pozycja i wymiary
+    public static CargoSpace spaceAtPosition() {
+        return new CargoSpace(1,2,3);  // dowolna pozycja i wymiary
     }
 }

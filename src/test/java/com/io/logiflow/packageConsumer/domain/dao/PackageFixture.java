@@ -81,6 +81,15 @@ public class PackageFixture {
         return p1;
     }
 
+    public static Package thirdBoxPackToTruck() {
+        Package p1 = mediumDao();
+        //  p1.setPackageId(2L);
+        p1.setUuid(UUID.fromString("f7f4b7d2-660c-4430-bcec-ce3f9dd32c36"));
+        p1.setTrackingNumber("TRK2026000000009");
+        return p1;
+    }
+
+
     public static Package filterPack() {
         Package p1 = largeDao();
         p1.setPackageId(2L);
@@ -125,6 +134,4 @@ public class PackageFixture {
         localPackages.add(lightPackage);
         return localPackages;
     }
-
-
 }

@@ -7,8 +7,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
 
@@ -19,4 +18,9 @@ public abstract class AbstractIntegrationTest {
                     .withDatabaseName("testdb")
                     .withUsername("postgres")
                     .withPassword("postgres");
+
+    static {
+        postgres.start();
+    }
+
 }

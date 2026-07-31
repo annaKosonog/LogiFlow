@@ -9,6 +9,11 @@ import org.mapstruct.Mapping;
 public interface CargoSpaceMapper {
 
     @Mapping(source = "uuid", target = "idCargo")
+    @Mapping(source = "space", target = "coordinatesDTO")
+    @Mapping(source = "space", target = "dimensionsDTO")
+    @Mapping(source = "space.depth", target = "dimensionsDTO.depth_length")
+    @Mapping(source = "space.height", target = "dimensionsDTO.height")
+    @Mapping(source = "space.width", target = "dimensionsDTO.width")
     CargoSpaceDTO toDTO(CargoSpace space);
 
     @Mapping(source = "idCargo", target = "uuid")

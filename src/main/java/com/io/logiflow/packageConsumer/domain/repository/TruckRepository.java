@@ -17,7 +17,6 @@ import java.util.UUID;
 public interface TruckRepository extends JpaRepository<Truck, Long>, JpaSpecificationExecutor<Truck> {
     Optional<Truck> findTruckByUuid(UUID uuid);
 
-    List<Truck> findTruckByLength(@Param("length") int length);
 
     Page<Truck> findAll(Specification<Truck> spec, Pageable pageable);
 }

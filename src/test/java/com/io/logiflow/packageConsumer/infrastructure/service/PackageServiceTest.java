@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.filterPack;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.smallRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.filterBoxPackDto;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
@@ -47,9 +48,6 @@ public class PackageServiceTest {
 
     @InjectMocks
     private PackageService packageService;
-
-    Package firstPackage = firstBoxPackToTruck();
-    Package secondPackage = secondBoxPackToTruck();
 
     @Test
     void shouldReturnCorrectRegisteredPack() {

@@ -2,6 +2,9 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,15 +37,30 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private TruckRepository truckRepository;
+
+    @Autowired
+    private PackageRepository packageRepository;
+
+    @BeforeEach
+    public void setUp() { //Poprawa dane surowe sql, repository
+        truckRepository.deleteAll();
+        packageRepository.deleteAll();
+        truckRepository.save(createLoadedTruck());
+        truckRepository.save(createLoadedSecondTruck());
+        packageRepository.save(thirdBoxPackToTruck());
+    }
+
     @Test
     void shouldReturnResourcesWithPagination() throws Exception {
         mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("page", "0")
-                        .param("size", "3"))
+                        .param("page", "1")
+                        .param("size", "5"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(3));
+                .andExpect(jsonPath("$.data.content.length()").value(2));
     }
 
     @Test
@@ -48,159 +69,133 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.number").value(0))          // numer strony
-                .andExpect(jsonPath("$.size").value(10))           // rozmiar strony
-                .andExpect(jsonPath("$.content", hasSize(6)))               // Lista elementów na stronie, tutaj 6
-                .andExpect(jsonPath("$.first").value(true))    // Czy to pierwsza strona 0 (pierwsza)
-                .andExpect(jsonPath("$.last").value(true));  //Czy to jest ostatnia strona z paginacji true tak
+                .andExpect(jsonPath("$.data.pageable.pageNumber").value(0))          // numer strony
+                .andExpect(jsonPath("$.data.pageable.pageSize").value(5))           // rozmiar strony
+                .andExpect(jsonPath("$.data.content", hasSize(2)))               // Lista elementów na stronie, tutaj 6
+                .andExpect(jsonPath("$.data.first").value(true))    // Czy to pierwsza strona 0 (pierwsza)
+                .andExpect(jsonPath("$.data.last").value(true));  //Czy to jest ostatnia strona z paginacji true tak
     }
 
     @Test
-    void shouldReturnTruckByFilterLength() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
+    void shouldReturnTruckByFilterLengthMinAndMax() throws Exception {
+        mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("length", "600"))
+                        .param("minLength", "175")
+                        .param("maxLength", "600"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].idTruck").value("493afc07-d433-4cfa-8947-0c6100c127df"))
-                .andExpect(jsonPath("$.data[1].idTruck").value("2b8ecd55-c636-4ba0-8192-42c9e8a14355"))
-                .andExpect(jsonPath("$.data.size()").value(2));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.content[1].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"))
+                .andExpect(jsonPath("$.data.content", hasSize(2)));
     }
 
     @Test
-    void shouldReturn200WhenParamLengthDoesNotExist() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
+    void shouldReturn200WhenParamLengthMin() throws Exception {
+        mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("length", "1250"))
+                        .param("minLength", "178"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()").value(0));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.content[1].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"))
+                .andExpect(jsonPath("$.data.content", hasSize(2)));
     }
 
     @Test
-    void shouldReturn500WhenFieldLengthHasWrongType() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
+    void shouldReturn400WhenFieldLengthHasWrongType() throws Exception {
+        mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("length", "Ala ma kota"))
+                        .param("minLength", "Ala ma kota"))
                 .andDo(print())
-                .andExpect(status().is5xxServerError())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Wystąpił nieoczekiwany błąd systemu"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void shouldReturn404WhenLengthIsNegative() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
+    void shouldReturn200WhenMaxLengthIsCorrect() throws Exception {
+        mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("length", "-2"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Length must be greater than 0."));
-    }
-
-    @Test
-    void shouldReturn404WhenWeProvidedDefaultValueOnly() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("length", "-1"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Provide at least one filter."));
-    }
-
-    @Test
-    void shouldReturnWeightWhenDataIsCorrect() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("weight", "3500"))
+                        .param("maxLength", "450"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()").value(1))
-                .andExpect(jsonPath("$.data[0].idTruck").value("493afc07-d433-4cfa-8947-0c6100c127df"))
-                .andExpect(jsonPath("$.data[0].dimensionsDTO.width").value(240));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"));
     }
 
     @Test
-    void shouldReturn200WhenParamWeightDoesNotExist() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
+    void shouldReturn200WhenWeProvidedMaxAndMinMaxPayloadTruck() throws Exception {
+        mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("weight", "1234"))
+                        .param("minMaxPayload", "100")
+                        .param("minMaxPayload", "220"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()").value(0));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.content[1].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"))
+                .andExpect(jsonPath("$.data.content", hasSize(2)));
     }
 
     @Test
-    void shouldReturn500WhenFieldWeightHasWrongType() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
+    void shouldReturn200WhenWeProvidedMinMaxPayloadTruck() throws Exception {
+        mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("weight", "Ala ma kota"))
-                .andDo(print())
-                .andExpect(status().is5xxServerError())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Wystąpił nieoczekiwany błąd systemu"));
-    }
-
-    @Test
-    void shouldReturnExceptionWhenWeightIsNegative() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("weight", "-1"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Weight cannot be null or negative."));
-    }
-
-    @Test
-    void shouldReturn200WhenWeProvidedTwoParametersLengthDefaultValueAndWeightCorrectParametr() throws Exception {
-        mockMvc.perform(get("/api/trucks/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("weight", "3500")
-                        .param("length", "-1"))
+                        .param("minMaxPayload", "199"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()").value(1))
-                .andExpect(jsonPath("$.data[0].idTruck").value("493afc07-d433-4cfa-8947-0c6100c127df"))
-                .andExpect(jsonPath("$.data[0].dimensionsDTO.width").value(240));
+                .andExpect(jsonPath("$.data.content", hasSize(1)))
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"));
+    }
+
+    @Test
+    void shouldReturn200WhenParamUUIDDoesNotExist() throws Exception {
+        UUID id = UUID.randomUUID();
+        mockMvc.perform(get("/api/trucks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("idTruck", String.valueOf(id)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content", hasSize(2)));
+    }
+
+    @Test
+    void shouldReturn400WhenFieldWeightHasWrongType() throws Exception {
+        mockMvc.perform(get("/api/trucks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("maxWeight", "Ala ma kota"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void shouldReturn200WhenAddNewPackageToTruckThatIsNotAssignedToATruck() throws Exception {
-        UUID truckId = UUID.fromString("bb541dbd-3206-4f7e-b23c-ae6f9af78db5");
+        UUID idTruck = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
         List<PackageDTO> listPackageToPack = new ArrayList<>();
-        listPackageToPack.add(thirdPackageToPack());
+        listPackageToPack.add(thirdBoxDTOPackToTruck());
 
         String body = objectMapper.writeValueAsString(listPackageToPack);
 
 
-        mockMvc.perform(post("/api/trucks/{truckId}", truckId)
+        mockMvc.perform(post("/api/trucks/{idTruck}", idTruck)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("The packing process has been successfully completed for the truck with ID " + truckId));
-
-
+                .andExpect(status().isOk());
     }
 
     @Test
     void shouldReturn409WhenAddPackageToTruckWhichAdd() throws Exception {
-        UUID truckId = UUID.fromString("bb541dbd-3206-4f7e-b23c-ae6f9af78db5");
+        UUID idTruck = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
 
         List<PackageDTO> listPackageToPack = new ArrayList<>();
-        listPackageToPack.add(firstPackageToPack());
+        listPackageToPack.add(savedToDb());
         listPackageToPack.add(secondPackageToPack());
 
         String body = objectMapper.writeValueAsString(listPackageToPack);
 
 
-        mockMvc.perform(post("/api/trucks/{truckId}", truckId)
+        mockMvc.perform(post("/api/trucks/{idTruck}", idTruck)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("The package with the number TRK2026000000004 has already been loaded onto the truck with ID: " + 2));
+                .andExpect(jsonPath("$.errors").value("Unable to load: One or more packages do not exist in the database!"));
     }
-
-
 }

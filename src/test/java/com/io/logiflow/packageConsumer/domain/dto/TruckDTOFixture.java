@@ -22,7 +22,7 @@ public class TruckDTOFixture {
 
     public static TruckDTO createSecondLoadedTruckDTO() {
         TruckDTO dto = new TruckDTO();
-        dto.setIdTruck(UUID.fromString("2b8ecd55-c636-4ba0-8192-42c9e8a14355"));
+        dto.setIdTruck(UUID.fromString("c771f079-fb74-4811-b491-e78673c41e0d"));
         dto.setDimensionsDTO(dimensionSecondTruck());
         dto.setMaxPayload(new BigDecimal("200"));
         dto.setCurrentWeight(new BigDecimal("80"));

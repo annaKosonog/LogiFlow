@@ -3,6 +3,8 @@ package com.io.logiflow.packageConsumer.domain.dao;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
+
 public class TruckFixture {
 
     // Domyślne wymiary, które interesują geometrię, ale nie testy wagowe
@@ -22,11 +24,17 @@ public class TruckFixture {
         return new Truck(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_LENGTH, new BigDecimal(maxPayload));
     }
 
+    public static Truck createSecondTruckWithPayload(String maxPayload) {
+        return new Truck(178, 190, 430, new BigDecimal(maxPayload));
+    }
+
+
     // Gotowy zestaw do testów np. metody unload()
     public static Truck createLoadedTruck() {
         // Tworzymy ciężarówkę z limitem 200.00
         Truck truck = createTruckWithPayload("200.00");
-        truck.setUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+        truck.setUuid(UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606"));
+        truck.getPackedPackages().add(firstBoxPackToTruck());
 
         // Ładujemy paczki
         truck.load(createBox("30.00"));
@@ -37,8 +45,9 @@ public class TruckFixture {
 
     public static Truck createLoadedSecondTruck() {
         // Tworzymy ciężarówkę z limitem 200.00
-        Truck truck = createTruckWithPayload("200.00");
-        truck.setTruckId(2L);
+        Truck truck = createSecondTruckWithPayload("150.00");
+        truck.setUuid(UUID.fromString("c771f079-fb74-4811-b491-e78673c41e0d"));
+        truck.getPackedPackages().add(secondBoxPackToTruck());
 
 
         // Ładujemy paczki

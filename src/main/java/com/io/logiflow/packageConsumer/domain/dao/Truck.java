@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Truck {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "truck_id")
     private Long truckId;
 

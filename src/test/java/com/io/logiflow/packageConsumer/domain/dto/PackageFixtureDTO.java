@@ -59,6 +59,10 @@ public class PackageFixtureDTO {
         return new PackageDTO(UUID.randomUUID(), "TRK-2026-A002", null, new BigDecimal("50.0"), firstCoordinate(), null);
     }
 
+    public static PackageDTO thirdBoxDTOPackToTruck() {
+        return new PackageDTO(UUID.fromString("f7f4b7d2-660c-4430-bcec-ce3f9dd32c36"), "TRK2026000000009", dimensionMediumDTO(), new BigDecimal("20.0"), firstCoordinate(), null);
+    }
+
     public static PackageDTO filterBoxPackDto() {
         return new PackageDTO(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"), "TRK2026000000002", dimensionLargeDAO(), new BigDecimal("50.0"), firstCoordinate(), null);
     }
@@ -108,10 +112,17 @@ public class PackageFixtureDTO {
                 new CoordinatesDTO(0, 0, 0), null);
     }
 
-    public static PackageDTO thirdPackageToPack() {
-        return new PackageDTO(UUID.fromString("e6d49a74-99f7-4e85-b325-3e2cd906d176"), "TRK2026000000007",
-                new DimensionsDTO(50, 30, 40), new BigDecimal("15"),
+    public static PackageDTO savedSecondPackageToPack() {
+        return new PackageDTO(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"), "TRK2026000000002",
+                new DimensionsDTO(5, 5, 5), new BigDecimal("30"),
                 new CoordinatesDTO(0, 0, 0), null);
+    }
+
+    public static PackageDTO savedToDb() {
+        return new PackageDTO(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"), "TRK2026000000001",
+                dimensionSmallDTO(), new BigDecimal("10"),
+                new CoordinatesDTO(0, 0, 5), 1L);
+
     }
 
 

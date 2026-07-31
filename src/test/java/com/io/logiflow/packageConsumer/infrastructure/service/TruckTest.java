@@ -44,7 +44,7 @@ class TruckTest {
 
         assertEquals(new BigDecimal("180.00"), truck.getCurrentWeight());
         assertTrue(truck.getPackedPackages().contains(packageToBeLoaded));
-        assertEquals(4, truck.getPackedPackages().size());
+        assertEquals(5, truck.getPackedPackages().size());
     }
 
     @Test
@@ -55,20 +55,20 @@ class TruckTest {
 
         assertEquals(new BigDecimal("200.00"), truck.getCurrentWeight());
         assertTrue(truck.getPackedPackages().contains(maxWeightPackage));
-        assertEquals(3, truck.getPackedPackages().size());
+        assertEquals(4, truck.getPackedPackages().size());
     }
 
     @Test
     void shouldThrowExceptionWhenPayLoadIsExceeded() {
         //GIVEN
-        Package heavyWeight = createBox("125");
+        Package heavyWeight = createBox("135");
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             truck.load(heavyWeight);
         });
 
         assertEquals("Truck loading failed", exception.getMessage());
-        assertEquals(2, truck.getPackedPackages().size());
+        assertEquals(3, truck.getPackedPackages().size());
 
         //Werfikacja czy ta paczka napewno nie została dodana
 
@@ -96,7 +96,7 @@ class TruckTest {
                 truck.unload(packageToUnload));
 
         assertEquals("Cannot unload a box that is not on the truck", exception.getMessage());
-        assertEquals(2, truck.getPackedPackages().size());
+        assertEquals(3, truck.getPackedPackages().size());
 
         //Weryfikacja czy paczka napewno została rozładowana
         BigDecimal expectedWeight = new BigDecimal("80.00");

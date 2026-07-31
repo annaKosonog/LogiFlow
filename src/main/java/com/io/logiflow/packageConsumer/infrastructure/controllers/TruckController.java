@@ -23,8 +23,8 @@ public class TruckController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TruckDTO>>> getAllTrucks(
             @ModelAttribute TruckFilterDto filter,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size
     ) {
         Page<TruckDTO> trucks = truckService.getTrucks(filter, page, size);
         return ResponseEntity.ok(ApiResponse.success(trucks));

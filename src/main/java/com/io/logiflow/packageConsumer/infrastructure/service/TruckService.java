@@ -16,7 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ public class TruckService {
     private final TruckMapper truckMapper;
 
     public Page<TruckDTO> getTrucks(TruckFilterDto filter, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
         Specification<Truck> truckSpecification = TruckSpecifications.buildSpecification(filter);
         Page<Truck> savedTruck = truckRepository.findAll(truckSpecification, pageable);
         return savedTruck.map(truckMapper::toDTO);
@@ -41,11 +40,5 @@ public class TruckService {
                 .orElseThrow(() -> new ResourceNotFoundException("The truck with the id " + truckId + " does not exist"));
         parcelPackingService.pack(packages, truck);
         truckRepository.save(truck);
-    }
-
-    public void validateWeight(BigDecimal maxPayload) {
-        if (maxPayload == null || maxPayload.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Weight cannot be null or negative.");
-        }
     }
 }

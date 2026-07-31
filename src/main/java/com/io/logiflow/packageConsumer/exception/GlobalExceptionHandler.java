@@ -47,10 +47,11 @@ GlobalExceptionHandler {
     }
 
     // 2. Odkomentowany i bezpieczny fallback dla faktycznych niespodziewanych błędów (500)
-    @ExceptionHandler(Exception.class)
+/*    @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Wystąpił nieoczekiwany błąd systemu"));
     }
+    */
 }

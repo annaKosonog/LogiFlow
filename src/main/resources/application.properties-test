@@ -9,3 +9,7 @@ spring.flyway.enabled=false
   
   # Logowanie zapytań SQL (opcjonalnie)
 spring.jpa.show-sql=true
+  
+  # Ogranicz rozmiar puli połączeń per kontekst — przy wielu kontekstach naraz, mniejsza pula = mniej obciążenia na Postgresa
+spring.datasource.hikari.maximum-pool-size=5
+spring.datasource.hikari.connection-timeout=10000

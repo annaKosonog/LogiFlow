@@ -2,36 +2,36 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.firstBoxPackDto;
-import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -70,13 +70,13 @@ class TruckServiceTest {
         aPackages = null;
     }
 
-  /*  @Test
+    @Test
     void shouldReturnPaginatedTrucks() {
-        int pageNumber = 0;
+        int pageNumber = 1;
         int pageSize = 1;
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-
+        TruckFilterDto filter = new TruckFilterDto();
         Truck savedTruck = new Truck();
         List<Truck> truckList = List.of(savedTruck);
 
@@ -84,39 +84,30 @@ class TruckServiceTest {
 
         TruckDTO dto = new TruckDTO();
 
-        when(truckRepository.findAll(pageable)).thenReturn(mockPageFromDb);
+        when(truckRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(mockPageFromDb);
+
         when(truckMapper.toDTO(savedTruck)).thenReturn(dto);
 
-        Page<TruckDTO> resultTrucks = truckService.getTrucks(pageNumber, pageSize);
+        Page<TruckDTO> resultTrucks = truckService.getTrucks(filter, pageNumber, pageSize);
 
         assertNotNull(resultTrucks);
-        assertEquals(1, resultTrucks.getTotalElements(), "Total elements in page should be 1");
+        assertEquals(2, resultTrucks.getTotalElements(), "Total elements in page should be 1");
         assertEquals(1, resultTrucks.getContent().size(), "Page content size should match mapped elements count");
         assertEquals(dto, resultTrucks.getContent().get(0), "The content should contain the mapped DTO");
-    }*/
+    }
 
-  /*  @Test
-    void shouldThrowExceptionWhenPageSizeIsInvalid() {
-        int pageNumber = 0;
-        int pageSize = 0;
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.getTrucks(pageNumber, pageSize));
-
-        assertEquals("Page size must not be less than one", exception.getMessage());
-        verifyNoInteractions(truckRepository);
-    }*/
-
- /*   @Test
+    @Test
     void shouldReturnEmptyPageWhenNoTrucksExist() {
         int page = 15;
         int size = 10;
 
-        Pageable pageable = PageRequest.of(page, size);
+        Page<Truck> emptyPage = Page.empty();
 
-        Page<Truck> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(truckRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(emptyPage);
 
-        when(truckRepository.findAll(pageable)).thenReturn(emptyPage);
-        Page<TruckDTO> resultPage = truckService.getTrucks(page, size);
+        Page<TruckDTO> resultPage = truckService.getTrucks(null, page, size);
 
         assertNotNull(resultPage);
         assertTrue(resultPage.isEmpty(), "The returned page should be empty");
@@ -125,7 +116,7 @@ class TruckServiceTest {
 
         // Upewniamy się, że mapper nigdy nie został wywołany (bo nie było czego mapować)
         verifyNoInteractions(truckMapper);
-    }*/
+    }
 
     @Test
     void shouldThrowExceptionWhenTruckIdNotExists() {
@@ -136,6 +127,31 @@ class TruckServiceTest {
 
         assertEquals("The truck with the id " + truckId + " does not exist", exception.getMessage());
     }
+
+    @Test
+    void getTrucks_shouldConvertPageNumberCorrectly_forPageableCalculation() {
+        // given: sprawdzamy że page-1 jest poprawnie przekazywane (page 3 -> index 2)
+        int page = 3;
+        int size = 5;
+        Pageable expectedPageable = PageRequest.of(page - 1, size);
+        TruckFilterDto filter = new TruckFilterDto();
+        Specification<Truck> mockedSpec = mock(Specification.class);
+        Page<Truck> truckPage = new PageImpl<>(List.of(), expectedPageable, 0);
+
+        try (MockedStatic<TruckSpecifications> mockedStatic = mockStatic(TruckSpecifications.class)) {
+            mockedStatic.when(() -> TruckSpecifications.buildSpecification(filter))
+                    .thenReturn(mockedSpec);
+            when(truckRepository.findAll(eq(mockedSpec), eq(expectedPageable)))
+                    .thenReturn(truckPage);
+
+            // when
+            truckService.getTrucks(filter, page, size);
+
+            // then
+            verify(truckRepository).findAll(mockedSpec, PageRequest.of(2, 5));
+        }
+    }
+
 
     @Test
     void shouldReturnPackagesWhichAddToTruck() {

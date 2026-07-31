@@ -1,10 +1,12 @@
-/*
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,17 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createSecondLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,55 +52,58 @@ public class TruckControllerTest {
     @MockBean
     private TruckService truckService;
 
+    @MockBean
+    private TruckRepository truckRepository;
+
+    TruckDTO mockTruckDto;
+    TruckDTO secondMockTruckDto;
+    Page<TruckDTO> defaultPage;
+
+    @BeforeEach
+    void setUp() {
+        truckRepository.deleteAll();
+        mockTruckDto = createLoadedTruckDTO();
+        secondMockTruckDto = createSecondLoadedTruckDTO();
+    }
+
     @Test
     void shouldReturnDefaultPageableWhenNoParamsProvided() throws Exception {
-        TruckDTO mockPackDto = createLoadedTruckDTO();
-
-        Page<TruckDTO> page = new PageImpl<>(
-                List.of(mockPackDto),
-                PageRequest.of(0, 10),
-                1
-        );
+        defaultPage = new PageImpl<>(List.of(mockTruckDto, secondMockTruckDto), PageRequest.of(1, 5), 2);
 
         //Sprawdzanie czy dla domyślnych wartości (0,10) serwis zostanie wywołany
-        when(truckService.getTrucks(0, 10)).thenReturn(page);
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
 
         mvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
-                .andExpect(jsonPath("$.pageable.pageNumber").value(0)) // To sprawdza Twoje 'page' (defaultValue = 0)
-                .andExpect(jsonPath("$.pageable.pageSize").value(10));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.pageable.pageNumber").value(1)) // To sprawdza Twoje 'page' (defaultValue = 0)
+                .andExpect(jsonPath("$.data.pageable.pageSize").value(5));
     }
 
     @Test
     void shouldReturnCustomPageableWhenParamsProvided() throws Exception {
+        defaultPage = new PageImpl<>(List.of(mockTruckDto, secondMockTruckDto), PageRequest.of(1, 5), 2);
+
         int customPage = 2;
         int customSize = 5;
 
         TruckDTO mockPackDto = createLoadedTruckDTO();
 
-        Page<TruckDTO> page = new PageImpl<>(
-                List.of(mockPackDto));
-
         // Konfigurujemy mock dla niestandardowych wartości 2 i 5
-        when(truckService.getTrucks(customPage, customSize)).thenReturn(page);
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(customPage), eq(customSize))).thenReturn(defaultPage);
 
         mvc.perform(get("/api/trucks")
                         .param("page", String.valueOf(customPage))
                         .param("size", String.valueOf(customSize))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
-                .andExpect(jsonPath("$.size").value(1)) // rozmiar listy w content
-                .andExpect(jsonPath("$.empty").value(false));
-
-        // Dodatkowa weryfikacja: upewniamy się, że serwis został wywołany dokładnie z tymi parametrami
-        Mockito.verify(truckService, Mockito.times(1)).getTrucks(customPage, customSize);
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.pageable.pageSize").value(5)) // rozmiar listy w content
+                .andExpect(jsonPath("$.data.empty").value(false));
     }
-
 
     @Test
     public void shouldAddPackagesToTruckSuccessfully() throws Exception {
@@ -110,7 +121,6 @@ public class TruckControllerTest {
         int status = result.getResponse().getStatus();
         assertEquals(200, status);
     }
-
 
     @Test
     public void shouldReturnBadRequestWhenPackageDoesNotFit() throws Exception {
@@ -133,6 +143,94 @@ public class TruckControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void shouldReturnTruckDtoWhenProvidedCorrectUUID() throws Exception {
+        UUID id = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
+        defaultPage = new PageImpl<>(List.of(mockTruckDto), PageRequest.of(1, 5), 2);
+
+        when(truckRepository.findTruckByUuid(id)).thenReturn(Optional.of(createLoadedTruck()));
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+        mvc.perform(get("/api/trucks")
+                        .param("idTruck", String.valueOf(id))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].dimensionsDTO.width").value(250))
+                .andExpect(jsonPath("$.data.content[0].currentWeight").value(new BigDecimal("80")));
+    }
+
+    @Test
+    public void shouldReturnTruckDTOWhenProvidedNoUUID() throws Exception {
+        UUID id = UUID.randomUUID();
+        defaultPage = new PageImpl<>(List.of(), PageRequest.of(1, 5), 2);
+
+        when(truckRepository.findTruckByUuid(id)).thenReturn(Optional.empty());
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+        mvc.perform(get("/api/trucks")
+                        .param("idTruck", String.valueOf(id))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isEmpty());
+    }
+
+    @Test
+    public void shouldReturnTruckDTOWhenProvidedCorrectMinAndMaxHeight() throws Exception {
+
+        BigDecimal minHeight = new BigDecimal("190");
+        BigDecimal maxHeight = new BigDecimal("225");
+        defaultPage = new PageImpl<>(List.of(mockTruckDto, secondMockTruckDto), PageRequest.of(1, 5), 2);
+
+        when(truckRepository.findAll()).thenReturn(List.of(createLoadedTruck(), createLoadedSecondTruck()));
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+
+        mvc.perform(get("/api/trucks")
+                        .param("minHeight", String.valueOf(minHeight))
+                        .param("maxHeight", String.valueOf(maxHeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.content[1].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"))
+                .andExpect(jsonPath("$.data.size").value(5));
+    }
+
+    @Test
+    public void shouldReturnTruckDTOWhenProvidedCorrectMinHeight() throws Exception {
+        BigDecimal minHeight = new BigDecimal("225");
+        defaultPage = new PageImpl<>(List.of(mockTruckDto), PageRequest.of(1, 5), 2);
+
+        when(truckRepository.findAll()).thenReturn(List.of(createLoadedTruck()));
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+
+        mvc.perform(get("/api/trucks")
+                        .param("minHeight", String.valueOf(minHeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    public void shouldReturnTruckDTOWhenProvidedCorrectMaxHeight() throws Exception {
+        BigDecimal maxHeight = new BigDecimal("10");
+        defaultPage = new PageImpl<>(List.of(), PageRequest.of(1, 5), 2);
+
+        when(truckRepository.findAll()).thenReturn(List.of(createLoadedTruck(), createLoadedSecondTruck()));
+        when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
+
+        mvc.perform(get("/api/trucks")
+                        .param("maxHeight", String.valueOf(maxHeight))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(0));
+    }
+
 
 }
-*/

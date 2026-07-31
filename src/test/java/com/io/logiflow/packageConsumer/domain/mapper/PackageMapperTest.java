@@ -1,37 +1,34 @@
-package com.io.logiflow.packageConsumer.infrastructure.service;
+package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.mapper.CommonMapperImpl;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageMapperImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.mediumDTO;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-        PackageMapperImpl.class,
-        CommonMapperImpl.class
-})
 public class PackageMapperTest {
 
-    @Autowired
-    private PackageMapper packageMapper = Mappers.getMapper(PackageMapper.class);
+    private PackageMapper packageMapper;
+
+    @BeforeEach
+    void setUp() {
+        PackageMapperImpl impl = new PackageMapperImpl();
+        ReflectionTestUtils.setField(impl, "commonMapper", new CommonMapperImpl());
+        packageMapper = impl;
+    }
 
     @Test
     void shouldMapDtoToEntity() {
@@ -77,4 +74,44 @@ public class PackageMapperTest {
         assertThat(result.get(1).getUuid().toString()).isNotBlank();
         assertThat(result.get(1).getTrackingNumber()).isEqualTo(mediumDTO().getTrackingNumber());
     }
+
+    @Test
+    void toDTO_shouldHandleNullTruck() {
+        Package pack = new Package();
+        pack.setUuid(UUID.randomUUID());
+        pack.setTruck(null);
+        pack.setWidth(10);
+        pack.setHeight(20);
+        pack.setDepth(30);
+
+        PackageDTO dto = packageMapper.toDTO(pack);
+
+        assertNotNull(dto);
+        assertNull(dto.getTruckID());
+    }
+
+    @Test
+    void toEntity_shouldReturnNull_whenDtoIsNull() {
+        assertNull(packageMapper.toEntity(null));
+    }
+
+    @Test
+    void toEntity_shouldHandleNullTruckID() {
+        PackageDTO dto = new PackageDTO();
+        dto.setId(UUID.randomUUID());
+        dto.setTruckID(null);
+        dto.setDimensions(new DimensionsDTO(10, 20, 30));
+
+        Package entity = packageMapper.toEntity(dto);
+
+        assertNull(entity.getTruck());
+    }
+
+    @Test
+    void mapIdToTruck_shouldCreateTruckWithGivenId() {
+        Truck truck = packageMapper.mapIdToTruck(9L);
+        assertNotNull(truck);
+        assertEquals(9L, truck.getTruckId());
+    }
+
 }
