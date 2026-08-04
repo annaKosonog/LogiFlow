@@ -1,0 +1,303 @@
+package com.io.logiflow.packageConsumer.infrastructure.service;
+
+import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.controllers.AbstractIntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.data.domain.Page;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
+
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
+
+    @Autowired
+    private PackageRepository packageRepository;
+    @Autowired
+    private PackageService packageService;
+
+    PackageFilterDTO filter = new PackageFilterDTO();
+
+
+    @BeforeEach
+    public void setUp() { //Poprawa dane surowe sql, repository
+        packageRepository.deleteAll();
+        packageRepository.save(firstBoxPackToTruck());
+        packageRepository.save(secondBoxPackToTruck());
+    }
+
+
+    @Test
+    void shouldReturnANewPackage() {
+        PackageCreateRequest request = smallRequest();
+        PackageDTO newPackage = packageService.registerNewPackage(request);
+        assertEquals(1, newPackage.getDimensions().getWidth());
+        assertEquals(1, newPackage.getDimensions().getHeight());
+        assertThat(newPackage.getId()).isNotNull();
+        assertThat(newPackage.getTrackingNumber()).isEqualTo("TRK2026000000009");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDimensionIsNull() {
+        PackageCreateRequest request = firstBoxCreateRequest();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
+        assertEquals("Dimensions and weight are required", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWeightIsNull() {
+        PackageCreateRequest request = firstBoxCreateRequest();
+        request.setWeight(null);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
+        assertEquals("Dimensions and weight are required", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowWhenNewPackageRequestWidthIsNegative() {
+        PackageCreateRequest request = requestFirst();
+        request.getDimensions().setWidth(-1);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
+        assertEquals("Width must be positive", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowWhenNewPackageRequestHeightIsNegative() {
+        PackageCreateRequest request = requestFirst();
+        request.getDimensions().setHeight(-1);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
+        assertEquals("Height must be positive", exception.getMessage());
+
+    }
+
+    @Test
+    void shouldThrowWhenNewPackageRequestDepthIsNegative() {
+        PackageCreateRequest request = requestFirst();
+        request.getDimensions().setDepth_length(-1);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
+        assertEquals("Depth must be positive", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowWhenNewPackageRequestWeightIsNegative() {
+        PackageCreateRequest request = requestFirst();
+        request.setWeight(new BigDecimal(-1));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
+        assertEquals("Weight must be positive", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnPackagesWhenProvideTrackingNumberToFilter() {
+        int page = 1;
+        int size = 5;
+
+        filter.setTrackingNumber("TRK2026000000001");
+        Page<PackageDTO> result = packageService.getPackages(filter, page, size);
+
+        assertThat(result.getContent())
+                .filteredOn(dto -> dto.getTrackingNumber().equals("TRK2026000000001"))
+                .singleElement()
+                .satisfies(dto -> {
+                            assertThat(dto.getDimensions().getHeight()).isEqualTo(1);
+                            assertThat(dto.getId()).isEqualTo(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
+                            assertThat(dto.getWeight()).isEqualByComparingTo(new BigDecimal("10.00"));
+                        }
+                );
+    }
+
+    @Test
+    void shouldReturnDefaultPageWhenTrackingNumberDoNotExists() {
+        int page = 1;
+        int size = 5;
+
+        filter.setTrackingNumber(null);
+        Page<PackageDTO> result = packageService.getPackages(filter, page, size);
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent())
+                .extracting(PackageDTO::getId)
+                .containsExactly(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"),
+                        UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"));
+
+        assertThat(result.getNumber()).isEqualTo(0);          // numer bieżącej strony
+        assertThat(result.getSize()).isEqualTo(5);            // żądany rozmiar strony
+        assertThat(result.getTotalElements()).isEqualTo(2);   // wszystkich rekordów w bazie
+        assertThat(result.isLast()).isTrue();
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberFormatIsTooShort() {
+        String trackingNumber = "TRK20260000002";
+        filter.setTrackingNumber(trackingNumber);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
+        assertEquals("Invalid tracking number format.", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberNotFound() {
+        String trackingNumber = "TRK2026000000000";
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
+        assertEquals("Package with tracking number " + trackingNumber + " not found", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberIsNullOrBlank() {
+        String trackingNumber = "";
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
+        assertEquals("Tracking number cannot be null or blank.", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrackingNumberNotStartedToTRK() {
+        String trackingNumber = "KRT20260000002";
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
+        assertEquals("Invalid tracking number format.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnUUIDIfUserProvidedCorrectDate() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        PackageDTO packagesByUUID = packageService.getPackagesByUUID(packageId);
+        assertNotNull(packageId);
+        assertEquals("TRK2026000000002", packagesByUUID.getTrackingNumber());
+        assertThat(packagesByUUID.getWeight()).isEqualByComparingTo("30");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPackageWithUUIDNumberNotFound() {
+        UUID packId = UUID.randomUUID();
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByUUID(packId));
+        assertEquals("Package with UUID number " + packId + " not found", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnPackageDTOWhenProvidedCorrectDataToUpdate() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("width", 15);
+        fields.put("height", 12);
+        fields.put("depth", 120);
+        fields.put("weight", new BigDecimal("87"));
+
+        PackageDTO updatePackageFields = packageService.updatePackageFields(packageId, fields);
+
+        assertEquals(15, updatePackageFields.getDimensions().getWidth());
+        assertEquals(12, updatePackageFields.getDimensions().getHeight());
+        assertEquals(120, updatePackageFields.getDimensions().getDepth_length());
+        assertThat(updatePackageFields.getWeight()).isEqualByComparingTo("87");
+        assertEquals("TRK2026000000002", updatePackageFields.getTrackingNumber());
+    }
+
+    @Test
+    void shouldReturnPackageDTOWhenProvidedOneParameterToUpdate() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("weight", new BigDecimal("127"));
+
+        PackageDTO updatePackageFields = packageService.updatePackageFields(packageId, fields);
+        assertThat(updatePackageFields.getWeight()).isEqualByComparingTo("127");
+        assertEquals("TRK2026000000002", updatePackageFields.getTrackingNumber());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIdoNotProvidedZeroParameterToUpdate() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        Map<String, Object> fields = new HashMap<>();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
+
+        assertEquals("At least one field must be provided", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIProvidedPackIdThatDoNotExistDBToUpdate() {
+        UUID packageId = UUID.randomUUID();
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("weight", new BigDecimal("127"));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.updatePackageFields(packageId, fields));
+        assertEquals("Package not found", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenParametersFieldIsProvidedWrong() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("width", "aac");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
+        assertThat(exception.getMessage())
+                .contains("width")
+                .contains("must be a valid number");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFieldWeightProvidedToStringInsteadBigDecimal() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("weight", "aac");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
+        assertThat(exception.getMessage())
+                .contains("weight")
+                .contains("must be a valid number");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFieldWeightIsNegative() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("weight", new BigDecimal("-12.4"));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
+        assertThat(exception.getMessage())
+                .contains("weight")
+                .contains(" must be positive");
+    }
+
+    @Test
+    void shouldReturnPackageDTOWhenProvidedCorrectUUID() {
+        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+
+        PackageDTO packagesByUUID = packageService.getPackagesByUUID(packageId);
+
+        assertEquals("TRK2026000000002", packagesByUUID.getTrackingNumber());
+        assertEquals(5, packagesByUUID.getDimensions().getDepth_length());
+        assertEquals(0, packagesByUUID.getCoordinates().getX());
+        assertEquals("30.00", packagesByUUID.getWeight().toString());
+        assertNull(packagesByUUID.getTruckID());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUUIDIsNull() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByUUID(null));
+        assertEquals("Provide uuid. ", exception.getMessage());
+    }
+}
