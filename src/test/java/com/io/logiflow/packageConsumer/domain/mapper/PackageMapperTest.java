@@ -96,7 +96,7 @@ public class PackageMapperTest {
     }
 
     @Test
-    void toEntity_shouldHandleNullTruckID() {
+    void toEntity_shouldHandleNullTruckID() { //Fixture
         PackageDTO dto = new PackageDTO();
         dto.setId(UUID.randomUUID());
         dto.setTruckID(null);

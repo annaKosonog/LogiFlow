@@ -23,6 +23,12 @@ public class PackageFixtureDTO {
         return new PackageDTO(UUID.randomUUID(), "XYZ-SMALL", dimensionSmallDTO(), new BigDecimal("10.0"), null, null);
     }
 
+    public static PackageDTO smallDTOUpdate() {
+        return new PackageDTO(UUID.randomUUID(), "XYZ-SMALL", new DimensionsDTO(45,1,1), new BigDecimal("12.95"), null, null);
+    }
+
+
+
     public static PackageDTO mediumDTO() {
         return new PackageDTO((UUID.randomUUID()), "XYZ-MEDIUM", dimensionMediumDTO(), new BigDecimal("20.0"), null, null); // objętość = 8
     }
@@ -76,7 +82,7 @@ public class PackageFixtureDTO {
         PackageDTO updatedPackage = new PackageDTO();
         updatedPackage.setTrackingNumber("TRK-2026-ORIGINAL"); // Numer bez zmian!
         updatedPackage.setDimensions(dimensionUpdate());                          // Bez zmian
-        updatedPackage.setWeight(new BigDecimal("12.95"));
+        updatedPackage.setWeight(new BigDecimal("750.0"));
         return updatedPackage;
     }
 

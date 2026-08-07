@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
@@ -29,6 +30,8 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.firstBoxCreateRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.largeAndHeavyBoxRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
+import static com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTOFixture.fieldWeightAndWidthToUpdate;
+import static com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTOFixture.fieldWeightToUpdate;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -518,13 +521,13 @@ class PackageControllerTest {
     @Test
     public void shouldUpdateAPackageToSystemSuccessfully() throws Exception {
         UUID packId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-        PackageDTO patchDto = smallDTO();
-        patchDto.getDimensions().setWidth(45);
-        patchDto.setWeight(new BigDecimal("12.95"));
+        PackageDTO savePackage = smallDTO();
+        UpdatePackageDimensionsRequestDTO patchFields = fieldWeightAndWidthToUpdate();
 
-        String jsonRequest = objectMapper.writeValueAsString(patchDto);
-        when(packageService.registerNewPackage(any(PackageCreateRequest.class))).thenReturn(patchDto);
-        when(packageService.updatePackageFields(Mockito.eq(packId), Mockito.anyMap())).thenReturn(patchDto);
+        String jsonRequest = objectMapper.writeValueAsString(patchFields);
+
+        when(packageService.registerNewPackage(any(PackageCreateRequest.class))).thenReturn(savePackage);
+        when(packageService.updatePackageFields(eq(packId), any(UpdatePackageDimensionsRequestDTO.class))).thenReturn(smallDTOUpdate());
 
         mvc.perform(patch("/api/packages/{packId}", packId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -541,14 +544,12 @@ class PackageControllerTest {
     public void shouldUpdateOnlyAllowedFieldsAndIgnoreRest() throws Exception {
         UUID originalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
-        Map<String, Object> fieldsToUpdate = new HashMap<>();
-        fieldsToUpdate.put("weight", 750.0);
-        fieldsToUpdate.put("trackingNumber", "HACKED-123");
+        UpdatePackageDimensionsRequestDTO patchFields =fieldWeightToUpdate();
 
         PackageDTO patchDto = updatePackageDTO();
 
         when(packageService.registerNewPackage(any(PackageCreateRequest.class))).thenReturn(patchDto);
-        when(packageService.updatePackageFields(Mockito.eq(originalId), Mockito.anyMap())).thenReturn(patchDto);
+        when(packageService.updatePackageFields(eq(originalId), any(UpdatePackageDimensionsRequestDTO.class))).thenReturn(patchDto);
 
         String jsonRequest = objectMapper.writeValueAsString(patchDto);
 

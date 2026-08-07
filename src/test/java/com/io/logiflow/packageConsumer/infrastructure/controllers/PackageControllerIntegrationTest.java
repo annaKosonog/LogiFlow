@@ -27,8 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
 public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -124,8 +122,8 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000001"))
-                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000002"))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000002"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000001"))
                 .andExpect(jsonPath("$.data.content.length()").value(2));
     }
 

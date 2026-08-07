@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.exception.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +40,11 @@ public class PackageController {
                 .body(ApiResponse.success(savedPackage));
     }
 
+    //todo osobne dto request, najlepiej rekordy
     @PatchMapping("/{packId}")
-    public ResponseEntity<ApiResponse<PackageDTO>> updateDimensions(@PathVariable UUID packId, @RequestBody Map<String, Object> fields) {
+    public ResponseEntity<ApiResponse<PackageDTO>> updateDimensions(
+            @PathVariable UUID packId,
+            @RequestBody UpdatePackageDimensionsRequestDTO fields) {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity
                 .ok(ApiResponse.success(updated));

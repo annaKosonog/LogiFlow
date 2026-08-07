@@ -1,10 +1,7 @@
 package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.*;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
@@ -19,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -60,32 +56,22 @@ public class PackageService {
     }
 
     @Transactional
-    public PackageDTO updatePackageFields(UUID packId, Map<String, Object> fields) { //waga, wymiary, adres dostawy
-        if (fields == null || fields.isEmpty()) {
+    public PackageDTO updatePackageFields(UUID packId, UpdatePackageDimensionsRequestDTO fields) { //waga, wymiary, adres dostawy
+        if (fields == null || !hasAnyField(fields)) {
             throw new IllegalArgumentException("At least one field must be provided");
         }
+
+        validatePackageDimensions(fields);
 
         Package existingPackage = packageRepository.findPackageByUuid(packId)
                 .orElseThrow(() -> new ResourceNotFoundException("Package not found"));
 
-        validatePositiveNumericFields(fields, "width", "height", "depth", "weight");
+        if (fields.weight() != null) existingPackage.setWeight(fields.weight());
+        if (fields.length() != null) existingPackage.setDepth(fields.length());
+        if (fields.width() != null) existingPackage.setWidth(fields.width());
+        if (fields.height() != null) existingPackage.setHeight(fields.height());
 
-        // Sprawdzamy czy w JSONIE przesłano konkretne klucze i bezpiecznie je przepisujemy
-        if (fields.containsKey("width")) {
-            existingPackage.setWidth(((Number) fields.get("width")).intValue());
-        }
-        if (fields.containsKey("height")) {
-            existingPackage.setHeight(((Number) fields.get("height")).intValue());
-        }
-        if (fields.containsKey("depth")) {
-            existingPackage.setDepth(((Number) fields.get("depth")).intValue());
-        }
-        if (fields.containsKey("weight")) {
-            Object weightValue = fields.get("weight");
-            existingPackage.setWeight(new BigDecimal(weightValue.toString()));
-        }
-        Package saved = packageRepository.save(existingPackage);
-        return packageMapper.toDTO(saved);
+        return packageMapper.toDTO(existingPackage);
     }
 
     public PackageDTO getPackagesByUUID(UUID uuid) {
@@ -121,42 +107,45 @@ public class PackageService {
         }
     }
 
-    private void validatePositiveNumericFields(Map<String, Object> fields, String... fieldNames) {
-        for (String fieldName : fieldNames) {
-            if (!fields.containsKey(fieldName)) {
-                continue;
-            }
-            Object value = fields.get(fieldName);
-            BigDecimal numericValue;
-            try {
-                numericValue = new BigDecimal(value.toString());
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(fieldName + " must be a valid number");
-            }
-            if (numericValue.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException(fieldName + " must be positive");
-            }
+    private void validatePositiveDimensions(BigDecimal weight, Integer length, Integer width, Integer height) {
+        if (weight != null && weight.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Weight must be greater than zero");
+        }
+        if (length != null && length <= 0) {
+            throw new IllegalArgumentException("Length/Depth must be greater than zero");
+        }
+        if (width != null && width <= 0) {
+            throw new IllegalArgumentException("Width must be greater than zero");
+        }
+        if (height != null && height <= 0) {
+            throw new IllegalArgumentException("Height must be greater than zero");
         }
     }
 
+    private void validatePackageDimensions(UpdatePackageDimensionsRequestDTO request) {
+        if (request == null) return;
+        validatePositiveDimensions(request.weight(), request.length(), request.width(), request.height());
+    }
+
     private void validateNewPackageRequest(PackageCreateRequest pack) {
+        // Sprawdzamy null tylko dla obiektów (pack, weight, dimensions)
         if (pack == null || pack.getDimensions() == null || pack.getWeight() == null) {
             throw new IllegalArgumentException("Dimensions and weight are required");
         }
 
-        DimensionsDTO dimensions = pack.getDimensions();
+        DimensionsDTO dims = pack.getDimensions();
 
-        if (dimensions.getWidth() <= 0) {
-            throw new IllegalArgumentException("Width must be positive");
-        }
-        if (dimensions.getHeight() <= 0) {
-            throw new IllegalArgumentException("Height must be positive");
-        }
-        if (dimensions.getDepth_length() <= 0) {
-            throw new IllegalArgumentException("Depth must be positive");
-        }
-        if (pack.getWeight().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Weight must be positive");
-        }
+        // int z getDepth_length(), getWidth(), getHeight() jest automatycznie konwertowany (autoboxing) na Integer!
+        validatePositiveDimensions(
+                pack.getWeight(),
+                dims.getDepth_length(),
+                dims.getWidth(),
+                dims.getHeight()
+        );
+    }
+
+    private boolean hasAnyField(UpdatePackageDimensionsRequestDTO request) {
+        return request.weight() != null || request.length() != null
+                || request.width() != null || request.height() != null;
     }
 }

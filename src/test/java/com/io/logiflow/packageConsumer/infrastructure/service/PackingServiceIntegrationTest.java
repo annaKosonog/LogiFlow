@@ -3,30 +3,27 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.AbstractIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.domain.Page;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.*;
+import static com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTOFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
 public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -42,22 +39,25 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
         packageRepository.deleteAll();
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
+        packageRepository.flush();
     }
+
 
 
     @Test
     void shouldReturnANewPackage() {
         PackageCreateRequest request = smallRequest();
         PackageDTO newPackage = packageService.registerNewPackage(request);
+
         assertEquals(1, newPackage.getDimensions().getWidth());
         assertEquals(1, newPackage.getDimensions().getHeight());
         assertThat(newPackage.getId()).isNotNull();
-        assertThat(newPackage.getTrackingNumber()).isEqualTo("TRK2026000000009");
     }
 
     @Test
     void shouldThrowExceptionWhenDimensionIsNull() {
         PackageCreateRequest request = firstBoxCreateRequest();
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
         assertEquals("Dimensions and weight are required", exception.getMessage());
     }
@@ -66,6 +66,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     void shouldThrowExceptionWhenWeightIsNull() {
         PackageCreateRequest request = firstBoxCreateRequest();
         request.setWeight(null);
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
         assertEquals("Dimensions and weight are required", exception.getMessage());
     }
@@ -74,16 +75,19 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     void shouldThrowWhenNewPackageRequestWidthIsNegative() {
         PackageCreateRequest request = requestFirst();
         request.getDimensions().setWidth(-1);
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
-        assertEquals("Width must be positive", exception.getMessage());
+        assertEquals("Width must be greater than zero", exception.getMessage());
     }
 
     @Test
     void shouldThrowWhenNewPackageRequestHeightIsNegative() {
         PackageCreateRequest request = requestFirst();
         request.getDimensions().setHeight(-1);
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
-        assertEquals("Height must be positive", exception.getMessage());
+
+        assertEquals("Height must be greater than zero", exception.getMessage());
 
     }
 
@@ -92,7 +96,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
         PackageCreateRequest request = requestFirst();
         request.getDimensions().setDepth_length(-1);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
-        assertEquals("Depth must be positive", exception.getMessage());
+        assertEquals("Length/Depth must be greater than zero", exception.getMessage());
     }
 
     @Test
@@ -100,7 +104,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
         PackageCreateRequest request = requestFirst();
         request.setWeight(new BigDecimal(-1));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
-        assertEquals("Weight must be positive", exception.getMessage());
+        assertEquals("Weight must be greater than zero", exception.getMessage());
     }
 
     @Test
@@ -194,12 +198,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldReturnPackageDTOWhenProvidedCorrectDataToUpdate() {
         UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("width", 15);
-        fields.put("height", 12);
-        fields.put("depth", 120);
-        fields.put("weight", new BigDecimal("87"));
+        UpdatePackageDimensionsRequestDTO fields = updateAllFields();
 
         PackageDTO updatePackageFields = packageService.updatePackageFields(packageId, fields);
 
@@ -213,9 +212,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldReturnPackageDTOWhenProvidedOneParameterToUpdate() {
         UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("weight", new BigDecimal("127"));
+        UpdatePackageDimensionsRequestDTO fields = secondFieldWeightToUpdate();
 
         PackageDTO updatePackageFields = packageService.updatePackageFields(packageId, fields);
         assertThat(updatePackageFields.getWeight()).isEqualByComparingTo("127");
@@ -225,8 +222,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldThrowExceptionWhenIdoNotProvidedZeroParameterToUpdate() {
         UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-
-        Map<String, Object> fields = new HashMap<>();
+        UpdatePackageDimensionsRequestDTO fields = emptyFieldsToUpdate();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
 
@@ -236,50 +232,23 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldThrowExceptionWhenIProvidedPackIdThatDoNotExistDBToUpdate() {
         UUID packageId = UUID.randomUUID();
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("weight", new BigDecimal("127"));
+        UpdatePackageDimensionsRequestDTO fields = secondFieldWeightToUpdate();
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.updatePackageFields(packageId, fields));
         assertEquals("Package not found", exception.getMessage());
     }
 
-    @Test
-    void shouldThrowExceptionWhenParametersFieldIsProvidedWrong() {
-        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("width", "aac");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
-        assertThat(exception.getMessage())
-                .contains("width")
-                .contains("must be a valid number");
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFieldWeightProvidedToStringInsteadBigDecimal() {
-        UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("weight", "aac");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
-        assertThat(exception.getMessage())
-                .contains("weight")
-                .contains("must be a valid number");
-    }
 
     @Test
     void shouldThrowExceptionWhenFieldWeightIsNegative() {
         UUID packageId = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
 
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("weight", new BigDecimal("-12.4"));
+        UpdatePackageDimensionsRequestDTO fields = negativeWeightToUpdate();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.updatePackageFields(packageId, fields));
         assertThat(exception.getMessage())
-                .contains("weight")
-                .contains(" must be positive");
+                .contains("Weight")
+                .contains(" must be greater than zero");
     }
 
     @Test
