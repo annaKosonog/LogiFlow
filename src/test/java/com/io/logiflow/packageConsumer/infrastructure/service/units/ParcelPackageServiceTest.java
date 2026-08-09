@@ -1,12 +1,12 @@
-package com.io.logiflow.packageConsumer.infrastructure.service;
+package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.PackageValidationException;
+import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.CargoSpaceFixture.mediumSpace;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
@@ -37,8 +38,7 @@ public class ParcelPackageServiceTest {
     private ParcelPackingService parcelPackingService;
     private Truck truck;
     private List<PackageDTO> aPackages;
-    @Mock
-    private PackageMapper packageMapper;
+
     @Mock
     private TruckRepository truckRepository;
 
@@ -47,11 +47,14 @@ public class ParcelPackageServiceTest {
 
     private List<Package> saveEntity;
 
+    private List<UUID> uuids;
+
     @BeforeEach
     void setUp() {
         truck = createLoadedTruck();
         lenient().when(truckRepository.findById(1L)).thenReturn(Optional.of(truck));
         aPackages = new ArrayList<>();
+        uuids = new ArrayList<>();
         saveEntity = new ArrayList<>();
     }
 
@@ -60,37 +63,38 @@ public class ParcelPackageServiceTest {
         parcelPackingService = null;
         truck = null;
         aPackages = null;
+        uuids = null;
     }
 
     @Test
     void testShouldPackSingleBoxCorrectly() {
         // Given
-        saveEntity.add(firstBoxPackToTruck());
+        saveEntity.add(thirdBoxPackToTruck());
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
-        aPackages.add(firstBoxPackDto());
+
 
         // When
-        parcelPackingService.pack(aPackages, truck);
+        parcelPackingService.pack(List.of(thirdBoxPackToTruck().getUuid()), createLoadedTruck());
 
         // Then
-        assertEquals(0, aPackages.get(0).getCoordinates().getX());
-        assertEquals(0, aPackages.get(0).getCoordinates().getY());
-        assertEquals(0, aPackages.get(0).getCoordinates().getZ());
+        assertEquals(3, createLoadedTruck().getPackedPackages().size());
+        assertThat(UUID.fromString("f7f4b7d2-660c-4430-bcec-ce3f9dd32c36").equals(thirdBoxPackToTruck().getUuid()));
     }
 
     @Test
     void shouldPackAllBoxesIntoTruck() {
+        uuids.add(firstBoxPackToTruck().getUuid());
+        uuids.add(secondBoxPackToTruck().getUuid());
+
         saveEntity.add(firstBoxPackToTruck());
         saveEntity.add(secondBoxPackToTruck());
 
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
-        aPackages.add(firstBoxPackDto());
-        aPackages.add(secondBoxPackDto());
 
-        parcelPackingService.pack(aPackages, truck);
-        assertEquals(2, aPackages.size());
+        parcelPackingService.pack(uuids, truck);
+        assertEquals(5, truck.getPackedPackages().size());
     }
 
     @Test
@@ -100,6 +104,7 @@ public class ParcelPackageServiceTest {
         Package heavyBox = heavyBox();
         heavyBox.setWeight(targetWeight);
         saveEntity.add(heavyBox);
+        uuids.add(heavyBox.getUuid());
 
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
@@ -108,7 +113,7 @@ public class ParcelPackageServiceTest {
         aPackages.add(heavyBoxDTO);
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> parcelPackingService.pack(aPackages, truck));
+                () -> parcelPackingService.pack(uuids, truck));
         // Then
         assertEquals("Truck loading failed", exception.getMessage());
         verify(truckRepository, never()).save(any(Truck.class));
@@ -117,14 +122,16 @@ public class ParcelPackageServiceTest {
     @Test
     void shouldSortBoxesByVolumeAscendingBeforePacking() {
         // 1. Pobieramy wejściową, nieposortowaną listę DTO z fixture: [Large, Small, Medium]
-        List<PackageDTO> localPackages = sortedPackagesDTO();
         List<Package> simulatedSortedEntities = sortedPackages();
+        uuids.add(sortedPackages().get(0).getUuid());
+        uuids.add(sortedPackages().get(1).getUuid());
+        uuids.add(sortedPackages().get(2).getUuid());
 
-        // WHEN\
+        // WHEN
         when(packageRepository.saveAll(anyList())).thenReturn(simulatedSortedEntities);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(simulatedSortedEntities);
 
-        parcelPackingService.pack(localPackages, truck);
+        parcelPackingService.pack(uuids, truck);
 
         // THEN
         List<Package> packedPackages = truck.getPackedPackages();
@@ -142,14 +149,15 @@ public class ParcelPackageServiceTest {
 
     @Test
     void shouldSortBoxesWithSameVolumeByWeightDescending() {
-        List<PackageDTO> localPackages = sortedPackagesDTOByWeightDescending();
         List<Package> simulatedSortedEntities = sortedPackagesDaoByWeightDescending();
+        uuids.add(simulatedSortedEntities.get(0).getUuid());
+        uuids.add(simulatedSortedEntities.get(1).getUuid());
 
         when(packageRepository.saveAll(anyList())).thenReturn(simulatedSortedEntities);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(simulatedSortedEntities);
 
-        parcelPackingService.pack(localPackages, truck);
-        List<Package> packedPackages = truck.getPackedPackages();
+        parcelPackingService.pack(uuids, truck);
+        truck.getPackedPackages();
 
         List<BigDecimal> newWeightsSorted = truck.getPackedPackages().stream()
                 .map(Package::getWeight)
@@ -164,6 +172,9 @@ public class ParcelPackageServiceTest {
     @Test
     void shouldPackBoxWhenItFitsExactlyInSpace() {
         Package packageBox = boxThatFitsExactly(mediumSpace());
+
+        uuids.add(packageBox.getUuid());
+
         PackageDTO packageDTO = boxThatFitsExactlyDto();
         saveEntity.add(packageBox);
         aPackages.add(packageDTO);
@@ -171,35 +182,34 @@ public class ParcelPackageServiceTest {
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        parcelPackingService.pack(aPackages, truck);
+        parcelPackingService.pack(uuids, truck);
         assertEquals(4, truck.getPackedPackages().size());
     }
 
     @Test
     void shouldNotPackBoxWhenTooWide() {
-        PackageDTO largeBoxDTO = largeBoxDTO();
         Package largePackage = largeBox();
+        uuids.add(largePackage.getUuid());
         saveEntity.add(largePackage);
 
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
-        aPackages.add(largeBoxDTO);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
+
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals(3, truck.getPackedPackages().size());
     }
 
     @Test
     void shouldNotPackBoxWhenTooTall() {
-        PackageDTO heightBoxDTO = heightBoxDTO();
         Package heightPackage = heightBox();
-        aPackages.add(heightBoxDTO);
+        uuids.add(heightPackage.getUuid());
         saveEntity.add(heightPackage);
 
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals(3, truck.getPackedPackages().size());
         assertThat(exception);
     }
@@ -208,49 +218,48 @@ public class ParcelPackageServiceTest {
     void shouldNotPackBoxWhenTooDeep() {
         Package deepthPackage = depthBox();
         PackageDTO depthBoxDTO = depthBoxDTO();
-        aPackages.add(depthBoxDTO);
+        uuids.add(deepthPackage.getUuid());
         saveEntity.add(deepthPackage);
 
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals(3, truck.getPackedPackages().size());
         assertFalse(truck.getPackedPackages().contains(deepthPackage));
     }
 
     @Test
     void shouldThrowExceptionWhenPackageListIsNull() {
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals("The list of packages to be loaded cannot be empty!", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenSizeAreDifferent() {
-        PackageDTO packageDTO = smallDTO();
-        aPackages.add(packageDTO);
+        uuids.add(smallDao().getUuid());
+        uuids.add(thirdBoxPackToTruck().getUuid());
 
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
 
         assertEquals("Unable to load: One or more packages do not exist in the database!", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenPackageIsAlreadyLoaded() {
-        PackageDTO packageDTO = smallDTO();
         Package smallDao = smallDaoSaved();
+        uuids.add(smallDao.getUuid());
 
-        aPackages.add(packageDTO);
         saveEntity.add(smallDao());
 
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
-        parcelPackingService.pack(aPackages, truck);
+        parcelPackingService.pack(uuids, truck);
 
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(aPackages, truck));
+        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals("The package with the number " + smallDao.getTrackingNumber() +
                 " has already been loaded onto the truck with ID: " + smallDao.getTruck().getTruckId(), exception.getMessage());
     }

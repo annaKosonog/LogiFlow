@@ -3,7 +3,6 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.PackageValidationException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class ParcelPackingService {
     private static final boolean[] ALLOWED_ROTATIONS = {false, true};
 
 
-    public void pack(List<PackageDTO> boxesToPack, Truck truck) {
+    public void pack(List<UUID> boxesToPack, Truck truck) {
         List<Package> existingPackages = resolveAndValidatePackages(boxesToPack);
         sortedPack(existingPackages);
         List<CargoSpace> finalCargoSpaces = new ArrayList<>(truck.getEmptyCargoSpaces().stream()
@@ -79,16 +78,13 @@ public class ParcelPackingService {
         return fits;
     }
 
-    private List<Package> resolveAndValidatePackages(List<PackageDTO> boxesToPack) {
+    private List<Package> resolveAndValidatePackages(List<UUID> boxesToPack) {
         if (boxesToPack == null || boxesToPack.isEmpty()) {
             throw new PackageValidationException("The list of packages to be loaded cannot be empty!");
         }
-        List<UUID> uuids = boxesToPack.stream()
-                .map(PackageDTO::getId)
-                .toList();
-        List<Package> existingPackages = packageRepository.findAllByUuidIn(uuids);
+        List<Package> existingPackages = packageRepository.findAllByUuidIn(boxesToPack);
 
-        if (existingPackages.size() != uuids.size()) {
+        if (existingPackages.size() != boxesToPack.size()) {
             throw new PackageValidationException("Unable to load: One or more packages do not exist in the database!");
         }
         validatePackagesAreNotAlreadyLoaded(existingPackages);
