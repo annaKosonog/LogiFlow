@@ -1,6 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
@@ -55,5 +56,12 @@ public class TruckFixture {
         truck.load(createBox("50.00"));
 
         return truck;
+    }
+
+    public static Truck createTruckWithoutCargoSpaces() {
+        Truck t1 =createTruckWithPayload("200");
+        t1.setUuid(UUID.fromString("7b92a341-9e12-4290-8d1e-8e3b52d19f2a"));
+        t1.setEmptyCargoSpaces(new ArrayList<>());
+        return t1;
     }
 }

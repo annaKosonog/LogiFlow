@@ -1,14 +1,16 @@
-package com.io.logiflow.packageConsumer.infrastructure.service;
+package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
+import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,9 +31,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.firstBoxPackDto;
+import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.randomUUIDTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.thirdPackingToPack;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -120,12 +123,12 @@ class TruckServiceTest {
 
     @Test
     void shouldThrowExceptionWhenTruckIdNotExists() {
-        UUID truckId = UUID.randomUUID();
+        PackingRequestDTO toPack = randomUUIDTruck();
 
-        when(truckRepository.findTruckByUuid(truckId)).thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.addPackagesToTruck(aPackages, truckId));
+        when(truckRepository.findTruckByUuid(toPack.truckId())).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.addPackagesToTruck(toPack));
 
-        assertEquals("The truck with the id " + truckId + " does not exist", exception.getMessage());
+        assertEquals("The truck with the id " + toPack.truckId() + " does not exist", exception.getMessage());
     }
 
     @Test
@@ -155,16 +158,14 @@ class TruckServiceTest {
 
     @Test
     void shouldReturnPackagesWhichAddToTruck() {
-        UUID truckId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-        List<Package> uuidList = new ArrayList<>();
-        uuidList.add(firstBoxPackToTruck());
-        aPackages.add(firstBoxPackDto());
+        PackingRequestDTO toPack = thirdPackingToPack();
+        UUID truckId = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
 
-        truck.setPackedPackages(uuidList);
+        when(truckRepository.findTruckByUuid(truckId)).thenReturn(Optional.of(createLoadedTruck()));
 
-        truckService.addPackagesToTruck(aPackages, truckId);
+        truckService.addPackagesToTruck(toPack);
 
-        assertEquals(1, truck.getPackedPackages().size());
+        assertEquals(3, truck.getPackedPackages().size());
     }
 
 

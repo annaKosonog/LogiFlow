@@ -1,25 +1,23 @@
-package com.io.logiflow.packageConsumer.infrastructure.controllers;
+package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
+import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.firstPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,8 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
 public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -44,12 +40,16 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
     private PackageRepository packageRepository;
 
     @BeforeEach
-    public void setUp() { //Poprawa dane surowe sql, repository
-        truckRepository.deleteAll();
-        packageRepository.deleteAll();
+    public void setUp() {
         truckRepository.save(createLoadedTruck());
         truckRepository.save(createLoadedSecondTruck());
         packageRepository.save(thirdBoxPackToTruck());
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        packageRepository.deleteAll();
+        truckRepository.deleteAll();
     }
 
     @Test
@@ -117,7 +117,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .param("maxLength", "450"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("bb541dbd-3206-4f7e-b23c-ae6f9af78db5"));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("minMaxPayload", "100")
-                        .param("minMaxPayload", "220"))
+                        .param("maxMaxPayload", "220"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
@@ -166,14 +166,10 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn200WhenAddNewPackageToTruckThatIsNotAssignedToATruck() throws Exception {
-        UUID idTruck = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
-        List<PackageDTO> listPackageToPack = new ArrayList<>();
-        listPackageToPack.add(thirdBoxDTOPackToTruck());
+        PackingRequestDTO toPack = thirdPackingToPack();
+        String body = objectMapper.writeValueAsString(toPack);
 
-        String body = objectMapper.writeValueAsString(listPackageToPack);
-
-
-        mockMvc.perform(post("/api/trucks/{idTruck}", idTruck)
+        mockMvc.perform(post("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
@@ -182,16 +178,10 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn409WhenAddPackageToTruckWhichAdd() throws Exception {
-        UUID idTruck = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
+        PackingRequestDTO toPack = firstPackingToPack();
+        String body = objectMapper.writeValueAsString(toPack);
 
-        List<PackageDTO> listPackageToPack = new ArrayList<>();
-        listPackageToPack.add(savedToDb());
-        listPackageToPack.add(secondPackageToPack());
-
-        String body = objectMapper.writeValueAsString(listPackageToPack);
-
-
-        mockMvc.perform(post("/api/trucks/{idTruck}", idTruck)
+        mockMvc.perform(post("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())

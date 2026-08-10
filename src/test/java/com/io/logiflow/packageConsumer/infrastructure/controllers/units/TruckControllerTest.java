@@ -1,10 +1,12 @@
-package com.io.logiflow.packageConsumer.infrastructure.controllers;
+package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.controllers.TruckController;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +22,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.largeBox;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.firstPackingToPack;
 import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
 import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createSecondLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,12 +109,11 @@ public class TruckControllerTest {
 
     @Test
     public void shouldAddPackagesToTruckSuccessfully() throws Exception {
-        List<Package> packageList = Arrays.asList(firstBoxPackToTruck(), secondBoxPackToTruck());
+        PackingRequestDTO toPack = firstPackingToPack();
 
-        String jsonRequest = objectMapper.writeValueAsString(packageList);
-        UUID truckId = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
+        String jsonRequest = objectMapper.writeValueAsString(toPack);
 
-        MvcResult result = mvc.perform(post("/api/trucks/{truckId}", truckId)
+        MvcResult result = mvc.perform(post("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isOk())
@@ -129,15 +130,16 @@ public class TruckControllerTest {
         gigantPackage.setTrackingNumber("TRK-OVERWEIGHT");
         gigantPackage.setWeight(new BigDecimal("5000.0"));
 
-        List<Package> packageList = List.of(gigantPackage);
+        List<UUID> packageList = List.of(gigantPackage.getUuid());
         UUID truckId = UUID.randomUUID();
+        PackingRequestDTO request = new PackingRequestDTO(packageList, truckId);
 
-        String jsonRequest = objectMapper.writeValueAsString(packageList);
+        String jsonRequest = objectMapper.writeValueAsString(request);
 
         Mockito.doThrow(new IllegalArgumentException("Truck loading failed"))
-                .when(truckService).addPackagesToTruck(Mockito.anyList(), Mockito.any(UUID.class));
+                .when(truckService).addPackagesToTruck(Mockito.any(PackingRequestDTO.class));
 
-        mvc.perform(post("/api/trucks/{truckId}", truckId)
+        mvc.perform(post("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isBadRequest());

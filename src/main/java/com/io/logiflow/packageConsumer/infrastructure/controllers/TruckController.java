@@ -1,6 +1,6 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
 import com.io.logiflow.packageConsumer.exception.ApiResponse;
@@ -9,9 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/trucks")
@@ -30,11 +27,11 @@ public class TruckController {
         return ResponseEntity.ok(ApiResponse.success(trucks));
     }
 
-    @PostMapping("/{idTruck}")
+    //dto idTruck, idPack
+    @PostMapping()
     public ResponseEntity<ApiResponse<Void>> packPackages(
-            @PathVariable UUID idTruck,
-            @RequestBody List<PackageDTO> packages) {
-        truckService.addPackagesToTruck(packages, idTruck);
+            @RequestBody PackingRequestDTO packages) {
+        truckService.addPackagesToTruck(packages);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

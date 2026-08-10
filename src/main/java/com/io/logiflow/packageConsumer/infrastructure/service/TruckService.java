@@ -2,6 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
@@ -27,6 +28,7 @@ public class TruckService {
     private final ParcelPackingService parcelPackingService;
     private final TruckMapper truckMapper;
 
+    @Transactional
     public Page<TruckDTO> getTrucks(TruckFilterDto filter, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Specification<Truck> truckSpecification = TruckSpecifications.buildSpecification(filter);
@@ -35,10 +37,10 @@ public class TruckService {
     }
 
     @Transactional
-    public void addPackagesToTruck(List<PackageDTO> packages, UUID truckId) {
-        Truck truck = truckRepository.findTruckByUuid(truckId)
-                .orElseThrow(() -> new ResourceNotFoundException("The truck with the id " + truckId + " does not exist"));
-        parcelPackingService.pack(packages, truck);
+    public void addPackagesToTruck(PackingRequestDTO request) {
+        Truck truck = truckRepository.findTruckByUuid(request.truckId())
+                .orElseThrow(() -> new ResourceNotFoundException("The truck with the id " + request.truckId() + " does not exist"));
+        parcelPackingService.pack(request.packageId(), truck);
         truckRepository.save(truck);
     }
 }
