@@ -2,8 +2,7 @@ package com.io.logiflow.packageConsumer.domain.dao;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.math.BigDecimal;
@@ -13,8 +12,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "packages")
-@Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Package {
 
     @Id
@@ -44,6 +46,7 @@ public class Package {
 
     @ManyToOne
     @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
+    @ToString.Exclude
     private Truck truck;
 
     @Column(name = "rotated", nullable = false)

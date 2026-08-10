@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.infrastructure.controllers;
+package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
@@ -7,6 +7,7 @@ import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.controllers.PackageController;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.firstBoxCreateRequest;

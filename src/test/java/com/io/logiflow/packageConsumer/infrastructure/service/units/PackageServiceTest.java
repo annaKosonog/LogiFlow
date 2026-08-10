@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.infrastructure.service;
+package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
@@ -8,6 +8,7 @@ import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

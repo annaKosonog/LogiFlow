@@ -67,15 +67,18 @@ public class PackageFixture {
 
     public static Package firstBoxPackToTruck() {
         Package p1 = smallDao();
-      //  p1.setPackageId(1L);
+        //  p1.setPackageId(1L);
         p1.setUuid(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
         p1.setTrackingNumber("TRK2026000000001");
+        p1.setCoordX(0);
+        p1.setCoordY(0);
+        p1.setCoordZ(0);
         return p1;
     }
 
     public static Package secondBoxPackToTruck() {
         Package p1 = largeDao();
-      //  p1.setPackageId(2L);
+        //  p1.setPackageId(2L);
         p1.setUuid(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"));
         p1.setTrackingNumber("TRK2026000000002");
         return p1;
@@ -86,6 +89,10 @@ public class PackageFixture {
         //  p1.setPackageId(2L);
         p1.setUuid(UUID.fromString("f7f4b7d2-660c-4430-bcec-ce3f9dd32c36"));
         p1.setTrackingNumber("TRK2026000000009");
+        p1.setCoordX(0);
+        p1.setCoordY(0);
+        p1.setCoordZ(0);
+        p1.setTruck(null);
         return p1;
     }
 
@@ -133,5 +140,16 @@ public class PackageFixture {
         lightBox().setTrackingNumber("XYZ-LIGHT");
         localPackages.add(lightPackage);
         return localPackages;
+    }
+
+    public static Package createOverSizeedPackage() {
+        Package p1 = new Package();
+        p1.setUuid(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
+        p1.setTrackingNumber("TRK2026000000123");
+        p1.setWeight(new BigDecimal("10"));
+        p1.setWidth(999);
+        p1.setHeight(999);
+        p1.setDepth(999);
+        return p1;
     }
 }

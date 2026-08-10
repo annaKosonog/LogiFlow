@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.infrastructure.service;
+package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 
 import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
@@ -6,8 +6,8 @@ import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
-import com.io.logiflow.packageConsumer.infrastructure.controllers.AbstractIntegrationTest;
-import org.junit.jupiter.api.AfterEach;
+import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
+import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,6 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
         packageRepository.deleteAll();
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
-        packageRepository.flush();
     }
 
 
