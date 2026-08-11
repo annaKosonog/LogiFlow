@@ -1,7 +1,7 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +16,8 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.firstPackingToPack;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.thirdPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -169,7 +169,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
         PackingRequestDTO toPack = thirdPackingToPack();
         String body = objectMapper.writeValueAsString(toPack);
 
-        mockMvc.perform(post("/api/trucks")
+        mockMvc.perform(post("/api/trucks/pack")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
@@ -181,7 +181,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
         PackingRequestDTO toPack = firstPackingToPack();
         String body = objectMapper.writeValueAsString(toPack);
 
-        mockMvc.perform(post("/api/trucks")
+        mockMvc.perform(post("/api/trucks/pack")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())

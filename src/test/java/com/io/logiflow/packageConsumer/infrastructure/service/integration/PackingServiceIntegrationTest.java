@@ -1,9 +1,9 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
-import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
@@ -18,8 +18,8 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.*;
-import static com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTOFixture.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 

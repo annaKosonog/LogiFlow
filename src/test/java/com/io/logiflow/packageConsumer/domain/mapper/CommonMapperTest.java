@@ -2,8 +2,8 @@ package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.CoordinatesDTO;
-import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import org.junit.jupiter.api.Test;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;

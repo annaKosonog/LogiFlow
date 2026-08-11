@@ -1,7 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
-import com.io.logiflow.packageConsumer.domain.dto.CargoSpaceDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -9,7 +9,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.CargoSpaceFixture.smallSpace;
-import static com.io.logiflow.packageConsumer.domain.dto.CargoSpaceDTOFixture.boxFits;
+import static com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTOFixture.boxFits;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CargoSpaceMapperTest {

@@ -1,10 +1,11 @@
 package com.io.logiflow.packageConsumer.infrastructure.service;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
@@ -17,7 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -43,4 +43,16 @@ public class TruckService {
         parcelPackingService.pack(request.packageId(), truck);
         truckRepository.save(truck);
     }
+
+    @Transactional
+    public TruckResponseDTO addTruck(CreateTruckDTO newTruck) {
+        if (truckRepository.existsByLicensePlate(newTruck.licensePlate())) {
+            throw new ResourceNotFoundException("The truck with license plate " + newTruck.licensePlate() + " already exists");
+        }
+        Truck entity = truckMapper.toEntityTruck(newTruck);
+        entity.setUuid(UUID.randomUUID());
+        Truck savedEntity = truckRepository.save(entity);
+        return truckMapper.toTruckResponseDTO(savedEntity);
+    }
+
 }

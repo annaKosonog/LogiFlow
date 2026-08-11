@@ -1,7 +1,7 @@
 package com.io.logiflow.packageConsumer.infrastructure.specification;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.infrastructure.specification.utils.SpecificationUtils;
 import org.springframework.data.jpa.domain.Specification;
 

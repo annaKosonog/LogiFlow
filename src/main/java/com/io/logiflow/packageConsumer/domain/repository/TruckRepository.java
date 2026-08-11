@@ -20,4 +20,6 @@ public interface TruckRepository extends JpaRepository<Truck, Long>, JpaSpecific
 
 
     Page<Truck> findAll(Specification<Truck> spec, Pageable pageable);
+
+    boolean existsByLicensePlate(String licensePlat);
 }

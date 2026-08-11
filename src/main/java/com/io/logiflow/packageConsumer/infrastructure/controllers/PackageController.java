@@ -1,9 +1,9 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
-import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.exception.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 
 @RestController

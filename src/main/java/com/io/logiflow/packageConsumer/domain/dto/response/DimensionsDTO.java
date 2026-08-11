@@ -1,8 +1,6 @@
-package com.io.logiflow.packageConsumer.domain.dto;
+package com.io.logiflow.packageConsumer.domain.dto.response;
 
 import lombok.*;
-
-import java.math.BigDecimal;
 
 @Getter
 @Setter

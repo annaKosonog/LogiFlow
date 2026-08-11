@@ -2,7 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.PackageValidationException;
@@ -25,7 +25,7 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dao.CargoSpaceFixture.mediumSpace;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;

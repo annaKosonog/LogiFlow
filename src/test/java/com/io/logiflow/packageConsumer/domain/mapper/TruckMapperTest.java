@@ -1,7 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.thirdBoxDTOPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.thirdBoxDTOPackToTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TruckMapperTest {

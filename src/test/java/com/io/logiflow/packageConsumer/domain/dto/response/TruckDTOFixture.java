@@ -1,11 +1,11 @@
-package com.io.logiflow.packageConsumer.domain.dto;
+package com.io.logiflow.packageConsumer.domain.dto.response;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dto.DimensionsDTOFixture.dimensionSecondTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.DimensionsDTOFixture.dimensionTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTOFixture.dimensionSecondTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTOFixture.dimensionTruck;
 
 public class TruckDTOFixture {
 

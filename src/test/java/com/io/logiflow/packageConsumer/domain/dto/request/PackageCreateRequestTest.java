@@ -1,10 +1,10 @@
-package com.io.logiflow.packageConsumer.domain.dto;
+package com.io.logiflow.packageConsumer.domain.dto.request;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 
 import java.math.BigDecimal;
 
-import static com.io.logiflow.packageConsumer.domain.dto.DimensionsDTOFixture.dimensionSmallDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTOFixture.dimensionSmallDTO;
 
 public class PackageCreateRequestTest {
 

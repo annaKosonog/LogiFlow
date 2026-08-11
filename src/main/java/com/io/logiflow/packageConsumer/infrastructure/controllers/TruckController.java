@@ -1,8 +1,10 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.exception.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +30,17 @@ public class TruckController {
     }
 
     //dto idTruck, idPack
-    @PostMapping()
+    @PostMapping("/pack")
     public ResponseEntity<ApiResponse<Void>> packPackages(
             @RequestBody PackingRequestDTO packages) {
         truckService.addPackagesToTruck(packages);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping()
+    public ResponseEntity<ApiResponse<TruckResponseDTO>> createTruck(
+            @RequestBody CreateTruckDTO newTruck) {
+        TruckResponseDTO addTruck = truckService.addTruck(newTruck);
+        return ResponseEntity.ok(ApiResponse.success(addTruck));
     }
 }

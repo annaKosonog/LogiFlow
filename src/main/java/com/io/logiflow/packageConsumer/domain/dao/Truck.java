@@ -25,6 +25,9 @@ public class Truck {
     @Column(unique = true, nullable = false)
     private UUID uuid = UUID.randomUUID();
 
+    @Column(name = "license_plate", nullable = false, unique = true)
+    private String licensePlate;
+
     @Column(name = "width_w")
     private int width; //Szerokość calkowita samochodu os X
     @Column(name = "height_h")

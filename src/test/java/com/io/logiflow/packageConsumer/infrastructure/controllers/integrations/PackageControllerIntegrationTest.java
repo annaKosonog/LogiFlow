@@ -2,7 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -120,8 +120,8 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000002"))
-                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000001"))
+                .andExpect(jsonPath("$.data.content[0].trackingNumber").value("TRK2026000000001"))
+                .andExpect(jsonPath("$.data.content[1].trackingNumber").value("TRK2026000000002"))
                 .andExpect(jsonPath("$.data.content.length()").value(2));
     }
 

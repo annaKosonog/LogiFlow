@@ -1,10 +1,10 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
-import com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.PackageController;
@@ -26,11 +26,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.firstBoxCreateRequest;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.largeAndHeavyBoxRequest;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.*;
-import static com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTOFixture.fieldWeightAndWidthToUpdate;
-import static com.io.logiflow.packageConsumer.domain.dto.UpdatePackageDimensionsRequestDTOFixture.fieldWeightToUpdate;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.firstBoxCreateRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.largeAndHeavyBoxRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.fieldWeightAndWidthToUpdate;
+import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.fieldWeightToUpdate;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;

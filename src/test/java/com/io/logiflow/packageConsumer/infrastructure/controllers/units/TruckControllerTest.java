@@ -2,9 +2,9 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.TruckController;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
@@ -29,9 +29,9 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.largeBox;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.firstPackingToPack;
-import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createLoadedTruckDTO;
-import static com.io.logiflow.packageConsumer.domain.dto.TruckDTOFixture.createSecondLoadedTruckDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createLoadedTruckDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createSecondLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -113,7 +113,7 @@ public class TruckControllerTest {
 
         String jsonRequest = objectMapper.writeValueAsString(toPack);
 
-        MvcResult result = mvc.perform(post("/api/trucks")
+        MvcResult result = mvc.perform(post("/api/trucks/pack")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isOk())
@@ -139,7 +139,7 @@ public class TruckControllerTest {
         Mockito.doThrow(new IllegalArgumentException("Truck loading failed"))
                 .when(truckService).addPackagesToTruck(Mockito.any(PackingRequestDTO.class));
 
-        mvc.perform(post("/api/trucks")
+        mvc.perform(post("/api/trucks/pack")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isBadRequest());

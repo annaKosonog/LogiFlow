@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain.dto;
+package com.io.logiflow.packageConsumer.domain.dto.request;
 
 import java.util.ArrayList;
 import java.util.List;

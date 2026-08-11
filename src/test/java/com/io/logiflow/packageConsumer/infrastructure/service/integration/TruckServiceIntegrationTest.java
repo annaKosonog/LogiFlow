@@ -2,9 +2,9 @@ package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
@@ -23,8 +23,8 @@ import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBox
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.randomUUIDTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.thirdPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.randomUUIDTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 

@@ -1,13 +1,13 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.exactRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.exactRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PackageCreateRequestMapperTest {

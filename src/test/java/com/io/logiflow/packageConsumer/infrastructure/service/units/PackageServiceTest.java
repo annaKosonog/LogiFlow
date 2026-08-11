@@ -1,9 +1,9 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
@@ -28,9 +28,9 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.filterPack;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageCreateRequestTest.smallRequest;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.filterBoxPackDto;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.smallRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.filterBoxPackDto;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.smallDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

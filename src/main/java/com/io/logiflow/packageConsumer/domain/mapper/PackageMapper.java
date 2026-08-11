@@ -2,7 +2,7 @@ package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

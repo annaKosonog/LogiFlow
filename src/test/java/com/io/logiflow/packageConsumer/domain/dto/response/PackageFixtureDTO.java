@@ -1,12 +1,12 @@
-package com.io.logiflow.packageConsumer.domain.dto;
+package com.io.logiflow.packageConsumer.domain.dto.response;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dto.CoordinatesDTOFixture.firstCoordinate;
-import static com.io.logiflow.packageConsumer.domain.dto.DimensionsDTOFixture.*;
+import static com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTOFixture.firstCoordinate;
+import static com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTOFixture.*;
 
 public class PackageFixtureDTO {
 

@@ -2,8 +2,8 @@ package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.DimensionsDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.mediumDTO;
-import static com.io.logiflow.packageConsumer.domain.dto.PackageFixtureDTO.smallDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.mediumDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.smallDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 

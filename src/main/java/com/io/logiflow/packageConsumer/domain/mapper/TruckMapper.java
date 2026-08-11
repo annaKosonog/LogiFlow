@@ -1,7 +1,9 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -15,4 +17,17 @@ public interface TruckMapper {
 
     @Mapping(source = "idTruck", target = "uuid")
     Truck toEntity(TruckDTO truckDTO);
+
+
+    @Mapping(source = "licensePlate", target = "licensePlate")
+    @Mapping(source = "dimensions.width", target = "width")
+    @Mapping(source = "dimensions.height", target = "height")
+    @Mapping(source = "dimensions.depth_length", target = "length")
+    Truck toEntityTruck(CreateTruckDTO createTruckDTO);
+
+
+    @Mapping(target = "uuid", source ="uuid" )
+    @Mapping(source = "licensePlate", target = "licensePlate")
+    @Mapping(source = "truck", target = "dimensions")
+    TruckResponseDTO toTruckResponseDTO(Truck truck);
 }

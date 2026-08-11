@@ -1,10 +1,10 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
@@ -32,8 +32,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.randomUUIDTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.PackingRequestDTOFixture.thirdPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.randomUUIDTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

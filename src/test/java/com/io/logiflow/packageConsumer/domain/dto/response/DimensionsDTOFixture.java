@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.domain.dto;
+package com.io.logiflow.packageConsumer.domain.dto.response;
 
 public class DimensionsDTOFixture {
 
