@@ -5,7 +5,7 @@ import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.repository.CargoSpaceRepository;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
-import com.io.logiflow.packageConsumer.exception.PackageValidationException;
+import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
 import org.junit.jupiter.api.Assertions;
@@ -94,14 +94,14 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
         parcelPackingService.pack(uuids, otherTruck);
 
         assertThatThrownBy(() -> parcelPackingService.pack(uuids, otherTruck))
-                .isInstanceOf(PackageValidationException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining(savedFirstPackage.getTrackingNumber());
     }
 
 
     @Test
     void shouldThrowExceptionWhenListUUIDIsNull() {
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, savedTruck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, savedTruck));
         Assertions.assertEquals("The list of packages to be loaded cannot be empty!", exception.getMessage());
     }
 
@@ -110,7 +110,7 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
         uuids.add(thirdBoxPackToTruck().getUuid());
         uuids.add(filterPack().getUuid());
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, savedTruck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, savedTruck));
 
         Assertions.assertEquals("Unable to load: One or more packages do not exist in the database!", exception.getMessage());
     }
@@ -122,7 +122,7 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
         parcelPackingService.pack(uuids, savedTruck);
 
         assertThatThrownBy(() -> parcelPackingService.pack(uuids, savedTruck))
-                .isInstanceOf(PackageValidationException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining(savedThirdPackage.getTrackingNumber())
                 .hasMessageContaining(savedTruck.getTruckId().toString());
     }
@@ -156,7 +156,7 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
 
         try {
             parcelPackingService.pack(uuids, savedTruck); // druga próba, ma się nie udać
-        } catch (PackageValidationException ignored) {
+        } catch (ResourceAlreadyExistsException ignored) {
         }
 
         Truck reloaded = truckRepository.findTruckByUuid(savedTruck.getUuid()).orElseThrow();
@@ -173,7 +173,7 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
         uuids.add(savedThirdPackage.getUuid());
 
         assertThatThrownBy(() -> parcelPackingService.pack(uuids, emptyTruck))
-                .isInstanceOf(PackageValidationException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining(emptyTruck.getTruckId().toString())
                 .hasMessageContaining("no valid available CargoSpaces");
     }
@@ -184,7 +184,7 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
         uuids.add(oversized.getUuid());
 
         assertThatThrownBy(() -> parcelPackingService.pack(uuids, savedTruck))
-                .isInstanceOf(PackageValidationException.class)
+                .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContaining("1 package(s)")
                 .hasMessageContaining(oversized.getUuid().toString());
     }

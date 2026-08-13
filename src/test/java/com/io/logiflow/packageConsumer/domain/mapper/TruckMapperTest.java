@@ -1,7 +1,9 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.thirdBoxDTOPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createLoadedTruckDTO;
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,5 +103,58 @@ public class TruckMapperTest {
 
         assertEquals(1, entity.getPackedPackages().size());
         assertEquals(UUID.fromString("f7f4b7d2-660c-4430-bcec-ce3f9dd32c36"), entity.getPackedPackages().get(0).getUuid());
+    }
+
+    @Test
+    void toEntity_shouldMapCreateTruckDto() {
+        CreateTruckDTO createTruckDTO = createFirstTruck();
+        Truck entity = truckMapper.toEntityTruck(createTruckDTO);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getUuid());
+        assertEquals("200.00", entity.getMaxPayload().toString());
+        assertEquals(600, entity.getLength());
+        assertEquals("WI 1234E", entity.getLicensePlate());
+        assertTrue(entity.getPackedPackages().isEmpty());
+    }
+
+    @Test
+    void toEntity_shouldReturnNull_whenCreateTruckDtoIsNull() {
+        assertNull(truckMapper.toEntityTruck(null));
+    }
+
+    @Test
+    void toEntity_shouldReturnTruck_whenCreateTruckDtoLicensePlateIsNull() {
+        CreateTruckDTO createTruckDTO = createNullLicensePlateTruck();
+        Truck entity = truckMapper.toEntityTruck(createTruckDTO);
+        assertNotNull(entity);
+        assertNull(entity.getLicensePlate());
+        assertEquals("150", entity.getMaxPayload().toString());
+    }
+
+    @Test
+    void toEntity_shouldReturnTruck_whenCreateTruckDtoEmptyWeight() {
+        CreateTruckDTO emptyWeightTruck = createEmptyWeightTruck();
+
+        Truck entity = truckMapper.toEntityTruck(emptyWeightTruck);
+        assertNotNull(entity);
+        assertNull(entity.getMaxPayload());
+    }
+
+    @Test
+    void toTruckResponseDTO_shouldMapTruck() {
+        Truck truck = createLoadedTruck();
+        TruckResponseDTO truckResponseDTO = truckMapper.toTruckResponseDTO(truck);
+
+        assertNotNull(truckResponseDTO);
+        assertEquals(UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606"), truckResponseDTO.uuid());
+        assertEquals("200.00", truckResponseDTO.maxPayload().toString());
+        assertEquals(220, truckResponseDTO.dimensions().getHeight());
+        assertEquals("WI 1234E", truckResponseDTO.licensePlate());
+    }
+
+    @Test
+    void toEntity_shouldReturnNull_whenTruckIsNull() {
+        assertNull(truckMapper.toTruckResponseDTO(null));
     }
 }

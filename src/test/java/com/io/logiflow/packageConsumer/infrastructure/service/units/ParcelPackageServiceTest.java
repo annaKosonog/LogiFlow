@@ -5,7 +5,7 @@ import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
-import com.io.logiflow.packageConsumer.exception.PackageValidationException;
+import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -196,7 +196,7 @@ public class ParcelPackageServiceTest {
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals(3, truck.getPackedPackages().size());
     }
 
@@ -209,7 +209,7 @@ public class ParcelPackageServiceTest {
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals(3, truck.getPackedPackages().size());
         assertThat(exception);
     }
@@ -224,14 +224,14 @@ public class ParcelPackageServiceTest {
         when(packageRepository.saveAll(anyList())).thenReturn(saveEntity);
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals(3, truck.getPackedPackages().size());
         assertFalse(truck.getPackedPackages().contains(deepthPackage));
     }
 
     @Test
     void shouldThrowExceptionWhenPackageListIsNull() {
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals("The list of packages to be loaded cannot be empty!", exception.getMessage());
     }
 
@@ -242,7 +242,7 @@ public class ParcelPackageServiceTest {
 
         when(packageRepository.findAllByUuidIn(any())).thenReturn(saveEntity);
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, truck));
 
         assertEquals("Unable to load: One or more packages do not exist in the database!", exception.getMessage());
     }
@@ -259,7 +259,7 @@ public class ParcelPackageServiceTest {
         parcelPackingService.pack(uuids, truck);
 
 
-        PackageValidationException exception = assertThrows(PackageValidationException.class, () -> parcelPackingService.pack(uuids, truck));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> parcelPackingService.pack(uuids, truck));
         assertEquals("The package with the number " + smallDao.getTrackingNumber() +
                 " has already been loaded onto the truck with ID: " + smallDao.getTruck().getTruckId(), exception.getMessage());
     }

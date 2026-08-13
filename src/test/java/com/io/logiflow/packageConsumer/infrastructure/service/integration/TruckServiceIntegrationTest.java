@@ -2,11 +2,14 @@ package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
@@ -23,10 +26,12 @@ import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBox
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.randomUUIDTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
 
 public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
@@ -135,6 +140,46 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.addPackagesToTruck(randomUUID));
         Assertions.assertEquals("The truck with the id " + randomUUID.truckId() + " does not exist", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnAddedTruck() {
+        CreateTruckDTO thirdTruck = createThirdTruck();
+
+        TruckResponseDTO addTruck = truckService.addTruck(thirdTruck);
+        Truck result = truckRepository.findTruckByUuid(savedFirstTruck.getUuid())
+                .orElseThrow();
+
+        assertThat(result.getUuid().equals(addTruck.uuid()));
+        assertThat(addTruck.licensePlate().contains("KR 12345"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProvidedParameterWeightIsNull() {
+        CreateTruckDTO emptyWeight = createEmptyWeightTruck();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(emptyWeight));
+        Assertions.assertEquals("Dimensions and weight are required", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenOnesProvidedParameterIsNegative() {
+        CreateTruckDTO negativeWidthTruck = createNegativeWidthTruck();
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(negativeWidthTruck));
+        Assertions.assertEquals("Width must be greater than zero", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProvidedLicensePlateIsNull() {
+        CreateTruckDTO createTruck = createNullLicensePlateTruck();
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(createTruck));
+        Assertions.assertEquals("license_plate is required", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProvidedLicensePlateIsExists() {
+        ResourceAlreadyExistsException exception = Assertions.assertThrows(ResourceAlreadyExistsException.class, () -> truckService.addTruck(createFirstTruck()));
+        Assertions.assertEquals("The truck with license plate WI 1234E already exists", exception.getMessage());
     }
 }
 

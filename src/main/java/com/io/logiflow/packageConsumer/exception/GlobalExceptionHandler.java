@@ -24,8 +24,8 @@ GlobalExceptionHandler {
                 .body(ApiResponse.error(exception.getMessage()));
     }
 
-    @ExceptionHandler(PackageValidationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalState(PackageValidationException ex) {
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(ResourceAlreadyExistsException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(ex.getMessage()));

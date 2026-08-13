@@ -2,6 +2,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
@@ -29,9 +30,11 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.largeBox;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.createThirdTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createLoadedTruckDTO;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createSecondLoadedTruckDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTOFixture.thirdCreateTruckResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -234,5 +237,19 @@ public class TruckControllerTest {
                 .andExpect(jsonPath("$.data.content.length()").value(0));
     }
 
+    @Test
+    public void shouldReturnANewTruckWhenProvidedCorrectParameter() throws Exception {
+        CreateTruckDTO aNewTruck = createThirdTruck();
+        when(truckService.addTruck(any(CreateTruckDTO.class))).thenReturn(thirdCreateTruckResponse());
 
+        String jsonRequest = objectMapper.writeValueAsString(aNewTruck);
+        mvc.perform(post("/api/trucks")
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.licensePlate").value("KR 12345"))
+                .andExpect(jsonPath("$.data.dimensions.width").value(250))
+                .andExpect(jsonPath("$.data.maxPayload").value(200));
+    }
 }

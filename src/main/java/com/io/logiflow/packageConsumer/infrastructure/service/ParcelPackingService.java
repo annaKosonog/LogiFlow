@@ -4,7 +4,7 @@ import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
 import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.exception.PackageValidationException;
+import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +29,7 @@ public class ParcelPackingService {
                 .toList());
 
         if (finalCargoSpaces.isEmpty()) {
-            throw new PackageValidationException("Truck ID: " + truck.getTruckId() + " has no valid available CargoSpaces!");
+            throw new ResourceAlreadyExistsException("Truck ID: " + truck.getTruckId() + " has no valid available CargoSpaces!");
         }
 
         List<Package> alreadyLoaded = new ArrayList<>(packageRepository.findAllByTruck(truck));
@@ -50,7 +50,7 @@ public class ParcelPackingService {
         packageRepository.saveAll(existingPackages);
         // JEŚLI SĄ NIESPAKOWANE PACZKI -> RZUCAMY WYJĄTEK
         if (!unpacked.isEmpty()) {
-            throw new PackageValidationException(
+            throw new ResourceAlreadyExistsException(
                     "Packing incomplete! The following " + unpacked.size() + " package(s) could not fit: " + unpacked
             );
         }
@@ -80,12 +80,12 @@ public class ParcelPackingService {
 
     private List<Package> resolveAndValidatePackages(List<UUID> boxesToPack) {
         if (boxesToPack == null || boxesToPack.isEmpty()) {
-            throw new PackageValidationException("The list of packages to be loaded cannot be empty!");
+            throw new ResourceAlreadyExistsException("The list of packages to be loaded cannot be empty!");
         }
         List<Package> existingPackages = packageRepository.findAllByUuidIn(boxesToPack);
 
         if (existingPackages.size() != boxesToPack.size()) {
-            throw new PackageValidationException("Unable to load: One or more packages do not exist in the database!");
+            throw new ResourceAlreadyExistsException("Unable to load: One or more packages do not exist in the database!");
         }
         validatePackagesAreNotAlreadyLoaded(existingPackages);
         return existingPackages;
@@ -187,7 +187,7 @@ public class ParcelPackingService {
                 .filter(pkg -> pkg.getTruck() != null)
                 .findFirst()
                 .ifPresent(pkg -> {
-                    throw new PackageValidationException("The package with the number " + pkg.getTrackingNumber()
+                    throw new ResourceAlreadyExistsException("The package with the number " + pkg.getTrackingNumber()
                             + " has already been loaded onto the truck with ID: " + pkg.getTruck().getTruckId()
                     );
                 });

@@ -1,6 +1,7 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
+import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.hamcrest.Matchers.hasSize;
@@ -41,6 +43,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
+        truckRepository.deleteAll();
         truckRepository.save(createLoadedTruck());
         truckRepository.save(createLoadedSecondTruck());
         packageRepository.save(thirdBoxPackToTruck());
@@ -117,7 +120,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .param("maxLength", "450"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].idTruck").value("bb541dbd-3206-4f7e-b23c-ae6f9af78db5"));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"));
     }
 
     @Test
@@ -187,5 +190,74 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.errors").value("Unable to load: One or more packages do not exist in the database!"));
+    }
+
+    @Test
+    void shouldReturnANewTruck() throws Exception {
+        CreateTruckDTO aNewTruck = createThirdTruck();
+
+        String jsonRequest = objectMapper.writeValueAsString(aNewTruck);
+        mockMvc.perform(post("/api/trucks")
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.licensePlate").value("KR 12345"))
+                .andExpect(jsonPath("$.data.dimensions.width").value(250))
+                .andExpect(jsonPath("$.data.maxPayload").value(200));
+    }
+
+
+    @Test
+    void shouldReturn409WhenAddNewTruckExistsToDb() throws Exception {
+        CreateTruckDTO firstTruck = createFirstTruck();
+        String body = objectMapper.writeValueAsString(firstTruck);
+
+        mockMvc.perform(post("/api/trucks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errors").value("The truck with license plate WI 1234E already exists"));
+    }
+
+    @Test
+    void shouldReturn400WhenLicensePlateIsNull() throws Exception {
+        CreateTruckDTO licensePlateNull = createNullLicensePlateTruck();
+
+        String body = objectMapper.writeValueAsString(licensePlateNull);
+
+        mockMvc.perform(post("/api/trucks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("license_plate is required"));
+    }
+
+    @Test
+    void shouldReturn400WhenWeightIsNull() throws Exception {
+        CreateTruckDTO empty = createEmptyWeightTruck();
+
+        String body = objectMapper.writeValueAsString(empty);
+        mockMvc.perform(post("/api/trucks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("Dimensions and weight are required"));
+    }
+
+    @Test
+    void shouldReturn400WhenNegativeWidthTruck() throws Exception {
+        CreateTruckDTO negativeWidth = createNegativeWidthTruck();
+
+        String body = objectMapper.writeValueAsString(negativeWidth);
+        mockMvc.perform(post("/api/trucks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("Width must be greater than zero"));
     }
 }

@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.domain.dao;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.UUID;
@@ -39,12 +40,13 @@ public class CargoSpace {
 
     @ManyToOne
     @JoinColumn(name = "truck_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Truck truck;
 
     // Konstruktor wymagany przez JPA
     public CargoSpace() {
     }
-
 
     public CargoSpace(int positionX, int positionY, int positionZ, int width, int height, int depth) {
         this.positionX = positionX;

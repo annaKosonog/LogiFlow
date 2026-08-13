@@ -4,10 +4,12 @@ import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidator.validateNotBlank;
+import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidator.validatePositiveDimensions;
 
 @Service
 @RequiredArgsConstructor
@@ -46,8 +51,10 @@ public class TruckService {
 
     @Transactional
     public TruckResponseDTO addTruck(CreateTruckDTO newTruck) {
+        validateNewTruck(newTruck);
+        validateNotBlank(newTruck.licensePlate(), "license_plate");
         if (truckRepository.existsByLicensePlate(newTruck.licensePlate())) {
-            throw new ResourceNotFoundException("The truck with license plate " + newTruck.licensePlate() + " already exists");
+            throw new ResourceAlreadyExistsException("The truck with license plate " + newTruck.licensePlate() + " already exists");
         }
         Truck entity = truckMapper.toEntityTruck(newTruck);
         entity.setUuid(UUID.randomUUID());
@@ -55,4 +62,17 @@ public class TruckService {
         return truckMapper.toTruckResponseDTO(savedEntity);
     }
 
+    private void validateNewTruck(CreateTruckDTO truck) {
+        if (truck == null || truck.dimensions() == null || truck.maxPayload() == null) {
+            throw new IllegalArgumentException("Dimensions and weight are required");
+        }
+
+        DimensionsDTO dims = truck.dimensions();
+        validatePositiveDimensions(
+                truck.maxPayload(),
+                dims.getDepth_length(),
+                dims.getWidth(),
+                dims.getHeight()
+        );
+    }
 }

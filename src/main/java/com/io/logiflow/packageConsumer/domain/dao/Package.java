@@ -47,6 +47,7 @@ public class Package {
     @ManyToOne
     @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Truck truck;
 
     @Column(name = "rotated", nullable = false)

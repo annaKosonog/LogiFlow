@@ -9,6 +9,7 @@ import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.domain.validator.DimensionValidator;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.specification.PackageSpecifications;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidator.validatePositiveDimensions;
 
 @Service
 @RequiredArgsConstructor
@@ -108,21 +111,6 @@ public class PackageService {
 
         if (!trackingNumber.matches(TRACKING_NUMBER_REGEX)) {
             throw new IllegalArgumentException("Invalid tracking number format.");
-        }
-    }
-
-    private void validatePositiveDimensions(BigDecimal weight, Integer length, Integer width, Integer height) {
-        if (weight != null && weight.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Weight must be greater than zero");
-        }
-        if (length != null && length <= 0) {
-            throw new IllegalArgumentException("Length/Depth must be greater than zero");
-        }
-        if (width != null && width <= 0) {
-            throw new IllegalArgumentException("Width must be greater than zero");
-        }
-        if (height != null && height <= 0) {
-            throw new IllegalArgumentException("Height must be greater than zero");
         }
     }
 
