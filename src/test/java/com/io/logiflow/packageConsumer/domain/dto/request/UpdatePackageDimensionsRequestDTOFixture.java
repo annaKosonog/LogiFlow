@@ -21,7 +21,7 @@ public class UpdatePackageDimensionsRequestDTOFixture {
     }
 
     public static UpdatePackageDimensionsRequestDTO negativeWeightToUpdate(){
-        return new UpdatePackageDimensionsRequestDTO(new BigDecimal("-12.4"), null, null, null);
+        return new UpdatePackageDimensionsRequestDTO(new BigDecimal("-12.4"), -124, null, null);
     }
 
     public static UpdatePackageDimensionsRequestDTO wrongTypeWeightToUpdate(){

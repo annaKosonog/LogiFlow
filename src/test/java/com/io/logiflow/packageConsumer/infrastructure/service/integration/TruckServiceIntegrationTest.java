@@ -31,7 +31,6 @@ import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestD
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.when;
 
 public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 

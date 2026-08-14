@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,8 +39,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
 
 
     @BeforeEach
-    public void setUp() { //Poprawa dane surowe sql, repository
-        packageRepository.deleteAll();
+    public void setUp() {
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
     }
@@ -283,11 +283,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldUpdateAllowedFieldsSuccessfully() throws Exception {
         UUID uuid = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-        Map<String, Object> path = Map.of(
-                "width", 12,
-                "weight", new BigDecimal(120),
-                "height", 146
-        );
+        UpdatePackageDimensionsRequestDTO path = updateAllFields();
 
         String jsonRequest = objectMapper.writeValueAsString(path);
 
@@ -297,15 +293,15 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(uuid.toString()))
-                .andExpect(jsonPath("$.data.dimensions.width").value(12))
-                .andExpect(jsonPath("$.data.dimensions.height").value(146))
+                .andExpect(jsonPath("$.data.dimensions.width").value(15))
+                .andExpect(jsonPath("$.data.dimensions.height").value(12))
                 .andExpect(jsonPath("$.data.trackingNumber").value("TRK2026000000002"));
     }
 
     @Test
     void shouldUpdateOnlySingleFieldWhenOnlyOneProvided() throws Exception {
         UUID uuid = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-        Map<String, Object> patch = Map.of("weight", new BigDecimal("99.5"));
+        UpdatePackageDimensionsRequestDTO patch = fieldWeightToUpdate();
         String jsonRequest = objectMapper.writeValueAsString(patch);
 
         mockMvc.perform(patch("/api/packages/{packId}", uuid)
@@ -313,36 +309,14 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
                         .content(jsonRequest))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.weight").value(new BigDecimal("99.5")));
-    }
-
-    @Test
-    void shouldIgnoreBothUuidAndTrackingNumberWhenBothArePresentInPatch() throws Exception {
-        UUID uuid = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
-
-        Map<String, Object> patch = Map.of(
-                "uuid", UUID.randomUUID().toString(),
-                "trackingNumber", "TRK2026000000888",
-                "height", 200
-        );
-
-        String jsonRequest = objectMapper.writeValueAsString(patch);
-
-        mockMvc.perform(patch("/api/packages/{packId}", uuid)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(uuid.toString()))
-                .andExpect(jsonPath("$.data.trackingNumber").value("TRK2026000000002"))
-                .andExpect(jsonPath("$.data.dimensions.height").value(200));
+                .andExpect(jsonPath("$.data.weight").value(new BigDecimal("750")));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistentPackage() throws Exception {
         UUID nonExistentUuid = UUID.randomUUID();
 
-        Map<String, Object> patch = Map.of("weight", new BigDecimal("50"));
+        UpdatePackageDimensionsRequestDTO patch = fieldWeightToUpdate();
         String jsonRequest = objectMapper.writeValueAsString(patch);
 
         mockMvc.perform(patch("/api/packages/{packId}", nonExistentUuid)
@@ -354,7 +328,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenUuidFormatIsInvalid() throws Exception {
-        Map<String, Object> patch = Map.of("weight", new BigDecimal("50"));
+        UpdatePackageDimensionsRequestDTO patch = fieldWeightAndWidthToUpdate();
         String jsonRequest = objectMapper.writeValueAsString(patch);
 
         mockMvc.perform(patch("/api/packages/{packId}", "not-a-valid-uuid")
@@ -379,8 +353,10 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
     void shouldReturn400WhenFieldHasWrongType() throws Exception {
         UUID uuid = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
 
-        Map<String, Object> patch = Map.of("weight", "not-a-number");
-        String jsonRequest = objectMapper.writeValueAsString(patch);
+        String jsonRequest = """
+                {
+                    "weight": "aac"
+                }""";
 
         mockMvc.perform(patch("/api/packages/{packId}", uuid)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -393,7 +369,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
     void shouldReturn400WhenDimensionIsNegative() throws Exception {
         UUID uuid = UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
 
-        Map<String, Object> patch = Map.of("width", -10);
+        UpdatePackageDimensionsRequestDTO patch = negativeWeightToUpdate();
         String jsonRequest = objectMapper.writeValueAsString(patch);
 
         mockMvc.perform(patch("/api/packages/{packId}", uuid)

@@ -2,13 +2,14 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.PackageController;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,9 +29,9 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.firstBoxCreateRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.largeAndHeavyBoxRequest;
-import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.*;
 import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.fieldWeightAndWidthToUpdate;
 import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.fieldWeightToUpdate;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -62,9 +63,15 @@ class PackageControllerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        packageRepository.deleteAll();
+
         mockPackDto = firstPackageToPack();
         secondMockPackDto = secondPackageToPack();
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        packageRepository.deleteAll();
+        packageRepository.flush();
     }
 
     @Test
@@ -543,7 +550,7 @@ class PackageControllerTest {
     public void shouldUpdateOnlyAllowedFieldsAndIgnoreRest() throws Exception {
         UUID originalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
-        UpdatePackageDimensionsRequestDTO patchFields =fieldWeightToUpdate();
+        UpdatePackageDimensionsRequestDTO patchFields = fieldWeightToUpdate();
 
         PackageDTO patchDto = updatePackageDTO();
 

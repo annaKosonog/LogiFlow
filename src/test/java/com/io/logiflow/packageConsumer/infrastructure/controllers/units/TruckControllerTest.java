@@ -9,6 +9,7 @@ import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.TruckController;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -66,9 +67,14 @@ public class TruckControllerTest {
 
     @BeforeEach
     void setUp() {
-        truckRepository.deleteAll();
         mockTruckDto = createLoadedTruckDTO();
         secondMockTruckDto = createSecondLoadedTruckDTO();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        truckRepository.deleteAll();
+        truckRepository.flush();
     }
 
     @Test

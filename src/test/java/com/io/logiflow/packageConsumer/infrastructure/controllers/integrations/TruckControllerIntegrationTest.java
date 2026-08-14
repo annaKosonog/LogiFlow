@@ -5,7 +5,6 @@ import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +46,6 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
         truckRepository.save(createLoadedTruck());
         truckRepository.save(createLoadedSecondTruck());
         packageRepository.save(thirdBoxPackToTruck());
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        packageRepository.deleteAll();
-        truckRepository.deleteAll();
     }
 
     @Test

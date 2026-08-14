@@ -1,9 +1,9 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
@@ -35,12 +35,10 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
 
     @BeforeEach
-    public void setUp() { //Poprawa dane surowe sql, repository
-        packageRepository.deleteAll();
+    public void setUp() {
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
     }
-
 
 
     @Test
