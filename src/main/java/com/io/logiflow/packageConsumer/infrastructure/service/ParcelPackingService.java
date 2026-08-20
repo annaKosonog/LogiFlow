@@ -7,6 +7,7 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,6 +22,7 @@ public class ParcelPackingService {
     private static final boolean[] ALLOWED_ROTATIONS = {false, true};
 
 
+    @Transactional
     public void pack(List<UUID> boxesToPack, Truck truck) {
         List<Package> existingPackages = resolveAndValidatePackages(boxesToPack);
         sortedPack(existingPackages);

@@ -9,7 +9,7 @@ import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.domain.validator.DimensionValidator;
+import com.io.logiflow.packageConsumer.domain.validator.PackageValidator;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.specification.PackageSpecifications;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidator.validatePositiveDimensions;
@@ -82,7 +81,7 @@ public class PackageService {
     }
 
     public PackageDTO getPackagesByUUID(UUID uuid) {
-        validateFilters(uuid);
+        PackageValidator.validateFilters(uuid);
         return packageRepository.findPackageByUuid(uuid)
                 .map(packageMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Package with UUID number " + uuid +
@@ -90,28 +89,11 @@ public class PackageService {
     }
 
     public PackageDTO getPackagesByTrackingNumber(String trackingNumber) {
-        validateTrackingNumber(trackingNumber);
+        PackageValidator.validateTrackingNumber(trackingNumber);
         return packageRepository.findPackageByTrackingNumber(trackingNumber)
                 .map(packageMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Package with tracking number " + trackingNumber +
                         " not found"));
-    }
-
-    private void validateFilters(UUID uuid) {
-        if (uuid == null) {
-            throw new IllegalArgumentException("Provide uuid. ");
-        }
-    }
-
-    private void validateTrackingNumber(String trackingNumber) {
-        String TRACKING_NUMBER_REGEX = "^TRK20\\d{2}\\d{9}$";
-        if (trackingNumber == null || trackingNumber.isBlank()) {
-            throw new IllegalArgumentException("Tracking number cannot be null or blank.");
-        }
-
-        if (!trackingNumber.matches(TRACKING_NUMBER_REGEX)) {
-            throw new IllegalArgumentException("Invalid tracking number format.");
-        }
     }
 
     private void validatePackageDimensions(UpdatePackageDimensionsRequestDTO request) {
@@ -120,7 +102,6 @@ public class PackageService {
     }
 
     private void validateNewPackageRequest(PackageCreateRequest pack) {
-        // Sprawdzamy null tylko dla obiektów (pack, weight, dimensions)
         if (pack == null || pack.getDimensions() == null || pack.getWeight() == null) {
             throw new IllegalArgumentException("Dimensions and weight are required");
         }
