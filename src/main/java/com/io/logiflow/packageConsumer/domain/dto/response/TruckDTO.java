@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class TruckDTO {
     private UUID idTruck;
+    private String licensePlate;
     private DimensionsDTO dimensionsDTO;
     private BigDecimal maxPayload;
     private BigDecimal currentWeight;
