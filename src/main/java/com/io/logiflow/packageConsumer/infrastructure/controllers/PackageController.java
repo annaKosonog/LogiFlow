@@ -25,7 +25,19 @@ public class PackageController {
 
     private final PackageService packingService;
 
-    @Operation(summary = "Pobierz listę dostępnych paczek oraz wyfiltruj po wybranych  kryteriach")
+    @Operation(summary = "Download the list of available packages and filter them by your chosen criteria")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "A pack was found, and its information was successfully returned",
+                    content = @Content(schema = @Schema(implementation = PackageDTO.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Invalid filtering, pagination, or sorting parameters (e.g., page < 0, incorrect date format)",
+                    content = @Content(schema = @Schema(implementation = PackageDTO.class))
+            )
+    })
     @GetMapping
     ResponseEntity<ApiResponse<Page<PackageDTO>>> getAllPackages(
             @ModelAttribute PackageFilterDTO filter,
@@ -36,21 +48,21 @@ public class PackageController {
         return ResponseEntity.ok(ApiResponse.success(packPage));
     }
 
-    @Operation(summary = "Dodanie nowej paczki", description = "Tworzy nową paczkę w systemie po wcześniejszej walidacji wymiarów i unikalności.")
+    @Operation(summary = "Add new package", description = "It creates a new package in the system after first validating its dimensions and uniqueness.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
-                    description = "Paczka została pomyślnie utworzona",
-                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+                    description = "The package was successfully created",
+                    content = @Content(schema = @Schema(implementation = PackageDTO.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400",
-                    description = "Nieprawidłowe dane wejściowe (np. ujemne wymiary, brak wymaganych pól)",
+                    description = "Invalid input data (dimension validation error)",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "409",
-                    description = "Paczka o podanym numerze śledzenia/etykiecie już istnieje w bazie",
+                    description = "A package with the provided tracking number already exists in the database",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
@@ -62,22 +74,22 @@ public class PackageController {
                 .body(ApiResponse.success(savedPackage));
     }
 
-    @Operation(summary = "Aktualizacja danych paczki")
+    @Operation(summary = "Updating package data")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "204",
-                    description = "Zasób został pomyślnie zaktualizowany (brak ciała odpowiedzi)",
-                    content = @Content // Informuje Swaggera, że odpowiedź NIE MA ciała
+                    description = "The resource has been successfully updated ",
+                    content = @Content(schema = @Schema(implementation = PackageDTO.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "404",
-                    description = "Nie znaleziono paczki o podanym ID",
-                    content = @Content
+                    description = "No package with the provided ID was found",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400",
-                    description = "Niepoprawne dane wejściowe (błąd walidacji wymiarów)",
-                    content = @Content
+                    description = "Invalid input data (dimension validation error)",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
     @PatchMapping("/{packId}")

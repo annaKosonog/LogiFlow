@@ -24,19 +24,19 @@ public class TruckController {
     private final TruckService truckService;
 
     @Operation(
-            summary = "Pobranie szczegółów paczki po wybranych kryteriach",
-            description = "W przypadku braku wyników zwraca pustą stronę ze statusem 200 OK."
+            summary = "Download truck details based on selected criteria",
+            description = "If no results are found, returns an empty page with a 200 OK status."
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
-                    description = "Znaleziono paczkę i pomyślnie zwrócono jej dane",
-                    content = @Content(schema = @Schema(implementation = ApiResponse.class)) // Tutaj OpenAPI pokaże Twój obiekt DTO
+                    description = "A truck was found, and its information was successfully returned",
+                    content = @Content(schema = @Schema(implementation = TruckDTO.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "404",
-                    description = "Niepoprawne parametry filtrowania, paginacji lub sortowania (np. page < 0, zły format daty)",
-                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+                    description = "Invalid filtering, pagination, or sorting parameters (e.g., page < 0, incorrect date format)",
+                    content = @Content(schema = @Schema(implementation = TruckDTO.class))
             )
     })
     @GetMapping
@@ -49,21 +49,21 @@ public class TruckController {
         return ResponseEntity.ok(ApiResponse.success(trucks));
     }
 
-    @Operation(summary = "Dodanie paczki do ciężarówki", description = "Do istniejącej ciężarówki  w systemie dodaje paczkę po wcześniejszym sprawdzeniu wymiarów i wagi")
+    @Operation(summary = "Adding a package to a truck ", description = "It adds a package to an existing truck in the system after first checking its dimensions and weight")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
-                    description = "Paczka została pomyślnie dodana do ciężarówki",
+                    description = "The package has been successfully loaded onto the truck",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400",
-                    description = "Nieprawidłowe dane wejściowe (np. ujemne wymiary, brak wymaganych pól)",
+                    description = "Invalid input data (dimension validation error)",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "409",
-                    description = "Paczka o podanym numerze śledzenia/etykiecie już znajduję się na ciężarówce",
+                    description = "The package with the tracking number provided is already on the truck",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
@@ -74,21 +74,21 @@ public class TruckController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @Operation(summary = "Dodanie nowej ciężarówki", description = "Tworzy nową ciężarówkę  w systemie po wcześniejszej walidacji wymiarów i unikalności.")
+    @Operation(summary = "Add a new truck", description = "It creates a new truck in the system after first validating its dimensions and uniqueness.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
-                    description = "Ciężarówka została pomyślnie utworzona",
-                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+                    description = "The truck was successfully created",
+                    content = @Content(schema = @Schema(implementation = TruckResponseDTO.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400",
-                    description = "Nieprawidłowe dane wejściowe (np. ujemne wymiary, brak wymaganych pól)",
+                    description = "Invalid input data (dimension validation error)",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "409",
-                    description = "Ciężarówka o podanym numerze śledzenia/etykiecie już istnieje w bazie",
+                    description = "The truck with the provided tracking number already exists in the database.",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
