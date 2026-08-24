@@ -13,6 +13,7 @@ import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,9 +55,6 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        packageRepository.deleteAll();
-        truckRepository.deleteAll();
-
         savedFirstPackage = packageRepository.save(firstBoxPackToTruck());
         savedThirdPackage = packageRepository.save(thirdBoxPackToTruck());
 
@@ -64,6 +62,18 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
         savedSecondTruck = truckRepository.save(createLoadedSecondTruck());
         packageRepository.flush();
         truckRepository.flush();
+    }
+
+    @AfterEach
+    void cleanUpDatabase() {
+        try {
+            packageRepository.deleteAll();
+            packageRepository.flush();
+            truckRepository.deleteAll();
+            truckRepository.flush();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @Test

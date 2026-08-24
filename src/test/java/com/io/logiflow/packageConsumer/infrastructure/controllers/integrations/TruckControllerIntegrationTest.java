@@ -5,6 +5,7 @@ import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,19 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        truckRepository.deleteAll();
         truckRepository.save(createLoadedTruck());
         truckRepository.save(createLoadedSecondTruck());
         packageRepository.save(thirdBoxPackToTruck());
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        try {
+            packageRepository.deleteAll();
+            truckRepository.deleteAll();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @Test
@@ -113,7 +123,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .param("maxLength", "450"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("bb541dbd-3206-4f7e-b23c-ae6f9af78db5"));
     }
 
     @Test

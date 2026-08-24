@@ -8,6 +8,7 @@ import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,16 +46,25 @@ class ParcelPackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        packageRepository.deleteAllInBatch();
-        cargoSpaceRepository.deleteAllInBatch();
-        truckRepository.deleteAllInBatch();
-
         savedTruck = truckRepository.save(createLoadedTruck());
         savedFirstPackage = packageRepository.save(firstBoxPackToTruck());
         savedSecondPackages = packageRepository.save(secondBoxPackToTruck());
         savedThirdPackage = packageRepository.save(thirdBoxPackToTruck());
         uuids = new ArrayList<>();
         packageRepository.flush();
+    }
+
+    @AfterEach
+    void cleanUpDatabase() {
+        try {
+            packageRepository.deleteAll();
+            packageRepository.flush();
+            cargoSpaceRepository.deleteAllInBatch();
+            truckRepository.deleteAll();
+            truckRepository.flush();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @Test

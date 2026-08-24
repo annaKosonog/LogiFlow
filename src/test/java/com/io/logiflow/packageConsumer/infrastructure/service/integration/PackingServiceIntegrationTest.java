@@ -8,6 +8,7 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,6 @@ import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDi
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -38,6 +38,16 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     public void setUp() {
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        try {
+            packageRepository.deleteAll();
+            packageRepository.flush();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
 

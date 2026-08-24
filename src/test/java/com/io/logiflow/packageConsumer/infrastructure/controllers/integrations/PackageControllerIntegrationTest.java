@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,16 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
     public void setUp() {
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        try {
+            packageRepository.deleteAll();
+            packageRepository.flush();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @Test
