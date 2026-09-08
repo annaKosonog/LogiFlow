@@ -10,5 +10,7 @@ CREATE TABLE IF NOT EXISTS trucks (
 
     -- Ładowność i obecna waga
                         max_payload DECIMAL(10, 2) NOT NULL,
-                        current_weight DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+                        current_weight DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+                        version BIGINT NOT NULL DEFAULT 0,
+                        CHECK (current_weight <=max_payload)
 );

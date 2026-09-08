@@ -4,11 +4,11 @@ import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.domain.validator.DimensionValidator;
 import com.io.logiflow.packageConsumer.domain.validator.PackageValidator;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.specification.PackageSpecifications;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidator.validatePositiveDimensions;
+import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidator.validateDimensions;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +54,7 @@ public class PackageService {
         return packageMapper.toDTO(savedEntity);
     }
 
+    @Transactional(readOnly = true)
     public Page<PackageDTO> getPackages(PackageFilterDTO filter, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Specification<Package> specification = PackageSpecifications.buildSpecification(filter);
@@ -62,7 +63,7 @@ public class PackageService {
     }
 
     @Transactional
-    public PackageDTO updatePackageFields(UUID packId, UpdatePackageDimensionsRequestDTO fields) { //waga, wymiary, adres dostawy
+    public PackageDTO updatePackageFields(UUID packId, UpdatePackageDimensionsRequestDTO fields) {
         if (fields == null || !hasAnyField(fields)) {
             throw new IllegalArgumentException("At least one field must be provided");
         }
@@ -80,6 +81,7 @@ public class PackageService {
         return packageMapper.toDTO(existingPackage);
     }
 
+    @Transactional(readOnly = true)
     public PackageDTO getPackagesByUUID(UUID uuid) {
         PackageValidator.validateFilters(uuid);
         return packageRepository.findPackageByUuid(uuid)
@@ -88,6 +90,7 @@ public class PackageService {
                         " not found"));
     }
 
+    @Transactional(readOnly = true)
     public PackageDTO getPackagesByTrackingNumber(String trackingNumber) {
         PackageValidator.validateTrackingNumber(trackingNumber);
         return packageRepository.findPackageByTrackingNumber(trackingNumber)
@@ -98,7 +101,11 @@ public class PackageService {
 
     private void validatePackageDimensions(UpdatePackageDimensionsRequestDTO request) {
         if (request == null) return;
-        validatePositiveDimensions(request.weight(), request.length(), request.width(), request.height());
+        DimensionValidator.validatePositiveDimensions(
+                new DimensionValidator.NamedDimension("Weight", request.weight()),
+                new DimensionValidator.NamedDimension("Length", request.length()),
+                new DimensionValidator.NamedDimension("Width", request.width()),
+                new DimensionValidator.NamedDimension("Height", request.height()));
     }
 
     private void validateNewPackageRequest(PackageCreateRequest pack) {
@@ -106,15 +113,8 @@ public class PackageService {
             throw new IllegalArgumentException("Dimensions and weight are required");
         }
 
-        DimensionsDTO dims = pack.getDimensions();
-
-        // int z getDepth_length(), getWidth(), getHeight() jest automatycznie konwertowany (autoboxing) na Integer!
-        validatePositiveDimensions(
-                pack.getWeight(),
-                dims.getDepth_length(),
-                dims.getWidth(),
-                dims.getHeight()
-        );
+        // int z getDepth_length(), getWidth(), getHeight() is automatically converted (autoboxed) to an Integer!
+        validateDimensions(pack.getDimensions(), "Package dimension");
     }
 
     private boolean hasAnyField(UpdatePackageDimensionsRequestDTO request) {

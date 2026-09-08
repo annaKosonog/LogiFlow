@@ -13,6 +13,6 @@ public class CargoSpaceDTO {
     private UUID idCargo;
     private CoordinatesDTO coordinatesDTO;
     private DimensionsDTO dimensionsDTO;
-    private TruckDTO truck;
+    private Long truckId;
 
 }

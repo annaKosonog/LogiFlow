@@ -20,9 +20,9 @@ public interface TruckMapper {
 
 
     @Mapping(source = "licensePlate", target = "licensePlate")
-    @Mapping(source = "dimensions.width", target = "width")
-    @Mapping(source = "dimensions.height", target = "height")
-    @Mapping(source = "dimensions.depth_length", target = "length")
+    @Mapping(source = "exteriorDimensions.width", target = "width")
+    @Mapping(source = "exteriorDimensions.height", target = "height")
+    @Mapping(source = "exteriorDimensions.depth_length", target = "length")
     Truck toEntityTruck(CreateTruckDTO createTruckDTO);
 
 

@@ -21,7 +21,7 @@ public interface PackageRepository extends JpaRepository<Package, Long>, JpaSpec
     @Query("SELECT p.trackingNumber FROM Package p WHERE p.trackingNumber = :trackingNumber")
     String findByTrackingNumber(String trackingNumber);
 
-    // Zapytanie SQL, które wyciąga kolejny numer z Twojej sekwencji w PostgreSQL
+
     @Query(value = "SELECT nextval('tracking_number_seq')", nativeQuery = true)
     long getNextTrackingSequenceValue();
 

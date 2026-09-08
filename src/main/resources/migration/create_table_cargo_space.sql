@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS cargo_spaces (
 
     -- Relacja ManyToOne do tabeli z ciężarówkami
                              truck_id BIGINT NOT NULL,
+                             version BIGINT NOT NULL DEFAULT 0,
 
     -- Klucz obcy łączący przestrzeń z tabelą trucks
     -- ON DELETE CASCADE usunie przestrzenie, jeśli usuniesz całą ciężarówkę

@@ -22,7 +22,7 @@ public class CargoSpace {
     @Column(unique = true, nullable = false)
     private UUID uuid = UUID.randomUUID();
 
-    //Punkt początkowy wolnej przestrzeni
+    //Starting point of the free space
     @Column(name = "position_x", nullable = false)
     private int positionX;
     @Column(name = "position_y", nullable = false)
@@ -30,13 +30,13 @@ public class CargoSpace {
     @Column(name = "position_z", nullable = false)
     private int positionZ;
 
-    //Wymiary wolnej przestrzeni
+    //Dimensions of the free space
     @Column(name = "width", nullable = false)
-    private int width; //Szerokość
+    private int width;
     @Column(name = "height", nullable = false)
-    private int height; //Wysokosc
+    private int height;
     @Column(name = "depth", nullable = false)
-    private int depth; //Glebokosc
+    private int depth;
 
     @ManyToOne
     @JoinColumn(name = "truck_id", nullable = false)
@@ -44,7 +44,9 @@ public class CargoSpace {
     @EqualsAndHashCode.Exclude
     private Truck truck;
 
-    // Konstruktor wymagany przez JPA
+    @Version
+    private Integer version;
+
     public CargoSpace() {
     }
 
@@ -57,7 +59,6 @@ public class CargoSpace {
         this.depth = depth;
     }
 
-    // Konstruktor biznesowy do tworzenia nowej przestrzeni
     public CargoSpace(int positionX, int positionY, int positionZ, int width, int height, int depth, Truck truck) {
         this.positionX = positionX;
         this.positionY = positionY;

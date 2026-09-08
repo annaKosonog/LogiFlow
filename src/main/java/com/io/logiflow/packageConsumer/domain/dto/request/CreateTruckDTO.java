@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 
 public record CreateTruckDTO(
         String licensePlate,
-        DimensionsDTO dimensions,
-        BigDecimal maxPayload
+        DimensionsDTO exteriorDimensions,
+        BigDecimal maxPayload,
+        DimensionsDTO cargoSpaceDimensions
 ) {
 }

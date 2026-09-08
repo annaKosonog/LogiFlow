@@ -3,10 +3,11 @@ package com.io.logiflow.packageConsumer.domain.dao;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
+
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -26,17 +27,16 @@ public class Package {
     @Column(unique = true, nullable = false)
     private UUID uuid = UUID.randomUUID();
 
-    @NotNull
     @Column(name = "tracking_number", unique = true, nullable = false, updatable = false)
     private String trackingNumber;
 
-    //wymiary paczki
+    //package exteriorDimensions
     private int width; //szerokośc
     private int height; //wysokość
     private int depth; //głębokość
     private BigDecimal weight; //cieżar
 
-    //współrzedne paczki
+    //package coordinate
     @Column(name = "coord_x", nullable = false)
     private int coordX;
     @Column(name = "coord_y", nullable = false)
@@ -45,7 +45,7 @@ public class Package {
     private int coordZ;
 
     @ManyToOne
-    @JoinColumn(name = "truck_id") // Wskazuje nazwę kolumny z kluczem obcym w bazie SQL
+    @JoinColumn(name = "truck_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Truck truck;
@@ -55,6 +55,9 @@ public class Package {
 
     @Column(name = "packing_order")
     private int packingOrder; //kolejność pakowania
+
+    @Version
+    private Integer version;
 
     public Package(int width, int height, int depth, BigDecimal weight) {
         this.width = width;
@@ -80,8 +83,9 @@ public class Package {
         if (this.trackingNumber != null) {
             return this.trackingNumber;
         }
-        LocalDateTime createdAt = LocalDateTime.now();
-        String year = createdAt.format(DateTimeFormatter.ofPattern("yyyy"));
+        Instant createdAt = Instant.now();
+        String year = DateTimeFormatter.ofPattern("yyyy")
+                .withZone(ZoneId.systemDefault()).format(createdAt);
         String paddedSequence = String.format("%09d", nextSequenceValue);
         return "TRK" + year + paddedSequence;
     }

@@ -5,7 +5,7 @@ import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
-import com.io.logiflow.packageConsumer.exception.ApiResponse;
+import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +50,7 @@ public class TruckController {
         return ResponseEntity.ok(ApiResponse.success(trucks));
     }
 
-    @Operation(summary = "Adding a package to a truck ", description = "It adds a package to an existing truck in the system after first checking its dimensions and weight")
+    @Operation(summary = "Adding a package to a truck ", description = "It adds a package to an existing truck in the system after first checking its exteriorDimensions and weight")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
@@ -71,10 +72,12 @@ public class TruckController {
     public ResponseEntity<ApiResponse<Void>> packPackages(
             @RequestBody PackingRequestDTO packages) {
         truckService.addPackagesToTruck(packages);
-        return ResponseEntity.ok(ApiResponse.success(null));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(null));
     }
 
-    @Operation(summary = "Add a new truck", description = "It creates a new truck in the system after first validating its dimensions and uniqueness.")
+    @Operation(summary = "Add a new truck", description = "It creates a new truck in the system after first validating its exteriorDimensions and uniqueness.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
@@ -95,7 +98,7 @@ public class TruckController {
     @PostMapping()
     public ResponseEntity<ApiResponse<TruckResponseDTO>> createTruck(
             @RequestBody CreateTruckDTO newTruck) {
-        TruckResponseDTO addTruck = truckService.addTruck(newTruck);
+        TruckResponseDTO addTruck = truckService.createTruck(newTruck);
         return ResponseEntity.ok(ApiResponse.success(addTruck));
     }
 }

@@ -29,13 +29,13 @@ public class Truck {
     private String licensePlate;
 
     @Column(name = "width_w")
-    private int width; //Szerokość calkowita samochodu os X
+    private int width;
     @Column(name = "height_h")
-    private int height;  //Wysokosc całkowita samochodu os Y
+    private int height;
     @Column(name = "length_l")
-    private int length;  //Długość całkowita samochodu os Z
+    private int length;
     @Column(name = "max_payload")
-    private BigDecimal maxPayload;  //Maksymalna ladownosc samochodu
+    private BigDecimal maxPayload;
     private BigDecimal currentWeight = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "truck")
@@ -43,6 +43,9 @@ public class Truck {
 
     @OneToMany(mappedBy = "truck", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CargoSpace> emptyCargoSpaces = new ArrayList<>();
+
+    @Version
+    private Integer version;
 
     public Truck(int width, int height, int length, BigDecimal maxPayload) {
         this.width = width;

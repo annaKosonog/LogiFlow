@@ -4,7 +4,7 @@ CREATE SEQUENCE IF NOT EXISTS tracking_number_seq START WITH 1 INCREMENT BY 1;
 CREATE TABLE IF NOT EXISTS packages (
                           package_id BIGSERIAL PRIMARY KEY,
                           uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
-    tracking_number VARCHAR(50) NOT NULL UNIQUE,
+                          tracking_number VARCHAR(50) NOT NULL UNIQUE,
 
     -- Wymiary paczki
                           width INT NOT NULL,
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS packages (
 
     -- NOWE POLA I RELACJE:
                           truck_id BIGINT DEFAULT NULL, -- Link do tabeli trucks (odpowiednik Twojego TruckId)
+                          version BIGINT NOT NULL DEFAULT 0,
 
     -- Definicja klucza obcego spiętego z tabelą trucks
                           CONSTRAINT fk_packages_truck FOREIGN KEY (truck_id)

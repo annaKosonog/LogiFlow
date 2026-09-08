@@ -4,7 +4,7 @@ import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
-import com.io.logiflow.packageConsumer.exception.ApiResponse;
+import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -48,7 +48,7 @@ public class PackageController {
         return ResponseEntity.ok(ApiResponse.success(packPage));
     }
 
-    @Operation(summary = "Add new package", description = "It creates a new package in the system after first validating its dimensions and uniqueness.")
+    @Operation(summary = "Add new package", description = "It creates a new package in the system after first validating its exteriorDimensions and uniqueness.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
@@ -98,6 +98,9 @@ public class PackageController {
             @RequestBody UpdatePackageDimensionsRequestDTO fields) {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity
-                .ok(ApiResponse.success(updated));
+                .status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.success(updated));
     }
 }
+
+//todo przetestować wielowątkowość optimistic lock Exception

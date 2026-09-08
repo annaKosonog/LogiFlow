@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface CommonMapper {
 
-    // Mapstruct widzi, skąd wziąć dane dla DimensionsDTO, bo przekazujemy mu całą encję Package
+
     default DimensionsDTO toDimensionsDTO(Package pack) {
         if (pack == null) {
             return null;
@@ -33,7 +33,7 @@ public interface CommonMapper {
     }
 
 
-    // Mapujemy płaskie pola X, Y, Z z encji na obiekt CoordinatesDTO
+    // Map fields X, Y, Z z to object CoordinatesDTO
     default CoordinatesDTO toCoordinatesDTO(Package pack) {
         if (pack == null) {
             return null;
