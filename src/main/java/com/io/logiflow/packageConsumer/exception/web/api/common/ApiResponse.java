@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.exception;
+package com.io.logiflow.packageConsumer.exception.web.api.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
@@ -19,7 +19,7 @@ public class ApiResponse<T> {
         this.timestamp = LocalDateTime.now();
     }
 
-    // Statyczne metody fabrykujące (Clean Code)
+    // Fabric method  (Clean Code)
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(data, null);
     }

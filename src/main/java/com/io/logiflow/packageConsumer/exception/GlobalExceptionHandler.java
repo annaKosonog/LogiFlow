@@ -1,7 +1,9 @@
 package com.io.logiflow.packageConsumer.exception;
 
+import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -38,20 +40,26 @@ GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
-    // 1. Zabezpieczenie przed nadpisywaniem błędu "404 Not Found" dla nieistniejących adresów URL
+    // 1. 404 Not Found
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("Nie znaleziono żądanego zasobu"));
+                .body(ApiResponse.error("The required resource was not found"));
     }
 
-    // 2. Odkomentowany i bezpieczny fallback dla faktycznych niespodziewanych błędów (500)
-/*    @ExceptionHandler(Exception.class)
+    // 2. Error 500
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Wystąpił nieoczekiwany błąd systemu"));
+                .body(ApiResponse.error("An unexpected system error has occurred"));
     }
-    */
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<String> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body("“The data has been modified by another user. Please refresh the page and try again.”");
+    }
 }

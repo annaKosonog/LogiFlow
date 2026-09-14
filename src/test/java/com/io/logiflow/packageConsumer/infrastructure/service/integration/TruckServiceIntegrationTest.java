@@ -155,7 +155,7 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     void shouldReturnAddedTruck() {
         CreateTruckDTO thirdTruck = createThirdTruck();
 
-        TruckResponseDTO addTruck = truckService.addTruck(thirdTruck);
+        TruckResponseDTO addTruck = truckService.createTruck(thirdTruck);
         Truck result = truckRepository.findTruckByUuid(savedFirstTruck.getUuid())
                 .orElseThrow();
 
@@ -167,27 +167,27 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     void shouldThrowExceptionWhenProvidedParameterWeightIsNull() {
         CreateTruckDTO emptyWeight = createEmptyWeightTruck();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(emptyWeight));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(emptyWeight));
         Assertions.assertEquals("Dimensions and weight are required", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenOnesProvidedParameterIsNegative() {
         CreateTruckDTO negativeWidthTruck = createNegativeWidthTruck();
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(negativeWidthTruck));
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(negativeWidthTruck));
         Assertions.assertEquals("Width must be greater than zero", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenProvidedLicensePlateIsNull() {
         CreateTruckDTO createTruck = createNullLicensePlateTruck();
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(createTruck));
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(createTruck));
         Assertions.assertEquals("license_plate is required", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenProvidedLicensePlateIsExists() {
-        ResourceAlreadyExistsException exception = Assertions.assertThrows(ResourceAlreadyExistsException.class, () -> truckService.addTruck(createFirstTruck()));
+        ResourceAlreadyExistsException exception = Assertions.assertThrows(ResourceAlreadyExistsException.class, () -> truckService.createTruck(createFirstTruck()));
         Assertions.assertEquals("The truck with license plate WI 1234E already exists", exception.getMessage());
     }
 }

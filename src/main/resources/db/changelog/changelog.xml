@@ -11,7 +11,6 @@
                  stripComments="true"/>
     </changeSet>
 
-    <!-- Wczytanie struktury tabel -->
     <changeSet id="2-create-truck" author="student">
         <sqlFile path="migration/create_table_truck.sql" relativeToChangelogFile="false" splitStatements="true"
                  stripComments="true"/>

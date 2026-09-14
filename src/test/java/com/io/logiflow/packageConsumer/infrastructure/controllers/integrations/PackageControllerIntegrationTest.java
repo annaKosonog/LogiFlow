@@ -272,7 +272,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenWeightHasWrongType() throws Exception {
-        String jsonRequest = "{\"dimensions\":{\"width\":10,\"height\":10,\"depth_length\":10},\"weight\":\"not-a-number\"}";
+        String jsonRequest = "{\"exteriorDimensions\":{\"width\":10,\"height\":10,\"depth_length\":10},\"weight\":\"not-a-number\"}";
 
         mockMvc.perform(post("/api/packages")
                         .contentType(MediaType.APPLICATION_JSON)

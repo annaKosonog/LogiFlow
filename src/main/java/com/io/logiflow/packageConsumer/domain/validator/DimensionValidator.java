@@ -1,24 +1,30 @@
 package com.io.logiflow.packageConsumer.domain.validator;
 
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
+
 import java.math.BigDecimal;
+
 
 public final class DimensionValidator {
     private DimensionValidator() {
     }
 
-    public  static void validatePositiveDimensions(BigDecimal weight, Integer length, Integer width, Integer height) {
-        if (weight != null && weight.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Weight must be greater than zero");
+    public static void validatePositiveDimensions(NamedDimension... dimensions) {
+        for (NamedDimension dim : dimensions) {
+            if (dim.value == null || dim.name == null || dim.name.isBlank()) {
+                continue;
+            }
+            if (toBigDecimal(dim.value).compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException(dim.name() + " must be greater than zero");
+            }
         }
-        if (length != null && length <= 0) {
-            throw new IllegalArgumentException("Length/Depth must be greater than zero");
+    }
+
+    private static BigDecimal toBigDecimal(Number number) {
+        if (number instanceof BigDecimal bd) {
+            return bd;
         }
-        if (width != null && width <= 0) {
-            throw new IllegalArgumentException("Width must be greater than zero");
-        }
-        if (height != null && height <= 0) {
-            throw new IllegalArgumentException("Height must be greater than zero");
-        }
+        return BigDecimal.valueOf(number.intValue());
     }
 
     public static void validateNotBlank(String value, String fieldName) {
@@ -27,7 +33,18 @@ public final class DimensionValidator {
         }
     }
 
-
+    public static void validateDimensions(DimensionsDTO dimensions, String prefix) {
+        DimensionValidator.validatePositiveDimensions(
+                new DimensionValidator.NamedDimension(prefix + " width", dimensions.getWidth()),
+                new DimensionValidator.NamedDimension(prefix + " height", dimensions.getHeight()),
+                new DimensionValidator.NamedDimension(prefix + " depth", dimensions.getDepth_length())
+        );
     }
+
+
+    public record NamedDimension(String name, Number value) {
+    }
+
+}
 
 

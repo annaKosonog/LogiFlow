@@ -6,7 +6,6 @@ import com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.CargoSpaceMapper;
 import com.io.logiflow.packageConsumer.domain.repository.CargoSpaceRepository;
-import com.io.logiflow.packageConsumer.domain.validator.DimensionValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

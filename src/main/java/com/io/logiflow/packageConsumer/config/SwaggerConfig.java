@@ -12,8 +12,8 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Platforma rezerwacji usług – API")
+                        .title("Service Booking Platform – API")
                         .version("1.0")
-                        .description("Dokumentacja REST API do Paczek"));
+                        .description("REST API Documentation for Parcels"));
     }
 }

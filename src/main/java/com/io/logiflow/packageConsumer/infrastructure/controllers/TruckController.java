@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/trucks")
 @RequiredArgsConstructor
@@ -68,6 +70,8 @@ public class TruckController {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
+
+    //List<UUID> dodanych, nie
     @PostMapping("/pack")
     public ResponseEntity<ApiResponse<Void>> packPackages(
             @RequestBody PackingRequestDTO packages) {

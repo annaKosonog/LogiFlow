@@ -41,6 +41,10 @@ public class PlacementStrategy {
         );
     }
 
+    public record Point(int x, int y, int z){
+
+    }
+
 
 }
 

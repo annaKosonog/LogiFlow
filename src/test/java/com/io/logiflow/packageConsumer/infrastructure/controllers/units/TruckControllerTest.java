@@ -246,7 +246,7 @@ public class TruckControllerTest {
     @Test
     public void shouldReturnANewTruckWhenProvidedCorrectParameter() throws Exception {
         CreateTruckDTO aNewTruck = createThirdTruck();
-        when(truckService.addTruck(any(CreateTruckDTO.class))).thenReturn(thirdCreateTruckResponse());
+        when(truckService.createTruck(any(CreateTruckDTO.class))).thenReturn(thirdCreateTruckResponse());
 
         String jsonRequest = objectMapper.writeValueAsString(aNewTruck);
         mvc.perform(post("/api/trucks")

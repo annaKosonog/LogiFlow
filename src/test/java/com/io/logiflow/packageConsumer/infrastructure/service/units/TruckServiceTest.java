@@ -12,7 +12,7 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
-import com.io.logiflow.packageConsumer.infrastructure.service.ParcelPackingService;
+import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.ParcelPackingService;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import org.junit.jupiter.api.AfterEach;
@@ -173,7 +173,7 @@ class TruckServiceTest {
     }
 
     @Test
-    void shouldReturnCorrectAddTruck() {
+    void shouldReturnCorrectCreateTruck() {
         CreateTruckDTO createTruck = createSecondTruck();
         String license_plate = "W0 1234";
 
@@ -182,7 +182,7 @@ class TruckServiceTest {
         when(truckRepository.save(any(Truck.class))).thenReturn(createLoadedSecondTruck());
         when(truckMapper.toTruckResponseDTO(any(Truck.class))).thenReturn(secondCreateTruckResponse());
 
-        TruckResponseDTO addTruck = truckService.addTruck(createTruck);
+        TruckResponseDTO addTruck = truckService.createTruck(createTruck);
 
         assertEquals(license_plate, addTruck.licensePlate());
         assertThat(addTruck.uuid().equals(UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606")));
@@ -191,14 +191,14 @@ class TruckServiceTest {
     @Test
     void shouldThrowExceptionWhenProvidedNegativeParameter() {
         CreateTruckDTO weightTruck = createNegativeWidthTruck();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(weightTruck));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(weightTruck));
         assertEquals("Width must be greater than zero", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenProvidedNullWeightParameter() {
         CreateTruckDTO weightTruck = createEmptyWeightTruck();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(weightTruck));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(weightTruck));
         assertEquals("Dimensions and weight are required", exception.getMessage());
     }
 
@@ -208,14 +208,14 @@ class TruckServiceTest {
 
         when(truckRepository.existsByLicensePlate(license_plate)).thenReturn(true);
 
-        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> truckService.addTruck(createFirstTruck()));
+        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> truckService.createTruck(createFirstTruck()));
         assertEquals("The truck with license plate WI 1234E already exists", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenLicensePlateIsNull() {
         CreateTruckDTO createTruck = createNullLicensePlateTruck();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.addTruck(createTruck));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(createTruck));
         assertEquals("license_plate is required", exception.getMessage());
     }
 }
