@@ -62,7 +62,7 @@ public class TruckFixture {
         Truck t1 = createTruckWithPayload("200");
         t1.setUuid(UUID.fromString("7b92a341-9e12-4290-8d1e-8e3b52d19f2a"));
         t1.setLicensePlate("PO 1234A");
-        t1.setEmptyCargoSpaces(new ArrayList<>());
+        t1.setCargoCompartments(new ArrayList<>());
         return t1;
     }
 }

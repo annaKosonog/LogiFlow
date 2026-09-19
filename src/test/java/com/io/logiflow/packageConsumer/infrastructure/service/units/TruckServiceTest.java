@@ -12,7 +12,6 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
-import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.ParcelPackingService;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import org.junit.jupiter.api.AfterEach;

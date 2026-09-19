@@ -7,7 +7,6 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
-import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.ParcelPackingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

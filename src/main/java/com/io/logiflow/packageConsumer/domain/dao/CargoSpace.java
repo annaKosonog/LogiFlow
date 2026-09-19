@@ -1,11 +1,14 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
 
+import com.io.logiflow.packageConsumer.domain.dto.request.ParcelInformation;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity

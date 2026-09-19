@@ -1,4 +1,4 @@
-package com.io.logiflow.packageConsumer.infrastructure.service;
+package com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation;
 
 import com.io.logiflow.packageConsumer.domain.dto.request.ParcelInformation;
 import com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTO;
@@ -34,10 +34,10 @@ public class CargoGrid {
 
     // Oznaczenie zajetego miejsca
     public void markOccupied(ParcelInformation parcel) {
-        CoordinatesDTO position = parcel.coordinatesDTO();
-        for (int x = position.x(); x < position.x() + parcel.dimensionsDTO().getWidth(); x++) {
-            for (int y = position.y(); y < position.y() + parcel.dimensionsDTO().getHeight(); y++) {
-                for (int z = position.z(); z < position.z() + parcel.dimensionsDTO().getDepth_length(); z++) {
+        CoordinatesDTO position = parcel.getPosition();
+        for (int x = position.x(); x < position.x() + parcel.getDimension().getWidth(); x++) {
+            for (int y = position.y(); y < position.y() + parcel.getDimension().getHeight(); y++) {
+                for (int z = position.z(); z < position.z() + parcel.getDimension().getDepth_length(); z++) {
                     occupied.set(index(x, y, z));
                 }
             }
@@ -57,7 +57,6 @@ public class CargoGrid {
                     }
                 }
             }
-
         }
         return true;
     }
@@ -68,5 +67,4 @@ public class CargoGrid {
         placedParcels.forEach(grid::markOccupied);
         return grid;
     }
-
 }

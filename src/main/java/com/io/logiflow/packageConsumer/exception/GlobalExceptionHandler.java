@@ -62,4 +62,12 @@ GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body("“The data has been modified by another user. Please refresh the page and try again.”");
     }
+
+    @ExceptionHandler(TruckPackingConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTruckPackingConflict(TruckPackingConflictException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
 }

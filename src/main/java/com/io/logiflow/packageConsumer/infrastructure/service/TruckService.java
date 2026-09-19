@@ -7,16 +7,19 @@ import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
+import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
-import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
-import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.ParcelPackingService;
+import com.io.logiflow.packageConsumer.exception.TruckPackingConflictException;
+import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.ParcelPlacementFinder;
+import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.TruckPackingExecutor;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,9 +33,10 @@ import static com.io.logiflow.packageConsumer.domain.validator.DimensionValidato
 public class TruckService {
 
     private final TruckRepository truckRepository;
-    private final ParcelPackingService parcelPackingService;
     private final CargoSpaceService cargoSpaceService;
     private final TruckMapper truckMapper;
+    private final TruckPackingExecutor truckPackingExecutor;
+    private static final int MAX_RETRIES = 3;
 
     @Transactional
     public Page<TruckDTO> getTrucks(TruckFilterDto filter, int page, int size) {
@@ -43,11 +47,20 @@ public class TruckService {
     }
 
     @Transactional
-    public void addPackagesToTruck(PackingRequestDTO request) {
-        Truck truck = truckRepository.findTruckByUuid(request.truckId())
-                .orElseThrow(() -> new ResourceNotFoundException("The truck with the id " + request.truckId() + " does not exist"));
-        parcelPackingService.pack(request.packageId(), truck);
+    public Truck addPackagesToTruck(PackingRequestDTO packages) {
+        int attempt = 0;
+        while (true) {
+            try {
+                return truckPackingExecutor.tryAddPackages(packages);
+            } catch (ObjectOptimisticLockingFailureException e) {
+                attempt++;
+                if (attempt >= MAX_RETRIES) {
+                    throw new TruckPackingConflictException(packages.truckId().toString(), e);
+                }
+            }
+        }
     }
+
 
     @Transactional
     public TruckResponseDTO createTruck(CreateTruckDTO newTruck) {
@@ -76,12 +89,11 @@ public class TruckService {
         Truck truck = new Truck();
         truck.setUuid(UUID.randomUUID());
         truck.setLicensePlate(request.licensePlate());
+
         truck.setMaxPayload(request.maxPayload());
         truck.setWidth(request.exteriorDimensions().getWidth());
         truck.setHeight(request.exteriorDimensions().getHeight());
         truck.setLength(request.exteriorDimensions().getDepth_length());
         return truck;
     }
-
-
 }
