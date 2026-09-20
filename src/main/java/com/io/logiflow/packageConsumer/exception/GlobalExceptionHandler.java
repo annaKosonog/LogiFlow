@@ -33,13 +33,6 @@ GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
-    @ExceptionHandler(PartialPackingException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePartialPacking(PartialPackingException ex) {
-        return ResponseEntity
-                .status(HttpStatus.MULTI_STATUS) // 207,422 — żądanie poprawne, ale nie w pełni wykonalne
-                .body(ApiResponse.error(ex.getMessage()));
-    }
-
     // 1. 404 Not Found
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException ex) {
@@ -57,10 +50,10 @@ GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<String> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body("“The data has been modified by another user. Please refresh the page and try again.”");
+                .body(ApiResponse.error("The data has been modified by another user. Please refresh the page and try again."));
     }
 
     @ExceptionHandler(TruckPackingConflictException.class)

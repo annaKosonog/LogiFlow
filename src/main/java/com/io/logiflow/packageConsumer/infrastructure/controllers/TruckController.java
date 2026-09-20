@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers;
 import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
@@ -16,8 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/trucks")
@@ -73,12 +72,17 @@ public class TruckController {
 
     //List<UUID> dodanych, nie
     @PostMapping("/pack")
-    public ResponseEntity<ApiResponse<Void>> packPackages(
+    public ResponseEntity<ApiResponse<PackingResultDTO>> packPackages(
             @RequestBody PackingRequestDTO packages) {
-        truckService.addPackagesToTruck(packages);
+        PackingResultDTO result = truckService.addPackagesToTruck(packages);
+
+        HttpStatus status = result.unpackedPackageUuids().isEmpty()
+                ? HttpStatus.CREATED
+                : HttpStatus.MULTI_STATUS;
+
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(null));
+                .status(status)
+                .body(ApiResponse.success(result));
     }
 
     @Operation(summary = "Add a new truck", description = "It creates a new truck in the system after first validating its exteriorDimensions and uniqueness.")

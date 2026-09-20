@@ -6,13 +6,18 @@ import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.ParcelInformation;
 import com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +29,8 @@ public class TruckPackingExecutor {
     private final ParcelPlacementFinder placementFinder;
     private final PackingRequestValidator packingRequestValidator;
 
-    public Truck tryAddPackages(PackingRequestDTO packages) {
+    @Transactional
+    public PackingResultDTO tryAddPackages(PackingRequestDTO packages) {
         Truck truck = truckRepository.findTruckByUuid(packages.truckId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "The truck with the id " + packages.truckId() + " does not exist"));
@@ -41,25 +47,41 @@ public class TruckPackingExecutor {
 
         int nextPackingOrder = startingPackingOrder(truck.getPackedPackages());
 
-        for (Package pkg : newPackages) {
-            CoordinatesDTO position = placementFinder
-                    .findFreePosition(grid, pkg, truck.getWidth(), truck.getHeight(), truck.getLength())
-                    .orElseThrow(() -> new IllegalStateException("No space for the package:: " + pkg.getUuid()));
+        List<Package> successfullyPlaced = new ArrayList<>();
+        List<UUID> unplacedPackageUuids = new ArrayList<>();
 
-            pkg.setCoordX(position.x());
-            pkg.setCoordY(position.y());
-            pkg.setCoordZ(position.z());
+        for (Package pkg : newPackages) {
+            Optional<CoordinatesDTO> position = placementFinder
+                    .findFreePosition(grid, pkg, truck.getWidth(), truck.getHeight(), truck.getLength());
+
+            if (position.isEmpty()) {
+                unplacedPackageUuids.add(pkg.getUuid());
+                continue; // nie przerywamy — próbujemy zapakować resztę partii
+            }
+
+            CoordinatesDTO coords = position.get();
+            pkg.setCoordX(coords.x());
+            pkg.setCoordY(coords.y());
+            pkg.setCoordZ(coords.z());
 
             DimensionsDTO dimension = new DimensionsDTO(pkg.getEffectiveWidth(), pkg.getHeight(), pkg.getEffectiveDepth());
-            grid.markOccupied(new ParcelInformation(pkg.getUuid(), position, dimension));
+            grid.markOccupied(new ParcelInformation(pkg.getUuid(), coords, dimension));
 
             truck.load(pkg);
             pkg.setTruck(truck);
             pkg.setPackingOrder(nextPackingOrder++);
+            successfullyPlaced.add(pkg);
         }
 
         packageRepository.saveAll(newPackages);
-        return truckRepository.save(truck);
+
+        truckRepository.save(truck);
+
+        List<UUID> packedUuids = successfullyPlaced.stream()
+                .map(Package::getUuid)
+                .toList();
+
+        return new PackingResultDTO(truck.getUuid(), packedUuids, unplacedPackageUuids);
     }
 
     private static int startingPackingOrder(List<Package> alreadyLoaded) {

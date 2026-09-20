@@ -4,14 +4,13 @@ import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.exception.TruckPackingConflictException;
-import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.ParcelPlacementFinder;
 import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.TruckPackingExecutor;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +46,7 @@ public class TruckService {
     }
 
     @Transactional
-    public Truck addPackagesToTruck(PackingRequestDTO packages) {
+    public PackingResultDTO addPackagesToTruck(PackingRequestDTO packages) {
         int attempt = 0;
         while (true) {
             try {
