@@ -4,7 +4,7 @@ services:
     image: postgres:16
     container_name: logistic_flow
     environment:
-      POSTGRES_PASSWORD: 123
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
       POSTGRES_USER: root
       POSTGRES_DB: delivery_management_db
     ports:
