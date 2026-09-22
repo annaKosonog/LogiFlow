@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -73,7 +74,7 @@ public class TruckController {
     //List<UUID> dodanych, nie
     @PostMapping("/pack")
     public ResponseEntity<ApiResponse<PackingResultDTO>> packPackages(
-            @RequestBody PackingRequestDTO packages) {
+            @Valid @RequestBody PackingRequestDTO packages) {
         PackingResultDTO result = truckService.addPackagesToTruck(packages);
 
         HttpStatus status = result.unpackedPackageUuids().isEmpty()
@@ -105,7 +106,7 @@ public class TruckController {
     })
     @PostMapping()
     public ResponseEntity<ApiResponse<TruckResponseDTO>> createTruck(
-            @RequestBody CreateTruckDTO newTruck) {
+            @Valid @RequestBody CreateTruckDTO newTruck) {
         TruckResponseDTO addTruck = truckService.createTruck(newTruck);
         return ResponseEntity.ok(ApiResponse.success(addTruck));
     }

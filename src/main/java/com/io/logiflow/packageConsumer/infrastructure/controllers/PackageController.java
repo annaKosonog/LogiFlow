@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -67,7 +68,7 @@ public class PackageController {
             )
     })
     @PostMapping
-    public ResponseEntity<ApiResponse<PackageDTO>> registerPackage(@RequestBody PackageCreateRequest createRequest) {
+    public ResponseEntity<ApiResponse<PackageDTO>> registerPackage(@Valid @RequestBody PackageCreateRequest createRequest) {
         PackageDTO savedPackage = packingService.registerNewPackage(createRequest);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -95,10 +96,10 @@ public class PackageController {
     @PatchMapping("/{packId}")
     public ResponseEntity<ApiResponse<PackageDTO>> updateDimensions(
             @PathVariable UUID packId,
-            @RequestBody UpdatePackageDimensionsRequestDTO fields) {
+            @Valid @RequestBody UpdatePackageDimensionsRequestDTO fields) {
         PackageDTO updated = packingService.updatePackageFields(packId, fields);
         return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
+                .status(HttpStatus.OK)
                 .body(ApiResponse.success(updated));
     }
 }

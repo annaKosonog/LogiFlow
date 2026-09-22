@@ -1,5 +1,6 @@
 package com.io.logiflow.packageConsumer.domain.dto.response;
 
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 @Getter
@@ -9,7 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DimensionsDTO {
-    private int width; //szerokośc
-    private int height; //wysokość
-    private int depth_length; //głębokość, długość
+    @Positive(message = "Width must be positive")
+    private int width;
+
+    @Positive(message = "Height must be positive")
+    private int height;
+
+    @Positive(message = "Depth must be positive")
+    private int depth_length;
 }

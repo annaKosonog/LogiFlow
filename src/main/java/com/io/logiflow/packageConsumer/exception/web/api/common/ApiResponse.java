@@ -24,10 +24,6 @@ public class ApiResponse<T> {
         return new ApiResponse<>(data, null);
     }
 
-    public static <T> ApiResponse<T> error( Object errors) {
-        return new ApiResponse<>(null,  errors);
-    }
-
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(null, message);
     }

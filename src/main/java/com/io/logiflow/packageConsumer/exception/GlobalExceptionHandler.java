@@ -4,9 +4,14 @@ import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class
@@ -63,4 +68,16 @@ GlobalExceptionHandler {
                 .body(ApiResponse.error(e.getMessage()));
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        fe -> fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Invalid value",
+                        (existing, replacement) -> existing // gdy dwa błędy na tym samym polu — zostaw pierwszy
+                ));
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error(fieldErrors.toString()));
+    }
 }
