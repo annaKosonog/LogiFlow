@@ -1,13 +1,17 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
+import com.io.logiflow.packageConsumer.domain.dao.ProcessFailed;
 import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.ParcelInformation;
+import com.io.logiflow.packageConsumer.domain.dto.request.ProcessFailedRequestDto;
 import com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTO;
+import com.io.logiflow.packageConsumer.domain.mapper.ProcessFailedMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.domain.repository.ProcessFailedRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,8 @@ public class TruckPackingExecutor {
 
     private final TruckRepository truckRepository;
     private final PackageRepository packageRepository;
+    private final ProcessFailedRepository processFailedRepository;
+    private final ProcessFailedMapper processFailedMapper;
     private final ParcelPlacementFinder placementFinder;
     private final PackingRequestValidator packingRequestValidator;
 
@@ -49,6 +55,7 @@ public class TruckPackingExecutor {
 
         List<Package> successfullyPlaced = new ArrayList<>();
         List<UUID> unplacedPackageUuids = new ArrayList<>();
+        ProcessFailed entityRequest = new ProcessFailed();
 
         for (Package pkg : newPackages) {
             Optional<CoordinatesDTO> position = placementFinder
@@ -71,6 +78,13 @@ public class TruckPackingExecutor {
             pkg.setTruck(truck);
             pkg.setPackingOrder(nextPackingOrder++);
             successfullyPlaced.add(pkg);
+
+
+            if (!unplacedPackageUuids.isEmpty()) {
+                ProcessFailedRequestDto processFailedRequestDto = new ProcessFailedRequestDto(unplacedPackageUuids);
+                entityRequest = processFailedMapper.toEntityRequest(processFailedRequestDto);
+                processFailedRepository.save(entityRequest);
+            }
         }
 
         packageRepository.saveAll(newPackages);
@@ -81,7 +95,8 @@ public class TruckPackingExecutor {
                 .map(Package::getUuid)
                 .toList();
 
-        return new PackingResultDTO(truck.getUuid(), packedUuids, unplacedPackageUuids);
+
+        return new PackingResultDTO(truck.getUuid(), packedUuids, entityRequest.getUuid());
     }
 
     private static int startingPackingOrder(List<Package> alreadyLoaded) {

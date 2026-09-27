@@ -1,8 +1,8 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
 import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ public class PackageCreateRequestMapperTest {
     }
 
     @Test
-    void toEntity_shouldReturnNull_whenDtoIsNull(){
+    void toEntity_shouldReturnNull_whenDtoIsNull() {
         assertNull(packageCreateRequestMapper.toPackageDao(null));
     }
 

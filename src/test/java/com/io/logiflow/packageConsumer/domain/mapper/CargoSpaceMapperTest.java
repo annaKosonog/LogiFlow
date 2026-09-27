@@ -40,9 +40,9 @@ public class CargoSpaceMapperTest {
         CargoSpaceDTO dto = cargoSpaceMapper.toDTO(cargoSpace);
 
         assertNotNull(dto);
-        assertEquals(0, dto.getCoordinatesDTO().getX());
-        assertEquals(0, dto.getCoordinatesDTO().getY());
-        assertEquals(0, dto.getCoordinatesDTO().getZ());
+        assertEquals(0, dto.getCoordinatesDTO().x());
+        assertEquals(0, dto.getCoordinatesDTO().y());
+        assertEquals(0, dto.getCoordinatesDTO().z());
         assertEquals(2, dto.getDimensionsDTO().getHeight());
         assertEquals(2, dto.getDimensionsDTO().getDepth_length());
     }
@@ -66,8 +66,6 @@ public class CargoSpaceMapperTest {
     void toEntity_shouldReturnNull_whenDtoIsNull() {
         assertNull(cargoSpaceMapper.toEntity(null));
     }
-
-
 
 
 }

@@ -266,7 +266,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
         assertEquals("TRK2026000000002", packagesByUUID.getTrackingNumber());
         assertEquals(5, packagesByUUID.getDimensions().getDepth_length());
-        assertEquals(0, packagesByUUID.getCoordinates().getX());
+        assertEquals(0, packagesByUUID.getCoordinates().x());
         assertEquals("30.00", packagesByUUID.getWeight().toString());
         assertNull(packagesByUUID.getTruckID());
     }

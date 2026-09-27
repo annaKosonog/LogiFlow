@@ -77,7 +77,7 @@ public class TruckController {
             @Valid @RequestBody PackingRequestDTO packages) {
         PackingResultDTO result = truckService.addPackagesToTruck(packages);
 
-        HttpStatus status = result.unpackedPackageUuids().isEmpty()
+        HttpStatus status = result.processFailedUuid() !=null
                 ? HttpStatus.CREATED
                 : HttpStatus.MULTI_STATUS;
 

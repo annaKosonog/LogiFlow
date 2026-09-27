@@ -57,3 +57,9 @@ VALUES ('23f018ef-44d4-473b-8f36-2a892f635098', 0, 0, 0, 140, 120, 190, 5);
 -- 6
 INSERT INTO cargo_spaces (uuid, position_x, position_y, position_z, width, height, depth, truck_id)
 VALUES ('db8e76f9-a7cf-443c-b675-044deb663b02', 0, 0, 0, 220, 250, 1200, 6);
+
+INSERT INTO process_failed (uuid)
+VALUES ('a1b2c3d4-1111-2222-3333-444455556666');
+
+INSERT INTO process_failed_unpacked_packages (process_failed_uuid,  package_uuid)
+VALUES ('a1b2c3d4-1111-2222-3333-444455556666', 'e6d49a74-99f7-4e85-b325-3e2cd906d176');

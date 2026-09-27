@@ -57,9 +57,9 @@ public class CommonMapperTest {
 
         CoordinatesDTO dto = commonMapper.toCoordinatesDTO(pack);
 
-        assertEquals(1, dto.getX());
-        assertEquals(2, dto.getY());
-        assertEquals(3, dto.getZ());
+        assertEquals(1, dto.x());
+        assertEquals(2, dto.y());
+        assertEquals(3, dto.z());
     }
 
     @Test

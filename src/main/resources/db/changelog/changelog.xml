@@ -28,12 +28,17 @@
                  stripComments="true"/>
     </changeSet>
 
-    <changeSet id="5-insert_into_table_truck" author="student">
+    <changeSet id="5-create_process_failed" author="student">
+        <sqlFile path="migration/create_table_process_failed.sql" relativeToChangelogFile="false" splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="6-insert_into_table_truck" author="student">
         <sqlFile path="migration/insert_into_table_truck.sql" relativeToChangelogFile="false" splitStatements="true"
                  stripComments="true"/>
     </changeSet>
 
-    <changeSet id="6-insert_into_table" author="student">
+    <changeSet id="7-insert_into_table" author="student">
         <sqlFile path="migration/insert_into_table.sql" relativeToChangelogFile="false" splitStatements="true"
                  stripComments="true"/>
     </changeSet>
@@ -45,5 +50,8 @@
                           true);
         </sql>
     </changeSet>
+
+
+
 
 </databaseChangeLog>

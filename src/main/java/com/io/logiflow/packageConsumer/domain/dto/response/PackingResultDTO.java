@@ -6,6 +6,6 @@ import java.util.UUID;
 public record PackingResultDTO(
         UUID truckId,
         List<UUID> packedPackageUuids,
-        List<UUID> unpackedPackageUuids
+        UUID processFailedUuid
 ) {
 }
