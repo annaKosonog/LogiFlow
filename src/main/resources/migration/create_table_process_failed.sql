@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS process_failed (
                                 process_failed_id  BIGSERIAL PRIMARY KEY,
-                                uuid                UUID NOT NULL UNIQUE,
-                                unpacked_package_uuids TEXT
+                                uuid                UUID NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS process_failed_unpacked_packages (
