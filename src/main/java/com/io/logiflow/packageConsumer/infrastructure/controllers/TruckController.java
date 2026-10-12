@@ -17,7 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/trucks")
@@ -70,16 +73,15 @@ public class TruckController {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
-
-    //List<UUID> dodanych, nie
     @PostMapping("/pack")
     public ResponseEntity<ApiResponse<PackingResultDTO>> packPackages(
             @Valid @RequestBody PackingRequestDTO packages) {
         PackingResultDTO result = truckService.addPackagesToTruck(packages);
 
-        HttpStatus status = result.processFailedUuid() !=null
-                ? HttpStatus.CREATED
-                : HttpStatus.MULTI_STATUS;
+        HttpStatus status = CollectionUtils.isEmpty(
+                Collections.singleton(result.processFailedUuid()))
+                ? HttpStatus.MULTI_STATUS
+                : HttpStatus.CREATED;
 
         return ResponseEntity
                 .status(status)

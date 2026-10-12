@@ -33,17 +33,17 @@
                  stripComments="true"/>
     </changeSet>
 
-    <changeSet id="6-insert_into_table_truck" author="student">
+    <changeSet id="6-insert_into_table_truck" author="student" context="!test">
         <sqlFile path="migration/insert_into_table_truck.sql" relativeToChangelogFile="false" splitStatements="true"
                  stripComments="true"/>
     </changeSet>
 
-    <changeSet id="7-insert_into_table" author="student">
+    <changeSet id="7-insert_into_table" author="student" context="!test">
         <sqlFile path="migration/insert_into_table.sql" relativeToChangelogFile="false" splitStatements="true"
                  stripComments="true"/>
     </changeSet>
 
-    <changeSet id="sync-tracking-sequence" author="student">
+    <changeSet id="sync-tracking-sequence" author="student" context="!test">
         <sql>
             SELECT setval('tracking_number_seq',
                           (SELECT COALESCE(MAX(CAST(SUBSTRING(tracking_number FROM 8) AS BIGINT)), 0) FROM packages),

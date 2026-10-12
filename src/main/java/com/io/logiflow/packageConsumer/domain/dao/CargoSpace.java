@@ -1,6 +1,5 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

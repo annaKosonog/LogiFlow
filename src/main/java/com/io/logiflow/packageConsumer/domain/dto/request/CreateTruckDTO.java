@@ -1,12 +1,15 @@
 package com.io.logiflow.packageConsumer.domain.dto.request;
 
 import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
+import jakarta.persistence.Column;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.ToString;
 
 import java.math.BigDecimal;
+
 
 public record CreateTruckDTO(
         @NotBlank(message = "License plate is required")

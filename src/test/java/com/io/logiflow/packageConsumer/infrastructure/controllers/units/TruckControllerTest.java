@@ -6,6 +6,7 @@ import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.TruckController;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
@@ -33,6 +34,7 @@ import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoad
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.createThirdTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTOFixture.firstAddPacking;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createLoadedTruckDTO;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckDTOFixture.createSecondLoadedTruckDTO;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTOFixture.thirdCreateTruckResponse;
@@ -120,16 +122,19 @@ public class TruckControllerTest {
     public void shouldAddPackagesToTruckSuccessfully() throws Exception {
         PackingRequestDTO toPack = firstPackingToPack();
 
+        when(truckService.addPackagesToTruck(any(PackingRequestDTO.class))).thenReturn(firstAddPacking());
+
         String jsonRequest = objectMapper.writeValueAsString(toPack);
+
 
         MvcResult result = mvc.perform(post("/api/trucks/pack")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         int status = result.getResponse().getStatus();
-        assertEquals(200, status);
+        assertEquals(201, status);
     }
 
     @Test

@@ -20,6 +20,7 @@ public class PackingRequestValidator {
             throw new ResourceAlreadyExistsException("The list of packages to be loaded cannot be empty!");
         }
         List<Package> existingPackages = packageRepository.findAllByUuidIn(boxesToPack);
+        existingPackages.forEach(System.out::println);
 
         if (existingPackages.size() != boxesToPack.size()) {
             throw new ResourceAlreadyExistsException("Unable to load: One or more packages do not exist in the database!");

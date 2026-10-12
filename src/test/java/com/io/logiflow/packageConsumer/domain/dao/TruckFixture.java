@@ -45,6 +45,14 @@ public class TruckFixture {
         return truck;
     }
 
+        public static Truck createThirdTruck() {
+            // Tworzymy ciężarówkę z limitem 200.00
+            Truck truck = createTruckWithPayload("200.00");
+            truck.setUuid(UUID.fromString("aaaaa-abbbb-4018-bcba-87e20ad08606"));
+            truck.setLicensePlate("KR 12345");
+            return truck;
+    }
+
     public static Truck createLoadedSecondTruck() {
         // Tworzymy ciężarówkę z limitem 200.00
         Truck truck = createSecondTruckWithPayload("150.00");

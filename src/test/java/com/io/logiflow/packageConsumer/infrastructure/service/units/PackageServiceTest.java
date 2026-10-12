@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.filterPack;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.smallRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestFixture.smallRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.filterBoxPackDto;
 import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.smallDTO;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -4,7 +4,8 @@ import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
 import com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
@@ -12,25 +13,14 @@ import static com.io.logiflow.packageConsumer.domain.dao.CargoSpaceFixture.small
 import static com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTOFixture.boxFits;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 public class CargoSpaceMapperTest {
 
     private CargoSpaceMapper cargoSpaceMapper;
 
     @BeforeEach
     void setUp() {
-        CommonMapper commonMapper = new CommonMapperImpl();
-
-        PackageMapperImpl packageMapperImpl = new PackageMapperImpl();
-        ReflectionTestUtils.setField(packageMapperImpl, "commonMapper", commonMapper);
-
-        TruckMapperImpl truckMapperImpl = new TruckMapperImpl();
-        ReflectionTestUtils.setField(truckMapperImpl, "packageMapper", packageMapperImpl);
-        ReflectionTestUtils.setField(truckMapperImpl, "commonMapper", commonMapper);
-
-        CargoSpaceMapperImpl cargoSpaceMapperImpl = new CargoSpaceMapperImpl();
-        ReflectionTestUtils.setField(cargoSpaceMapperImpl, "truckMapper", truckMapperImpl);
-
-        cargoSpaceMapper = cargoSpaceMapperImpl;
+        cargoSpaceMapper = new CargoSpaceMapperImpl();
     }
 
     @Test

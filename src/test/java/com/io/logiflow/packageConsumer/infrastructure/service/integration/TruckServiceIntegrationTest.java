@@ -5,6 +5,7 @@ import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
@@ -18,18 +19,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.thirdBoxPackToTruck;
+import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.*;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.randomUUIDTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 
@@ -44,10 +46,11 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     TruckFilterDto filter = new TruckFilterDto();
 
     Package savedFirstPackage;
-    Package savedThirdPackage;
+    Package savedSecondPackage;
 
     Truck savedFirstTruck;
     Truck savedSecondTruck;
+    List<UUID> uuids;
 
 
     @Autowired
@@ -55,26 +58,31 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        savedFirstPackage = packageRepository.save(firstBoxPackToTruck());
-        savedThirdPackage = packageRepository.save(thirdBoxPackToTruck());
-
         savedFirstTruck = truckRepository.save(createLoadedTruck());
         savedSecondTruck = truckRepository.save(createLoadedSecondTruck());
-        packageRepository.flush();
-        truckRepository.flush();
+
+        savedFirstPackage = packageRepository.save(firstBoxPackToTruck());
+        savedSecondPackage = packageRepository.save(secondBoxPackToTruck());
+        uuids = new ArrayList<>();
     }
 
     @AfterEach
     void cleanUpDatabase() {
-        try {
-            packageRepository.deleteAll();
-            packageRepository.flush();
-            truckRepository.deleteAll();
-            truckRepository.flush();
-        } catch (Exception e) {
-            throw e;
-        }
+        truckRepository.deleteAll();
+        packageRepository.deleteAll();
     }
+
+    @Autowired
+    private Environment environment;
+
+    @Test
+    void checkLiquibaseContext() {
+        System.out.println(
+                "Liquibase contexts = " +
+                        environment.getProperty("spring.liquibase.contexts")
+        );
+    }
+
 
     @Test
     void shouldReturnAllTruck() {
@@ -133,14 +141,11 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldAddPackagesToTruck() {
         PackingRequestDTO toPack = thirdPackingToPack();
-        truckService.addPackagesToTruck(toPack);
+        packageRepository.save(thirdBoxPackToTruck());
 
-        Truck reloaded = truckRepository.findTruckByUuid(savedFirstTruck.getUuid())
-                .orElseThrow(() -> new AssertionError("Nie znaleziono ciężarówki o UUID: " + savedThirdPackage.getUuid()));
+        PackingResultDTO result = truckService.addPackagesToTruck(toPack);
 
-        assertThat(reloaded.getPackedPackages())
-                .extracting(Package::getUuid)
-                .contains(savedThirdPackage.getUuid());
+        Assertions.assertEquals(UUID.fromString("d81f3a6c-5e97-4b2d-8c04-f7a2b9e1d365"), result.packedPackageUuids().getFirst());
     }
 
     @Test
@@ -153,14 +158,16 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnAddedTruck() {
+        // given
         CreateTruckDTO thirdTruck = createThirdTruck();
 
-        TruckResponseDTO addTruck = truckService.createTruck(thirdTruck);
-        Truck result = truckRepository.findTruckByUuid(savedFirstTruck.getUuid())
-                .orElseThrow();
+        // when
+        TruckResponseDTO addedTruck = truckService.createTruck(thirdTruck);
 
-        assertThat(result.getUuid().equals(addTruck.uuid()));
-        assertThat(addTruck.licensePlate().contains("KR 12345"));
+        // then
+
+        assertThat(thirdTruck.maxPayload()).isEqualTo(addedTruck.maxPayload());
+        assertThat(thirdTruck.licensePlate()).isEqualTo("KR 12345");
     }
 
     @Test
@@ -175,7 +182,7 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     void shouldThrowExceptionWhenOnesProvidedParameterIsNegative() {
         CreateTruckDTO negativeWidthTruck = createNegativeWidthTruck();
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(negativeWidthTruck));
-        Assertions.assertEquals("Width must be greater than zero", exception.getMessage());
+        Assertions.assertEquals("Exterior width must be greater than zero", exception.getMessage());
     }
 
     @Test
@@ -189,6 +196,36 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     void shouldThrowExceptionWhenProvidedLicensePlateIsExists() {
         ResourceAlreadyExistsException exception = Assertions.assertThrows(ResourceAlreadyExistsException.class, () -> truckService.createTruck(createFirstTruck()));
         Assertions.assertEquals("The truck with license plate WI 1234E already exists", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnCorrectAddPackToTruck() {
+        packageRepository.save(thirdBoxPackToTruck());
+        uuids.add(thirdBoxPackToTruck().getUuid());
+        truckService.addPackagesToTruck(thirdPackingToPack());
+
+        List<Package> packagesOnTruck = packageRepository.findAll().stream()
+                .filter(p -> p.getTruck() != null)
+                .filter(p -> p.getTruck().getUuid().equals(savedFirstTruck.getUuid()))
+                .toList();
+
+        assertThat(packagesOnTruck)
+                .extracting(Package::getUuid)
+                .contains(thirdBoxPackToTruck().getUuid());
+
+        assertThat(packagesOnTruck).hasSize(1);
+    }
+
+    @Test
+    void shouldPackMultiplePackagesInOneCall() {
+        packageRepository.save(packageNotSaveInDb());
+        uuids.add(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"));
+        uuids.add(UUID.fromString("7f3a2b1c-9d84-4e6f-b521-8a7c3d2e1f90"));
+
+        PackingResultDTO result = truckService.addPackagesToTruck(multiPacked());
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.packedPackageUuids().size());
     }
 }
 

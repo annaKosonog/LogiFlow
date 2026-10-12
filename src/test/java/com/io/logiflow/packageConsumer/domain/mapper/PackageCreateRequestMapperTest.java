@@ -7,7 +7,7 @@ import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.exactRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestFixture.exactRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PackageCreateRequestMapperTest {

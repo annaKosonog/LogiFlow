@@ -24,7 +24,7 @@ public final class DimensionValidator {
         if (number instanceof BigDecimal bd) {
             return bd;
         }
-        return BigDecimal.valueOf(number.intValue());
+        return new BigDecimal(number.toString());
     }
 
     public static void validateNotBlank(String value, String fieldName) {
@@ -43,6 +43,14 @@ public final class DimensionValidator {
 
 
     public record NamedDimension(String name, Number value) {
+    }
+
+    public static void validatePackage(Number weight, Number length, Number width, Number height) {
+        validatePositiveDimensions(
+                new NamedDimension("Weight", weight),
+                new NamedDimension("Length", length),
+                new NamedDimension("Width", width),
+                new NamedDimension("Height", height));
     }
 
 }

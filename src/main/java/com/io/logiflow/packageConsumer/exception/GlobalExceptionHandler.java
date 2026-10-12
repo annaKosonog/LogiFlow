@@ -46,14 +46,6 @@ GlobalExceptionHandler {
                 .body(ApiResponse.error("The required resource was not found"));
     }
 
-    // 2. Error 500
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected system error has occurred"));
-    }
-
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ApiResponse<Void>> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
         return ResponseEntity
@@ -78,6 +70,6 @@ GlobalExceptionHandler {
                 ));
         return ResponseEntity
                 .badRequest()
-                .body(ApiResponse.error(fieldErrors.toString()));
+                .body(ApiResponse.error(fieldErrors.values().iterator().next()));
     }
 }

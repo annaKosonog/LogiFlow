@@ -65,6 +65,14 @@ public class PackageFixture {
         return new Package(cargoSpace.getWidth(), cargoSpace.getHeight(), cargoSpace.getDepth(), new BigDecimal("10"));
     }
 
+    public static Package aPackage(int w, int h, int d) {
+        Package p = new Package();
+        p.setWidth(w);
+        p.setHeight(h);
+        p.setDepth(d);
+        return p;
+    }
+
     public static Package firstBoxPackToTruck() {
         Package p1 = smallDao();
         //  p1.setPackageId(1L);
@@ -87,12 +95,11 @@ public class PackageFixture {
     public static Package thirdBoxPackToTruck() {
         Package p1 = mediumDao();
         //  p1.setPackageId(2L);
-        p1.setUuid(UUID.fromString("f7f4b7d2-660c-4430-bcec-ce3f9dd32c36"));
+        p1.setUuid(UUID.fromString("d81f3a6c-5e97-4b2d-8c04-f7a2b9e1d365"));
         p1.setTrackingNumber("TRK2026000000009");
         p1.setCoordX(0);
         p1.setCoordY(0);
         p1.setCoordZ(0);
-        p1.setTruck(null);
         return p1;
     }
 
@@ -101,6 +108,13 @@ public class PackageFixture {
         Package p1 = largeDao();
         p1.setPackageId(2L);
         p1.setTrackingNumber("TRK2026000000002");
+        return p1;
+    }
+
+    public static Package packageNotSaveInDb() {
+        Package p1 = largeDao();
+        p1.setUuid(UUID.fromString("7f3a2b1c-9d84-4e6f-b521-8a7c3d2e1f90"));
+        p1.setTrackingNumber("TRK2026000000005");
         return p1;
     }
 

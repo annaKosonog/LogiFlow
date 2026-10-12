@@ -3,23 +3,26 @@ package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,6 +34,9 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private PackageService packageService;
 
+    @Autowired
+    private JdbcTemplate jdbc;
+
     PackageFilterDTO filter = new PackageFilterDTO();
 
 
@@ -38,6 +44,15 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     public void setUp() {
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
+
+        jdbc.execute("""
+    SELECT setval(
+        'tracking_number_seq',
+        GREATEST(COALESCE((SELECT MAX(CAST(SUBSTRING(tracking_number FROM 8) AS BIGINT))
+                           FROM packages), 0), 1),
+        (SELECT COUNT(*) > 0 FROM packages)
+    )
+""");
     }
 
     @AfterEach
@@ -54,6 +69,9 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldReturnANewPackage() {
         PackageCreateRequest request = smallRequest();
+        System.out.println(packageRepository.findAll());
+        System.out.println("--------------------------------------");
+
         PackageDTO newPackage = packageService.registerNewPackage(request);
 
         assertEquals(1, newPackage.getDimensions().getWidth());
@@ -63,10 +81,10 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldThrowExceptionWhenDimensionIsNull() {
-        PackageCreateRequest request = firstBoxCreateRequest();
+        PackageCreateRequest request = createPackageWithoutDimension();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
-        assertEquals("Dimensions and weight are required", exception.getMessage());
+        assertEquals("Length must be greater than zero", exception.getMessage());
     }
 
     @Test
@@ -100,10 +118,16 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldThrowWhenNewPackageRequestDepthIsNegative() {
-        PackageCreateRequest request = requestFirst();
-        request.getDimensions().setDepth_length(-1);
+        DimensionsDTO d = new DimensionsDTO();
+        d.setWidth(10);
+        d.setHeight(10);
+        d.setDepth_length(-10);
+
+        PackageCreateRequest request = new PackageCreateRequest();
+        request.setWeight(BigDecimal.valueOf(2));
+        request.setDimensions(d);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.registerNewPackage(request));
-        assertEquals("Length/Depth must be greater than zero", exception.getMessage());
+        assertEquals("Length must be greater than zero", exception.getMessage());
     }
 
     @Test

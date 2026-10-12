@@ -4,16 +4,20 @@ import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 
 import java.math.BigDecimal;
 
-import static com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTOFixture.dimensionSmallDTO;
+import static com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTOFixture.*;
 
-public class PackageCreateRequestTest {
+public class PackageCreateRequestFixture {
 
     public static PackageCreateRequest firstBoxCreateRequest() {
-        return new PackageCreateRequest(null, new BigDecimal("25.0"), null);
+        return new PackageCreateRequest(dimensionMediumDTO(), new BigDecimal("25.0"), null);
+    }
+
+    public static PackageCreateRequest createPackageWithoutDimension() {
+        return new PackageCreateRequest(new DimensionsDTO(), new BigDecimal("25.0"), null);
     }
 
     public static PackageCreateRequest largeAndHeavyBoxRequest() {
-        return new PackageCreateRequest(null, new BigDecimal("130.0"), null);
+        return new PackageCreateRequest(dimensionLargeDTO(), new BigDecimal("130.0"), null);
     }
 
     public static PackageCreateRequest smallRequest() {
@@ -27,6 +31,7 @@ public class PackageCreateRequestTest {
     public static PackageCreateRequest exactSecondRequest() {
         return new PackageCreateRequest(new DimensionsDTO(210, 90, 40), new BigDecimal("54.0"), null);
     }
+
     public static PackageCreateRequest exactThirdRequest() {
         return new PackageCreateRequest(new DimensionsDTO(67, 54, 600), new BigDecimal("123.0"), null);
     }
@@ -38,8 +43,6 @@ public class PackageCreateRequestTest {
     public static PackageCreateRequest requestSecond() {
         return new PackageCreateRequest(new DimensionsDTO(6, 6, 6), new BigDecimal("2.0"), null);
     }
-
-
 
 
 }

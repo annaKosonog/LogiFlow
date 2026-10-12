@@ -14,6 +14,6 @@ public class CargoSpaceFixture {
     }
 
     public static CargoSpace spaceAtPosition() {
-        return new CargoSpace(1,2,3);  // dowolna pozycja i wymiary
+        return new CargoSpace(1, 2, 3);  // dowolna pozycja i wymiary
     }
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.firstBoxPackToTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.secondBoxPackToTruck;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.*;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestFixture.*;
 import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -248,7 +249,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenDimensionsAreMissing() throws Exception {
-        String jsonRequest = objectMapper.writeValueAsString(firstBoxCreateRequest());
+        String jsonRequest = objectMapper.writeValueAsString(createPackageWithoutDimension());
 
         mockMvc.perform(post("/api/packages")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -368,6 +369,9 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
                 {
                     "weight": "aac"
                 }""";
+
+        System.out.println("============================================");
+        System.out.println(packageRepository.findAll());
 
         mockMvc.perform(patch("/api/packages/{packId}", uuid)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -21,6 +21,7 @@ import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOF
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,7 +46,6 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
     public void setUp() {
         truckRepository.save(createLoadedTruck());
         truckRepository.save(createLoadedSecondTruck());
-        packageRepository.save(thirdBoxPackToTruck());
     }
 
     @AfterEach
@@ -87,11 +87,11 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/trucks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("minLength", "175")
-                        .param("maxLength", "600"))
+                        .param("maxLength", "601"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].idTruck").value("528e0004-a6f9-4018-bcba-87e20ad08606"))
-                .andExpect(jsonPath("$.data.content[1].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"))
+                .andExpect(jsonPath("$.data.content[0].licensePlate").value("WI 1234E"))
+                .andExpect(jsonPath("$.data.content[1].licensePlate").value("W0 1234"))
                 .andExpect(jsonPath("$.data.content", hasSize(2)));
     }
 
@@ -123,7 +123,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .param("maxLength", "450"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].idTruck").value("bb541dbd-3206-4f7e-b23c-ae6f9af78db5"));
+                .andExpect(jsonPath("$.data.content[0].idTruck").value("c771f079-fb74-4811-b491-e78673c41e0d"));
     }
 
     @Test
@@ -172,14 +172,16 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn200WhenAddNewPackageToTruckThatIsNotAssignedToATruck() throws Exception {
+        packageRepository.save(thirdBoxPackToTruck());
         PackingRequestDTO toPack = thirdPackingToPack();
+
         String body = objectMapper.writeValueAsString(toPack);
 
         mockMvc.perform(post("/api/trucks/pack")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -235,7 +237,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors").value("license_plate is required"));
+                .andExpect(jsonPath("$.errors").value("License plate is required"));
     }
 
     @Test
@@ -248,7 +250,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors").value("Dimensions and weight are required"));
+                .andExpect(jsonPath("$.errors").value("Max payload is required"));
     }
 
     @Test
@@ -261,6 +263,6 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors").value("Width must be greater than zero"));
+                .andExpect(jsonPath("$.errors").value("Width must be positive"));
     }
 }

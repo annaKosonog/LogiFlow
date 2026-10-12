@@ -42,6 +42,7 @@ public class TruckPackingExecutor {
                         "The truck with the id " + packages.truckId() + " does not exist"));
 
         List<Package> newPackages = packingRequestValidator.resolveAndValidatePackages(packages.packageId());
+        newPackages.forEach(Package::getPackageId);
 
         List<ParcelInformation> placedParcels = truck.getPackedPackages().stream()
                 .map(p -> new ParcelInformation(p.getUuid(),

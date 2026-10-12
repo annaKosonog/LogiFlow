@@ -27,8 +27,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.firstBoxCreateRequest;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestTest.largeAndHeavyBoxRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestFixture.firstBoxCreateRequest;
+import static com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequestFixture.largeAndHeavyBoxRequest;
 import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.fieldWeightAndWidthToUpdate;
 import static com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTOFixture.fieldWeightToUpdate;
 import static com.io.logiflow.packageConsumer.domain.dto.response.PackageFixtureDTO.*;

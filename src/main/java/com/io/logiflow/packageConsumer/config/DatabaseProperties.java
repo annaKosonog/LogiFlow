@@ -3,22 +3,23 @@ package com.io.logiflow.packageConsumer.config;
 import lombok.Getter;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @Getter
 public class DatabaseProperties {
 
-    @Value("${spring.datasource.url}")
-    private String url;
+    private final JdbcConnectionDetails details;
 
-    @Value("${spring.datasource.username}")
-    private String username;
+    public DatabaseProperties(JdbcConnectionDetails details) {
+        this.details = details;
+    }
 
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    @Value("${spring.datasource.driver-class-name}")
-    private String driverClassName;
+    public String getUrl() { return details.getJdbcUrl(); }
+    public String getUsername() { return details.getUsername(); }
+    public String getPassword() { return details.getPassword(); }
 
 }

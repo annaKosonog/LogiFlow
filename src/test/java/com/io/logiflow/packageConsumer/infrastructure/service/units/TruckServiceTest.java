@@ -4,6 +4,7 @@ import com.io.logiflow.packageConsumer.domain.dao.Truck;
 import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
@@ -11,8 +12,9 @@ import com.io.logiflow.packageConsumer.domain.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
-import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.service.CargoSpaceService;
 import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
+import com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation.TruckPackingExecutor;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,8 +38,8 @@ import java.util.UUID;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedSecondTruck;
 import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoadedTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOFixture.*;
-import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.randomUUIDTruck;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
+import static com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTOFixture.boxFits;
 import static com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTOFixture.secondCreateTruckResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,14 +51,18 @@ class TruckServiceTest {
     @Mock
     private TruckRepository truckRepository;
 
-    @Mock
-    private ParcelPackingService parcelPackingService;
 
     @Mock
-    private TruckMapper truckMapper;
+    TruckMapper truckMapper;
 
     @Mock
     private PackageRepository packageRepository;
+
+    @Mock
+    private CargoSpaceService cargoSpaceService;
+
+    @Mock
+    TruckPackingExecutor truckPackingExecutor;
 
     @InjectMocks
     private TruckService truckService;
@@ -127,16 +133,6 @@ class TruckServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenTruckIdNotExists() {
-        PackingRequestDTO toPack = randomUUIDTruck();
-
-        when(truckRepository.findTruckByUuid(toPack.truckId())).thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> truckService.addPackagesToTruck(toPack));
-
-        assertEquals("The truck with the id " + toPack.truckId() + " does not exist", exception.getMessage());
-    }
-
-    @Test
     void getTrucks_shouldConvertPageNumberCorrectly_forPageableCalculation() {
         // given: sprawdzamy że page-1 jest poprawnie przekazywane (page 3 -> index 2)
         int page = 3;
@@ -162,9 +158,6 @@ class TruckServiceTest {
     @Test
     void shouldReturnPackagesWhichAddToTruck() {
         PackingRequestDTO toPack = thirdPackingToPack();
-        UUID truckId = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
-
-        when(truckRepository.findTruckByUuid(truckId)).thenReturn(Optional.of(createLoadedTruck()));
 
         truckService.addPackagesToTruck(toPack);
 
@@ -177,21 +170,25 @@ class TruckServiceTest {
         String license_plate = "W0 1234";
 
         when(truckRepository.existsByLicensePlate(license_plate)).thenReturn(false);
-        when(truckMapper.toEntityTruck(any(CreateTruckDTO.class))).thenReturn(createLoadedSecondTruck());
         when(truckRepository.save(any(Truck.class))).thenReturn(createLoadedSecondTruck());
         when(truckMapper.toTruckResponseDTO(any(Truck.class))).thenReturn(secondCreateTruckResponse());
+        when(cargoSpaceService.addNewCargoSpaceToTruck(any(Truck.class), any(DimensionsDTO.class))).thenReturn(boxFits());
 
         TruckResponseDTO addTruck = truckService.createTruck(createTruck);
 
         assertEquals(license_plate, addTruck.licensePlate());
-        assertThat(addTruck.uuid().equals(UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606")));
+        assertThat(addTruck.uuid())
+                .isEqualTo(UUID.fromString("c771f079-fb74-4811-b491-e78673c41e0d"));
+
+        verify(truckRepository).save(any(Truck.class));
+        verify(cargoSpaceService).addNewCargoSpaceToTruck(any(Truck.class), any(DimensionsDTO.class));
     }
 
     @Test
     void shouldThrowExceptionWhenProvidedNegativeParameter() {
         CreateTruckDTO weightTruck = createNegativeWidthTruck();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> truckService.createTruck(weightTruck));
-        assertEquals("Width must be greater than zero", exception.getMessage());
+        assertEquals("Exterior width must be greater than zero", exception.getMessage());
     }
 
     @Test

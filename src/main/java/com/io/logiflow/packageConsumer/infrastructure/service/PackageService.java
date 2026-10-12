@@ -4,6 +4,7 @@ import com.io.logiflow.packageConsumer.domain.dao.Package;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
@@ -36,6 +37,7 @@ public class PackageService {
     @Transactional
     public PackageDTO registerNewPackage(PackageCreateRequest pack) {
         validateNewPackageRequest(pack);
+
         long nextSeq = packageRepository.getNextTrackingSequenceValue();
         Package entity = createRequestMapper.toPackageDao(pack);
         String generatedTrackingNumber = entity.generateTrackingNumberAutomatically(nextSeq);
@@ -101,20 +103,17 @@ public class PackageService {
 
     private void validatePackageDimensions(UpdatePackageDimensionsRequestDTO request) {
         if (request == null) return;
-        DimensionValidator.validatePositiveDimensions(
-                new DimensionValidator.NamedDimension("Weight", request.weight()),
-                new DimensionValidator.NamedDimension("Length", request.length()),
-                new DimensionValidator.NamedDimension("Width", request.width()),
-                new DimensionValidator.NamedDimension("Height", request.height()));
+        DimensionValidator.validatePackage(
+                request.weight(), request.length(), request.width(), request.height());
     }
 
     private void validateNewPackageRequest(PackageCreateRequest pack) {
         if (pack == null || pack.getDimensions() == null || pack.getWeight() == null) {
             throw new IllegalArgumentException("Dimensions and weight are required");
         }
-
-        // int z getDepth_length(), getWidth(), getHeight() is automatically converted (autoboxed) to an Integer!
-        validateDimensions(pack.getDimensions(), "Package dimension");
+        DimensionsDTO d = pack.getDimensions();
+        DimensionValidator.validatePackage(
+                pack.getWeight(), d.getDepth_length(), d.getWidth(), d.getHeight());
     }
 
     private boolean hasAnyField(UpdatePackageDimensionsRequestDTO request) {

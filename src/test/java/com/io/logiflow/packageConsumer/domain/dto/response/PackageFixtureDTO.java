@@ -24,9 +24,8 @@ public class PackageFixtureDTO {
     }
 
     public static PackageDTO smallDTOUpdate() {
-        return new PackageDTO(UUID.randomUUID(), "XYZ-SMALL", new DimensionsDTO(45,1,1), new BigDecimal("12.95"), null, null);
+        return new PackageDTO(UUID.randomUUID(), "XYZ-SMALL", new DimensionsDTO(45, 1, 1), new BigDecimal("12.95"), null, null);
     }
-
 
 
     public static PackageDTO mediumDTO() {

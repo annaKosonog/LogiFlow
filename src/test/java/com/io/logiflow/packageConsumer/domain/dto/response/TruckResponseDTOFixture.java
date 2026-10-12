@@ -1,7 +1,5 @@
 package com.io.logiflow.packageConsumer.domain.dto.response;
 
-import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
