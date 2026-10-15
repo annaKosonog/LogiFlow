@@ -38,7 +38,7 @@ public class PackageService {
     public PackageDTO registerNewPackage(PackageCreateRequest pack) {
         validateNewPackageRequest(pack);
 
-        long nextSeq = packageRepository.getNextTrackingSequenceValue();
+        long nextSeq = packageRepository.getNextTrackingSequenceValue()+1;
         Package entity = createRequestMapper.toPackageDao(pack);
         String generatedTrackingNumber = entity.generateTrackingNumberAutomatically(nextSeq);
         String checkTrackingNumber = packageRepository.findByTrackingNumber(generatedTrackingNumber);

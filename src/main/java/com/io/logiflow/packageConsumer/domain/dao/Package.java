@@ -3,6 +3,7 @@ package com.io.logiflow.packageConsumer.domain.dao;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.repository.Lock;
 
 
 import java.math.BigDecimal;
