@@ -9,7 +9,6 @@ import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,15 +43,6 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     public void setUp() {
         packageRepository.save(firstBoxPackToTruck());
         packageRepository.save(secondBoxPackToTruck());
-
-        jdbc.execute("""
-    SELECT setval(
-        'tracking_number_seq',
-        GREATEST(COALESCE((SELECT MAX(CAST(SUBSTRING(tracking_number FROM 8) AS BIGINT))
-                           FROM packages), 0), 1),
-        (SELECT COUNT(*) > 0 FROM packages)
-    )
-""");
     }
 
     @AfterEach
