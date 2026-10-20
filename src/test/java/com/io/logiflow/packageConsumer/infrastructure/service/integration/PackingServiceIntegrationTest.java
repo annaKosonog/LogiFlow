@@ -1,14 +1,14 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.integration;
 
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
-import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
+import com.io.logiflow.packageConsumer.application.service.PackageService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

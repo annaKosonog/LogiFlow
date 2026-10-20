@@ -1,10 +1,10 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,6 @@ import static com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTOF
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.firstPackingToPack;
 import static com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTOFixture.thirdPackingToPack;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

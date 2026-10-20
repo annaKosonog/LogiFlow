@@ -1,5 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.dto.response;
 
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResultDTO;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

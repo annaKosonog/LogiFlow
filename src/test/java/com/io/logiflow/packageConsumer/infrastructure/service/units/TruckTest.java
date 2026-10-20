@@ -1,7 +1,7 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

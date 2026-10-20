@@ -1,9 +1,12 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.CommonMapperImpl;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageMapper;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageMapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

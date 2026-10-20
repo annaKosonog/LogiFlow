@@ -1,5 +1,9 @@
 package com.io.logiflow.packageConsumer.domain.dto.response;
 
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.CoordinatesDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

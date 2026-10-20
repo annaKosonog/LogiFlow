@@ -1,6 +1,6 @@
 package com.io.logiflow.packageConsumer.domain.dto.request;
 
-import com.io.logiflow.packageConsumer.domain.dao.ProcessFailed;
+import com.io.logiflow.packageConsumer.infrastructure.dao.ProcessFailed;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,16 +2,15 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 

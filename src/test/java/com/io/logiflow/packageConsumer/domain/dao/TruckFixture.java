@@ -1,5 +1,8 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -15,7 +18,7 @@ public class TruckFixture {
     private static final int DEFAULT_LENGTH = 600;
 
     // Fabryka dla pudełek (podajesz tylko wagę)
-    public static Package createBox(String weight) {
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package createBox(String weight) {
         return new Package(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_LENGTH, new BigDecimal(weight));
     }
 

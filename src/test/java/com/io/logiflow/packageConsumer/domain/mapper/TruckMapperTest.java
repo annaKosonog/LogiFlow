@@ -1,9 +1,13 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.*;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.CommonMapperImpl;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageMapperImpl;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.TruckMapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -28,7 +32,7 @@ public class TruckMapperTest {
         PackageMapperImpl packageMapperImpl = new PackageMapperImpl();
         ReflectionTestUtils.setField(packageMapperImpl, "commonMapper", commonMapper);
 
-        TruckMapperImpl impl = new TruckMapperImpl();
+        TruckMapperImpl impl = new com.io.logiflow.packageConsumer.infrastructure.mapper.TruckMapperImpl();
         ReflectionTestUtils.setField(impl, "packageMapper", packageMapperImpl);
         ReflectionTestUtils.setField(impl, "commonMapper", commonMapper);
 

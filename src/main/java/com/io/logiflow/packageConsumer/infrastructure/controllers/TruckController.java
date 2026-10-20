@@ -1,13 +1,13 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackingResultDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.TruckResponseDTO;
-import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
-import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResultDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
+import com.io.logiflow.packageConsumer.infrastructure.exception.web.api.common.ApiResponse;
+import com.io.logiflow.packageConsumer.application.service.TruckService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

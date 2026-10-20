@@ -1,11 +1,11 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.UpdatePackageDimensionsRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
-import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
-import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.UpdatePackageDimensionsRequestDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.exception.web.api.common.ApiResponse;
+import com.io.logiflow.packageConsumer.application.service.PackageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

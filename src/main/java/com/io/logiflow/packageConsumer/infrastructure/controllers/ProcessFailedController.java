@@ -1,8 +1,8 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers;
 
-import com.io.logiflow.packageConsumer.domain.dto.response.ProcessFailedResponseDto;
-import com.io.logiflow.packageConsumer.exception.web.api.common.ApiResponse;
-import com.io.logiflow.packageConsumer.infrastructure.service.ProcessFailedService;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.ProcessFailedResponseDto;
+import com.io.logiflow.packageConsumer.infrastructure.exception.web.api.common.ApiResponse;
+import com.io.logiflow.packageConsumer.application.service.ProcessFailedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;

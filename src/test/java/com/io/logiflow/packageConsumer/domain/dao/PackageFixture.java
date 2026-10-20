@@ -1,5 +1,8 @@
 package com.io.logiflow.packageConsumer.domain.dao;
 
+import com.io.logiflow.packageConsumer.infrastructure.dao.CargoSpace;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,71 +13,71 @@ import static com.io.logiflow.packageConsumer.domain.dao.TruckFixture.createLoad
 
 public class PackageFixture {
 
-    public static Package boxAt(int x, int y, int z, String weight) {
-        Package pkg = createBox(weight); // metoda z Twojej klasy testowej pomocniczej (TestDataFactory / TestFixtures)
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package boxAt(int x, int y, int z, String weight) {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package pkg = createBox(weight); // metoda z Twojej klasy testowej pomocniczej (TestDataFactory / TestFixtures)
         pkg.setCoordX(x);
         pkg.setCoordY(y);
         pkg.setCoordZ(z);
         return pkg;
     }
 
-    public static Package smallDao() {
-        return new Package(1, 1, 1, new BigDecimal("10"));  // objętość = 1
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package smallDao() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(1, 1, 1, new BigDecimal("10"));  // objętość = 1
     }
 
-    public static Package smallDaoSaved() {
-        Package p1 = smallDao();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package smallDaoSaved() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = smallDao();
         p1.setTruck(createLoadedTruck());
         return p1;
     }
 
 
-    public static Package largeDao() {
-        return new Package(5, 5, 5, new BigDecimal("30"));  // objętość = 125
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package largeDao() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(5, 5, 5, new BigDecimal("30"));  // objętość = 125
     }
 
-    public static Package mediumDao() {
-        return new Package(2, 2, 2, new BigDecimal("20")); // objętość = 8
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package mediumDao() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(2, 2, 2, new BigDecimal("20")); // objętość = 8
     }
 
-    public static Package largeBox() {
-        return new Package(700, 10, 10, new BigDecimal("50")); // objętość = 1000
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package largeBox() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(700, 10, 10, new BigDecimal("50")); // objętość = 1000
     }
 
-    public static Package heightBox() {
-        return new Package(10, 221, 10, new BigDecimal("50")); // objętość = 1000
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package heightBox() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(10, 221, 10, new BigDecimal("50")); // objętość = 1000
     }
 
-    public static Package depthBox() {
-        return new Package(10, 10, 601, new BigDecimal("50")); // objętość = 1000
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package depthBox() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(10, 10, 601, new BigDecimal("50")); // objętość = 1000
     }
 
-    public static Package lightBox() {
-        return new Package(2, 2, 1, new BigDecimal("5"));
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package lightBox() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(2, 2, 1, new BigDecimal("5"));
     }
 
-    public static Package exact() {
-        return new Package(10, 10, 10, new BigDecimal("5"));
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package exact() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(10, 10, 10, new BigDecimal("5"));
     }
 
-    public static Package heavyBox() {
-        return new Package(4, 1, 1, new BigDecimal("20"));
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package heavyBox() {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(4, 1, 1, new BigDecimal("20"));
     }
 
-    public static Package boxThatFitsExactly(CargoSpace cargoSpace) {
-        return new Package(cargoSpace.getWidth(), cargoSpace.getHeight(), cargoSpace.getDepth(), new BigDecimal("10"));
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package boxThatFitsExactly(CargoSpace cargoSpace) {
+        return new com.io.logiflow.packageConsumer.infrastructure.dao.Package(cargoSpace.getWidth(), cargoSpace.getHeight(), cargoSpace.getDepth(), new BigDecimal("10"));
     }
 
-    public static Package aPackage(int w, int h, int d) {
-        Package p = new Package();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package aPackage(int w, int h, int d) {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p = new com.io.logiflow.packageConsumer.infrastructure.dao.Package();
         p.setWidth(w);
         p.setHeight(h);
         p.setDepth(d);
         return p;
     }
 
-    public static Package firstBoxPackToTruck() {
-        Package p1 = smallDao();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package firstBoxPackToTruck() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = smallDao();
         //  p1.setPackageId(1L);
         p1.setUuid(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
         p1.setTrackingNumber("TRK2026000000001");
@@ -84,16 +87,16 @@ public class PackageFixture {
         return p1;
     }
 
-    public static Package secondBoxPackToTruck() {
-        Package p1 = largeDao();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package secondBoxPackToTruck() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = largeDao();
         //  p1.setPackageId(2L);
         p1.setUuid(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"));
         p1.setTrackingNumber("TRK2026000000002");
         return p1;
     }
 
-    public static Package thirdBoxPackToTruck() {
-        Package p1 = mediumDao();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package thirdBoxPackToTruck() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = mediumDao();
         //  p1.setPackageId(2L);
         p1.setUuid(UUID.fromString("d81f3a6c-5e97-4b2d-8c04-f7a2b9e1d365"));
         p1.setTrackingNumber("TRK2026000000009");
@@ -104,23 +107,23 @@ public class PackageFixture {
     }
 
 
-    public static Package filterPack() {
-        Package p1 = largeDao();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package filterPack() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = largeDao();
         p1.setPackageId(2L);
         p1.setTrackingNumber("TRK2026000000002");
         return p1;
     }
 
-    public static Package packageNotSaveInDb() {
-        Package p1 = largeDao();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package packageNotSaveInDb() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = largeDao();
         p1.setUuid(UUID.fromString("7f3a2b1c-9d84-4e6f-b521-8a7c3d2e1f90"));
         p1.setTrackingNumber("TRK2026000000005");
         return p1;
     }
 
 
-    public static Package updatePackage() {
-        Package updatedPackage = new Package();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package updatePackage() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package updatedPackage = new com.io.logiflow.packageConsumer.infrastructure.dao.Package();
         updatedPackage.setPackageId(5L);
         updatedPackage.setTrackingNumber("TRK-2026-ORIGINAL"); // Numer bez zmian!
         updatedPackage.setWidth(45);                          // Zmieniona szerokość
@@ -130,13 +133,13 @@ public class PackageFixture {
         return updatedPackage;
     }
 
-    public static List<Package> sortedPackages() {
-        List<Package> localPackages = new ArrayList<>();
-        Package small = smallDao();
+    public static List<com.io.logiflow.packageConsumer.infrastructure.dao.Package> sortedPackages() {
+        List<com.io.logiflow.packageConsumer.infrastructure.dao.Package> localPackages = new ArrayList<>();
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package small = smallDao();
         small.setTrackingNumber("XYZ-SMALL");
-        Package medium = mediumDao();
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package medium = mediumDao();
         medium.setTrackingNumber("XYZ-MEDIUM");
-        Package large = largeDao();
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package large = largeDao();
         large.setTrackingNumber("XYZ-LARGE");
         localPackages.add(large);
         localPackages.add(small);
@@ -144,20 +147,20 @@ public class PackageFixture {
         return localPackages;
     }
 
-    public static List<Package> sortedPackagesDaoByWeightDescending() {
-        List<Package> localPackages = new ArrayList<>();
-        Package heavyPackage = heavyBox();
+    public static List<com.io.logiflow.packageConsumer.infrastructure.dao.Package> sortedPackagesDaoByWeightDescending() {
+        List<com.io.logiflow.packageConsumer.infrastructure.dao.Package> localPackages = new ArrayList<>();
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package heavyPackage = heavyBox();
         heavyPackage.setTrackingNumber("XYZ-HEAVY");
         localPackages.add(heavyPackage);
 
-        Package lightPackage = lightBox();
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package lightPackage = lightBox();
         lightBox().setTrackingNumber("XYZ-LIGHT");
         localPackages.add(lightPackage);
         return localPackages;
     }
 
-    public static Package createOverSizeedPackage() {
-        Package p1 = new Package();
+    public static com.io.logiflow.packageConsumer.infrastructure.dao.Package createOverSizeedPackage() {
+        com.io.logiflow.packageConsumer.infrastructure.dao.Package p1 = new Package();
         p1.setUuid(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
         p1.setTrackingNumber("TRK2026000000123");
         p1.setWeight(new BigDecimal("10"));

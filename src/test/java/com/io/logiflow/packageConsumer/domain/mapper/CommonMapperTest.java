@@ -1,9 +1,11 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.CoordinatesDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.CommonMapper;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.CommonMapperImpl;
 import org.junit.jupiter.api.Test;
 
 import static com.io.logiflow.packageConsumer.domain.dao.PackageFixture.smallDao;

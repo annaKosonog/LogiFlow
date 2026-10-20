@@ -1,7 +1,9 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
-import com.io.logiflow.packageConsumer.domain.dao.CargoSpace;
-import com.io.logiflow.packageConsumer.domain.dto.response.CargoSpaceDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dao.CargoSpace;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.CargoSpaceDTO;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.CargoSpaceMapper;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.CargoSpaceMapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

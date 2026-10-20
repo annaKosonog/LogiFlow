@@ -1,14 +1,14 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.units;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageFilterDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageCreateRequestMapper;
-import com.io.logiflow.packageConsumer.domain.mapper.PackageMapper;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.exception.ResourceNotFoundException;
-import com.io.logiflow.packageConsumer.infrastructure.service.PackageService;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageFilterDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageCreateRequestMapper;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageMapper;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
+import com.io.logiflow.packageConsumer.application.service.PackageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

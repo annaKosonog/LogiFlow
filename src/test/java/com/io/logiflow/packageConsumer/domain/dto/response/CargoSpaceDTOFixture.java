@@ -1,5 +1,7 @@
 package com.io.logiflow.packageConsumer.domain.dto.response;
 
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.CargoSpaceDTO;
+
 import java.util.UUID;
 
 import static com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTOFixture.firstCoordinate;

@@ -1,7 +1,9 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.response.CoordinatesDTO;
+import com.io.logiflow.packageConsumer.domain.CargoGrid;
+import com.io.logiflow.packageConsumer.domain.ParcelPlacementFinder;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.CoordinatesDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

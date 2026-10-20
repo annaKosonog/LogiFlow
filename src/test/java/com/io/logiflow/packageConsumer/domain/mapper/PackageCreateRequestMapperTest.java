@@ -1,9 +1,11 @@
 package com.io.logiflow.packageConsumer.domain.mapper;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackageCreateRequest;
-import com.io.logiflow.packageConsumer.domain.dto.response.DimensionsDTO;
-import com.io.logiflow.packageConsumer.domain.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateRequest;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageCreateRequestMapper;
+import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageCreateRequestMapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

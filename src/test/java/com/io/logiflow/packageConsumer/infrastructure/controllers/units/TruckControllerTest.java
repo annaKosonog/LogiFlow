@@ -1,15 +1,14 @@
 package com.io.logiflow.packageConsumer.infrastructure.controllers.units;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dto.request.CreateTruckDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.domain.dto.request.TruckFilterDto;
-import com.io.logiflow.packageConsumer.domain.dto.response.TruckDTO;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.domain.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
+import com.io.logiflow.packageConsumer.infrastructure.dto.request.TruckFilterDto;
+import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.TruckController;
-import com.io.logiflow.packageConsumer.infrastructure.service.TruckService;
+import com.io.logiflow.packageConsumer.application.service.TruckService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

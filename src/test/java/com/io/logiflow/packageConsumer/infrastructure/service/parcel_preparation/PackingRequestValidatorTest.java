@@ -1,9 +1,10 @@
 package com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparation;
 
-import com.io.logiflow.packageConsumer.domain.dao.Package;
-import com.io.logiflow.packageConsumer.domain.dao.Truck;
-import com.io.logiflow.packageConsumer.domain.repository.PackageRepository;
-import com.io.logiflow.packageConsumer.exception.ResourceAlreadyExistsException;
+import com.io.logiflow.packageConsumer.domain.PackingRequestValidator;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
+import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
