@@ -6,7 +6,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageFilterD
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageMapper;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.application.service.PackageService;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.*;
 public class PackageServiceTest {
 
     @Mock
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
     @Mock
     private PackageMapper packageMapper;
@@ -57,9 +57,9 @@ public class PackageServiceTest {
 
         Package savedEntity = firstBoxPackToTruck();
 
-        when(packageRepository.findByTrackingNumber(any())).thenReturn(null);
+        when(packageJpaRepository.findByTrackingNumber(any())).thenReturn(null);
         when(createRequestMapper.toPackageDao(any(PackageCreateRequest.class))).thenReturn(savedEntity);
-        when(packageRepository.save(any(Package.class))).thenReturn(savedEntity);
+        when(packageJpaRepository.save(any(Package.class))).thenReturn(savedEntity);
         when(packageMapper.toDTO(any(Package.class))).thenReturn(inputDto);
 
         packageService.registerNewPackage(inputRequest);
@@ -67,7 +67,7 @@ public class PackageServiceTest {
 
         verify(createRequestMapper, times(1)).toPackageDao(inputRequest);
         verify(packageMapper).toDTO(packageCaptor.capture());
-        verify(packageRepository).save(any(Package.class));
+        verify(packageJpaRepository).save(any(Package.class));
     }
 
     @Test
@@ -81,16 +81,16 @@ public class PackageServiceTest {
         mappedEntity.setUuid(null);
         mappedEntity.setTrackingNumber(inputDto.getTrackingNumber());
 
-        when(packageRepository.getNextTrackingSequenceValue()).thenReturn(seq);
+        when(packageJpaRepository.getNextTrackingSequenceValue()).thenReturn(seq);
         when(createRequestMapper.toPackageDao(any(PackageCreateRequest.class))).thenReturn(mappedEntity);
-        when(packageRepository.findByTrackingNumber(inputDto.getTrackingNumber())).thenReturn(null);
-        when(packageRepository.save(any(Package.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(packageJpaRepository.findByTrackingNumber(inputDto.getTrackingNumber())).thenReturn(null);
+        when(packageJpaRepository.save(any(Package.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(packageMapper.toDTO(any(Package.class))).thenReturn(inputDto);
 
         packageService.registerNewPackage(createRequest);
 
         ArgumentCaptor<Package> packageCaptor = ArgumentCaptor.forClass(Package.class);
-        verify(packageRepository).save(packageCaptor.capture());
+        verify(packageJpaRepository).save(packageCaptor.capture());
 
         Package savedEntity = packageCaptor.getValue();
         assertNotNull(savedEntity.getUuid(), "The entity UUID should be automatically generated and not null");
@@ -110,7 +110,7 @@ public class PackageServiceTest {
 
         PackageDTO packageDto = new PackageDTO();
 
-        when(packageRepository.findAll(any(Specification.class), any(Pageable.class)))
+        when(packageJpaRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(mockPageFromDb);
 
         when(packageMapper.toDTO(packageEntity))
@@ -126,7 +126,7 @@ public class PackageServiceTest {
         assertThat(result.getTotalElements()).isEqualTo(2);
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(packageRepository).findAll(any(Specification.class), pageableCaptor.capture());
+        verify(packageJpaRepository).findAll(any(Specification.class), pageableCaptor.capture());
 
         Pageable captured = pageableCaptor.getValue();
         assertThat(captured.getPageNumber()).isEqualTo(pageNumber - 1); // Oczekujemy 1
@@ -152,7 +152,7 @@ public class PackageServiceTest {
         Page<Package> mockPageFromDb = new PageImpl<>(List.of(packageEntity), expectedPageable, 1);
 
         // Rejestrujemy zachowanie mocków ZANIM wywołamy serwis
-        when(packageRepository.findAll(any(Specification.class), eq(expectedPageable)))
+        when(packageJpaRepository.findAll(any(Specification.class), eq(expectedPageable)))
                 .thenReturn(mockPageFromDb);
         when(packageMapper.toDTO(packageEntity))
                 .thenReturn(packageDto);
@@ -166,7 +166,7 @@ public class PackageServiceTest {
         assertThat(result.getContent().get(0)).isEqualTo(packageDto);
 
         // Weryfikujemy czy repozytorium zostało wywołane z odpowiednią paginacją
-        verify(packageRepository).findAll(any(Specification.class), eq(expectedPageable));
+        verify(packageJpaRepository).findAll(any(Specification.class), eq(expectedPageable));
     }
 
 
@@ -183,7 +183,7 @@ public class PackageServiceTest {
         assertEquals("Page size must not be less than one", exception.getMessage());
 
         // Gwarancja: Repozytorium nie powinno być w ogóle wywołane
-        verifyNoInteractions(packageRepository);
+        verifyNoInteractions(packageJpaRepository);
     }
 
     @Test
@@ -193,7 +193,7 @@ public class PackageServiceTest {
         int size = 10;
         Page<Package> emptyPageFromDb = Page.empty();
 
-        when(packageRepository.findAll(any(Specification.class), any(Pageable.class)))
+        when(packageJpaRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(emptyPageFromDb);
         Page<PackageDTO> resultPage = packageService.getPackages(null, page, size);
 
@@ -211,7 +211,7 @@ public class PackageServiceTest {
     void shouldReturnTrackNumberIfUserProvidedCorrectDate() {
         String trackingNumber = "TRK2026000000002";
 
-        when(packageRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.of(filterPack()));
+        when(packageJpaRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.of(filterPack()));
         when(packageMapper.toDTO(any(Package.class))).thenReturn(filterBoxPackDto());
 
         PackageDTO packagesByFilter = packageService.getPackagesByTrackingNumber(trackingNumber);
@@ -228,7 +228,7 @@ public class PackageServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
 
         assertEquals("Invalid tracking number format.", exception.getMessage());
-        verify(packageRepository, never()).findByTrackingNumber(trackingNumber);
+        verify(packageJpaRepository, never()).findByTrackingNumber(trackingNumber);
     }
 
     @Test
@@ -237,14 +237,14 @@ public class PackageServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
 
         assertEquals("Invalid tracking number format.", exception.getMessage());
-        verify(packageRepository, never()).findByTrackingNumber(trackingNumber);
+        verify(packageJpaRepository, never()).findByTrackingNumber(trackingNumber);
     }
 
     @Test
     void shouldThrowExceptionWhenTrackingNumberNotFound() {
         String trackingNumber = "TRK2026000000000";
 
-        when(packageRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.empty());
+        when(packageJpaRepository.findPackageByTrackingNumber(any())).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByTrackingNumber(trackingNumber));
 
@@ -255,7 +255,7 @@ public class PackageServiceTest {
     void shouldReturnUUIDIfUserProvidedCorrectDate() {
         UUID uuid = filterBoxPackDto().getId();
 
-        when(packageRepository.findPackageByUuid(any())).thenReturn(Optional.of(filterPack()));
+        when(packageJpaRepository.findPackageByUuid(any())).thenReturn(Optional.of(filterPack()));
         when(packageMapper.toDTO(any(Package.class))).thenReturn(filterBoxPackDto());
 
         PackageDTO packagesByFilter = packageService.getPackagesByUUID(uuid);
@@ -263,29 +263,29 @@ public class PackageServiceTest {
         assertNotNull(uuid);
         assertEquals("TRK2026000000002", packagesByFilter.getTrackingNumber());
 
-        verify(packageRepository, times(1)).findPackageByUuid(uuid);
+        verify(packageJpaRepository, times(1)).findPackageByUuid(uuid);
     }
 
     @Test
     void shouldThrowExceptionWhenWeDoNotProvidedUUID() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByUUID(null));
         assertEquals("Provide uuid. ", exception.getMessage());
-        verify(packageRepository, never()).findPackageByUuid(null);
-        verify(packageRepository, never()).findPackageByTrackingNumber(null);
+        verify(packageJpaRepository, never()).findPackageByUuid(null);
+        verify(packageJpaRepository, never()).findPackageByTrackingNumber(null);
     }
 
     @Test
     void shouldThrowExceptionWhenWeDoNotProvidedTrackingNumber() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> packageService.getPackagesByTrackingNumber(null));
         assertEquals("Tracking number cannot be null or blank.", exception.getMessage());
-        verify(packageRepository, never()).findPackageByUuid(null);
-        verify(packageRepository, never()).findPackageByTrackingNumber(null);
+        verify(packageJpaRepository, never()).findPackageByUuid(null);
+        verify(packageJpaRepository, never()).findPackageByTrackingNumber(null);
     }
 
     @Test
     void shouldThrowExceptionWhenUUIDNotFound() {
         UUID uuid = filterBoxPackDto().getId();
-        when(packageRepository.findPackageByUuid(any())).thenReturn(Optional.empty());
+        when(packageJpaRepository.findPackageByUuid(any())).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> packageService.getPackagesByUUID(uuid));
 

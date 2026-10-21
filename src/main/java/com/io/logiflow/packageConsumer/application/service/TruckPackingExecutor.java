@@ -13,7 +13,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.CoordinatesDT
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.ProcessFailedMapper;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.ProcessFailedRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
@@ -32,7 +32,7 @@ public class TruckPackingExecutor {
 
 
     private final TruckRepository truckRepository;
-    private final PackageRepository packageRepository;
+    private final PackageJpaRepository packageJpaRepository;
     private final ProcessFailedRepository processFailedRepository;
     private final ProcessFailedMapper processFailedMapper;
     private final ParcelPlacementFinder placementFinder;
@@ -91,7 +91,7 @@ public class TruckPackingExecutor {
             }
         }
 
-        packageRepository.saveAll(newPackages);
+        packageJpaRepository.saveAll(newPackages);
 
         truckRepository.save(truck);
 

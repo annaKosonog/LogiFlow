@@ -8,7 +8,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.request.TruckFilterDto
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
@@ -41,7 +41,7 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     private TruckRepository truckRepository;
 
     @Autowired
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
     TruckFilterDto filter = new TruckFilterDto();
 
@@ -61,15 +61,15 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
         savedFirstTruck = truckRepository.save(createLoadedTruck());
         savedSecondTruck = truckRepository.save(createLoadedSecondTruck());
 
-        savedFirstPackage = packageRepository.save(firstBoxPackToTruck());
-        savedSecondPackage = packageRepository.save(secondBoxPackToTruck());
+        savedFirstPackage = packageJpaRepository.save(firstBoxPackToTruck());
+        savedSecondPackage = packageJpaRepository.save(secondBoxPackToTruck());
         uuids = new ArrayList<>();
     }
 
     @AfterEach
     void cleanUpDatabase() {
         truckRepository.deleteAll();
-        packageRepository.deleteAll();
+        packageJpaRepository.deleteAll();
     }
 
     @Autowired
@@ -141,7 +141,7 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldAddPackagesToTruck() {
         PackingRequestDTO toPack = thirdPackingToPack();
-        packageRepository.save(thirdBoxPackToTruck());
+        packageJpaRepository.save(thirdBoxPackToTruck());
 
         PackingResultDTO result = truckService.addPackagesToTruck(toPack);
 
@@ -200,11 +200,11 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnCorrectAddPackToTruck() {
-        packageRepository.save(thirdBoxPackToTruck());
+        packageJpaRepository.save(thirdBoxPackToTruck());
         uuids.add(thirdBoxPackToTruck().getUuid());
         truckService.addPackagesToTruck(thirdPackingToPack());
 
-        List<Package> packagesOnTruck = packageRepository.findAll().stream()
+        List<Package> packagesOnTruck = packageJpaRepository.findAll().stream()
                 .filter(p -> p.getTruck() != null)
                 .filter(p -> p.getTruck().getUuid().equals(savedFirstTruck.getUuid()))
                 .toList();
@@ -218,7 +218,7 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldPackMultiplePackagesInOneCall() {
-        packageRepository.save(packageNotSaveInDb());
+        packageJpaRepository.save(packageNotSaveInDb());
         uuids.add(UUID.fromString("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"));
         uuids.add(UUID.fromString("7f3a2b1c-9d84-4e6f-b521-8a7c3d2e1f90"));
 

@@ -3,7 +3,7 @@ package com.io.logiflow.packageConsumer.infrastructure.service.parcel_preparatio
 import com.io.logiflow.packageConsumer.domain.PackingRequestValidator;
 import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
 import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class PackingRequestValidatorTest {
 
     @Mock
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
     @InjectMocks
     private PackingRequestValidator packingRequestValidator;
@@ -42,14 +42,14 @@ class PackingRequestValidatorTest {
     void setUp() {
         uuids = new ArrayList<>();
         packageList = new ArrayList<>();
-        packageRepository.flush();
+        packageJpaRepository.flush();
     }
 
     @AfterEach
     void cleanUpDatabase() {
         try {
-            packageRepository.deleteAll();
-            packageRepository.flush();
+            packageJpaRepository.deleteAll();
+            packageJpaRepository.flush();
         } catch (Exception e) {
             throw e;
         }
@@ -63,14 +63,14 @@ class PackingRequestValidatorTest {
 
     @Test
     void shouldReturnListWhenAllPackageExistsInDb() {
-        packageRepository.save(firstBoxPackToTruck());
-        packageRepository.save(thirdBoxPackToTruck());
+        packageJpaRepository.save(firstBoxPackToTruck());
+        packageJpaRepository.save(thirdBoxPackToTruck());
         packageList.add(firstBoxPackToTruck());
         packageList.add(thirdBoxPackToTruck());
 
         uuids.add(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
         uuids.add(UUID.fromString("d81f3a6c-5e97-4b2d-8c04-f7a2b9e1d365"));
-        when(packageRepository.findAllByUuidIn(anyList())).thenReturn(packageList);
+        when(packageJpaRepository.findAllByUuidIn(anyList())).thenReturn(packageList);
         List<Package> result = packingRequestValidator.resolveAndValidatePackages(uuids);
         Assertions.assertEquals(2, result.size());
     }
@@ -78,11 +78,11 @@ class PackingRequestValidatorTest {
 
     @Test
     void shouldThrowExceptionWhenOnePackageNotExistsInDb() {
-        packageRepository.save(firstBoxPackToTruck());
+        packageJpaRepository.save(firstBoxPackToTruck());
         packageList.add(firstBoxPackToTruck());
         uuids.add(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
         uuids.add(UUID.fromString("7f3a2b1c-9d84-4e6f-b521-8a7c3d2e1f90"));
-        when(packageRepository.findAllByUuidIn(anyList())).thenReturn(packageList);
+        when(packageJpaRepository.findAllByUuidIn(anyList())).thenReturn(packageList);
 
         ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> packingRequestValidator.resolveAndValidatePackages(uuids));
         Assertions.assertEquals("Unable to load: One or more packages do not exist in the database!", exception.getMessage());
@@ -91,14 +91,14 @@ class PackingRequestValidatorTest {
     @Test
     void shouldPackMultiplePackagesThatIsLoadedOntoTheTruck() {
         Package packageAlreadyLoaded = firstBoxPackToTruck();
-        packageRepository.save(firstBoxPackToTruck());
+        packageJpaRepository.save(firstBoxPackToTruck());
         Truck loadedTruck = createLoadedTruck();
         packageList.add(packageAlreadyLoaded);
         loadedTruck.setPackedPackages(packageList);
         packageAlreadyLoaded.setTruck(loadedTruck);
 
         uuids.add(UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"));
-        when(packageRepository.findAllByUuidIn(anyList())).thenReturn(packageList);
+        when(packageJpaRepository.findAllByUuidIn(anyList())).thenReturn(packageList);
         ResourceAlreadyExistsException message = assertThrows(ResourceAlreadyExistsException.class, () -> packingRequestValidator.resolveAndValidatePackages(uuids));
 
         assertEquals("The package with the number " + firstBoxPackToTruck().getTrackingNumber()

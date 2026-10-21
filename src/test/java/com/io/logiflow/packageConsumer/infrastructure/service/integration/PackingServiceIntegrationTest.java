@@ -5,7 +5,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageFilterD
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
 import com.io.logiflow.packageConsumer.application.service.PackageService;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
     @Autowired
     private PackageService packageService;
 
@@ -41,15 +41,15 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        packageRepository.save(firstBoxPackToTruck());
-        packageRepository.save(secondBoxPackToTruck());
+        packageJpaRepository.save(firstBoxPackToTruck());
+        packageJpaRepository.save(secondBoxPackToTruck());
     }
 
     @AfterEach
     public void cleanUp() {
         try {
-            packageRepository.deleteAll();
-            packageRepository.flush();
+            packageJpaRepository.deleteAll();
+            packageJpaRepository.flush();
         } catch (Exception e) {
             throw e;
         }
@@ -59,7 +59,7 @@ public class PackingServiceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldReturnANewPackage() {
         PackageCreateRequest request = smallRequest();
-        System.out.println(packageRepository.findAll());
+        System.out.println(packageJpaRepository.findAll());
         System.out.println("--------------------------------------");
 
         PackageDTO newPackage = packageService.registerNewPackage(request);

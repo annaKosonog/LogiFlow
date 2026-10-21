@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateRequest;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.UpdatePackageDimensionsRequestDTO;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,20 +36,20 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
 
     @BeforeEach
     public void setUp() {
-        packageRepository.save(firstBoxPackToTruck());
-        packageRepository.save(secondBoxPackToTruck());
+        packageJpaRepository.save(firstBoxPackToTruck());
+        packageJpaRepository.save(secondBoxPackToTruck());
     }
 
     @AfterEach
     public void cleanUp() {
         try {
-            packageRepository.deleteAll();
-            packageRepository.flush();
+            packageJpaRepository.deleteAll();
+            packageJpaRepository.flush();
         } catch (Exception e) {
             throw e;
         }
@@ -370,7 +370,7 @@ public class PackageControllerIntegrationTest extends AbstractIntegrationTest {
                 }""";
 
         System.out.println("============================================");
-        System.out.println(packageRepository.findAll());
+        System.out.println(packageJpaRepository.findAll());
 
         mockMvc.perform(patch("/api/packages/{packId}", uuid)
                         .contentType(MediaType.APPLICATION_JSON)

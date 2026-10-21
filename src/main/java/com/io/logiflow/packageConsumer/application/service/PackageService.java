@@ -8,7 +8,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.DimensionsDTO
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageCreateRequestMapper;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.PackageMapper;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.domain.validator.DimensionValidator;
 import com.io.logiflow.packageConsumer.domain.validator.PackageValidator;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PackageService {
 
-    private final PackageRepository packageRepository;
+    private final PackageJpaRepository packageJpaRepository;
     private final PackageMapper packageMapper;
     private final PackageCreateRequestMapper createRequestMapper;
 
@@ -36,10 +36,10 @@ public class PackageService {
     public PackageDTO registerNewPackage(PackageCreateRequest pack) {
         validateNewPackageRequest(pack);
 
-        long nextSeq = packageRepository.getNextTrackingSequenceValue()+1;
+        long nextSeq = packageJpaRepository.getNextTrackingSequenceValue()+1;
         Package entity = createRequestMapper.toPackageDao(pack);
         String generatedTrackingNumber = entity.generateTrackingNumberAutomatically(nextSeq);
-        String checkTrackingNumber = packageRepository.findByTrackingNumber(generatedTrackingNumber);
+        String checkTrackingNumber = packageJpaRepository.findByTrackingNumber(generatedTrackingNumber);
         if (checkTrackingNumber != null) {
             throw new RuntimeException("The package with the number " + generatedTrackingNumber + " already exist");
         }
@@ -50,7 +50,7 @@ public class PackageService {
         entity.setCoordY(0);
         entity.setCoordZ(0);
 
-        Package savedEntity = packageRepository.save(entity);
+        Package savedEntity = packageJpaRepository.save(entity);
         return packageMapper.toDTO(savedEntity);
     }
 
@@ -58,7 +58,7 @@ public class PackageService {
     public Page<PackageDTO> getPackages(PackageFilterDTO filter, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Specification<Package> specification = PackageSpecifications.buildSpecification(filter);
-        Page<Package> packPage = packageRepository.findAll(specification, pageable);
+        Page<Package> packPage = packageJpaRepository.findAll(specification, pageable);
         return packPage.map(packageMapper::toDTO);
     }
 
@@ -70,7 +70,7 @@ public class PackageService {
 
         validatePackageDimensions(fields);
 
-        Package existingPackage = packageRepository.findPackageByUuid(packId)
+        Package existingPackage = packageJpaRepository.findPackageByUuid(packId)
                 .orElseThrow(() -> new ResourceNotFoundException("Package not found"));
 
         if (fields.weight() != null) existingPackage.setWeight(fields.weight());
@@ -84,7 +84,7 @@ public class PackageService {
     @Transactional(readOnly = true)
     public PackageDTO getPackagesByUUID(UUID uuid) {
         PackageValidator.validateFilters(uuid);
-        return packageRepository.findPackageByUuid(uuid)
+        return packageJpaRepository.findPackageByUuid(uuid)
                 .map(packageMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Package with UUID number " + uuid +
                         " not found"));
@@ -93,7 +93,7 @@ public class PackageService {
     @Transactional(readOnly = true)
     public PackageDTO getPackagesByTrackingNumber(String trackingNumber) {
         PackageValidator.validateTrackingNumber(trackingNumber);
-        return packageRepository.findPackageByTrackingNumber(trackingNumber)
+        return packageJpaRepository.findPackageByTrackingNumber(trackingNumber)
                 .map(packageMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Package with tracking number " + trackingNumber +
                         " not found"));

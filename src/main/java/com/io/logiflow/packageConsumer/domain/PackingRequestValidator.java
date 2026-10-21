@@ -1,7 +1,6 @@
 package com.io.logiflow.packageConsumer.domain;
 
 import com.io.logiflow.packageConsumer.infrastructure.dao.Package;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,13 +12,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PackingRequestValidator {
 
-    private final PackageRepository packageRepository;
+    private final PackageResource resource;
 
     public List<Package> resolveAndValidatePackages(List<UUID> boxesToPack) {
         if (boxesToPack == null || boxesToPack.isEmpty()) {
             throw new ResourceAlreadyExistsException("The list of packages to be loaded cannot be empty!");
         }
-        List<Package> existingPackages = packageRepository.findAllByUuidIn(boxesToPack);
+        List<Package> existingPackages = resource.findAllByUuidIn(boxesToPack);
 
         if (existingPackages.size() != boxesToPack.size()) {
             throw new ResourceAlreadyExistsException("Unable to load: One or more packages do not exist in the database!");

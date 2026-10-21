@@ -9,7 +9,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.TruckMapper;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.application.service.CargoSpaceService;
@@ -56,7 +56,7 @@ class TruckServiceTest {
     TruckMapper truckMapper;
 
     @Mock
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
     @Mock
     private CargoSpaceService cargoSpaceService;

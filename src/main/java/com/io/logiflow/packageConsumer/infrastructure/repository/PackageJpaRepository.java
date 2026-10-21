@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface PackageRepository extends JpaRepository<Package, Long>, JpaSpecificationExecutor<Package> {
+public interface PackageJpaRepository extends JpaRepository<Package, Long>, JpaSpecificationExecutor<Package> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p.trackingNumber FROM Package p WHERE p.trackingNumber = :trackingNumber")

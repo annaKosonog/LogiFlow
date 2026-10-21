@@ -5,7 +5,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageCreateR
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackageFilterDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.UpdatePackageDimensionsRequestDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackageDTO;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.PackageController;
 import com.io.logiflow.packageConsumer.application.service.PackageService;
@@ -52,7 +52,7 @@ class PackageControllerTest {
     private PackageService packageService;
 
     @MockBean
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
     @InjectMocks
     private PackageController packageController;
@@ -70,8 +70,8 @@ class PackageControllerTest {
 
     @AfterEach
     public void cleanUp() {
-        packageRepository.deleteAll();
-        packageRepository.flush();
+        packageJpaRepository.deleteAll();
+        packageJpaRepository.flush();
     }
 
     @Test

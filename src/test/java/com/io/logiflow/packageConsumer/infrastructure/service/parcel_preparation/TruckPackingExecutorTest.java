@@ -12,7 +12,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.request.ProcessFailedR
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.CoordinatesDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResultDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.ProcessFailedMapper;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.ProcessFailedRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
@@ -48,7 +48,7 @@ class TruckPackingExecutorTest {
     TruckRepository truckRepository;
 
     @Mock
-    PackageRepository packageRepository;
+    PackageJpaRepository packageJpaRepository;
 
     @Mock
     ProcessFailedRepository processFailedRepository;
@@ -107,7 +107,7 @@ class TruckPackingExecutorTest {
 
     @Test
     void shouldReturnOnePackageThatShouldBeAddPack() {
-        packageRepository.save(firstBoxPackToTruck());
+        packageJpaRepository.save(firstBoxPackToTruck());
         UUID truckUuid = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
         UUID packageUuid = UUID.fromString("3a2b1c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d");
         uuids.add(packageUuid);

@@ -3,7 +3,7 @@ package com.io.logiflow.packageConsumer.infrastructure.controllers.integrations;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
-import com.io.logiflow.packageConsumer.infrastructure.repository.PackageRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
     private TruckRepository truckRepository;
 
     @Autowired
-    private PackageRepository packageRepository;
+    private PackageJpaRepository packageJpaRepository;
 
     @BeforeEach
     public void setUp() {
@@ -50,7 +50,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
     @AfterEach
     public void cleanUp() {
         try {
-            packageRepository.deleteAll();
+            packageJpaRepository.deleteAll();
             truckRepository.deleteAll();
         } catch (Exception e) {
             throw e;
@@ -171,7 +171,7 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn200WhenAddNewPackageToTruckThatIsNotAssignedToATruck() throws Exception {
-        packageRepository.save(thirdBoxPackToTruck());
+        packageJpaRepository.save(thirdBoxPackToTruck());
         PackingRequestDTO toPack = thirdPackingToPack();
 
         String body = objectMapper.writeValueAsString(toPack);
