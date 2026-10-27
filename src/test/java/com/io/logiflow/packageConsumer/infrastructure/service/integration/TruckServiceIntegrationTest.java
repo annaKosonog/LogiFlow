@@ -9,7 +9,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResult
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.integrations.AbstractIntegrationTest;
@@ -38,7 +38,7 @@ import static org.junit.Assert.assertThrows;
 public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private TruckRepository truckRepository;
+    private TruckJpaRepository truckJpaRepository;
 
     @Autowired
     private PackageJpaRepository packageJpaRepository;
@@ -58,8 +58,8 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        savedFirstTruck = truckRepository.save(createLoadedTruck());
-        savedSecondTruck = truckRepository.save(createLoadedSecondTruck());
+        savedFirstTruck = truckJpaRepository.save(createLoadedTruck());
+        savedSecondTruck = truckJpaRepository.save(createLoadedSecondTruck());
 
         savedFirstPackage = packageJpaRepository.save(firstBoxPackToTruck());
         savedSecondPackage = packageJpaRepository.save(secondBoxPackToTruck());
@@ -68,7 +68,7 @@ public class TruckServiceIntegrationTest extends AbstractIntegrationTest {
 
     @AfterEach
     void cleanUpDatabase() {
-        truckRepository.deleteAll();
+        truckJpaRepository.deleteAll();
         packageJpaRepository.deleteAll();
     }
 

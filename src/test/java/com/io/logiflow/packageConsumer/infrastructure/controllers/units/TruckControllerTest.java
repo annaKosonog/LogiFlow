@@ -6,7 +6,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.TruckFilterDto;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.controllers.TruckController;
 import com.io.logiflow.packageConsumer.application.service.TruckService;
 import org.junit.jupiter.api.AfterEach;
@@ -60,7 +60,7 @@ public class TruckControllerTest {
     private TruckService truckService;
 
     @MockBean
-    private TruckRepository truckRepository;
+    private TruckJpaRepository truckJpaRepository;
 
     TruckDTO mockTruckDto;
     TruckDTO secondMockTruckDto;
@@ -74,8 +74,8 @@ public class TruckControllerTest {
 
     @AfterEach
     void cleanUp() {
-        truckRepository.deleteAll();
-        truckRepository.flush();
+        truckJpaRepository.deleteAll();
+        truckJpaRepository.flush();
     }
 
     @Test
@@ -163,7 +163,7 @@ public class TruckControllerTest {
         UUID id = UUID.fromString("528e0004-a6f9-4018-bcba-87e20ad08606");
         defaultPage = new PageImpl<>(List.of(mockTruckDto), PageRequest.of(1, 5), 2);
 
-        when(truckRepository.findTruckByUuid(id)).thenReturn(Optional.of(createLoadedTruck()));
+        when(truckJpaRepository.findTruckByUuid(id)).thenReturn(Optional.of(createLoadedTruck()));
         when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
 
         mvc.perform(get("/api/trucks")
@@ -180,7 +180,7 @@ public class TruckControllerTest {
         UUID id = UUID.randomUUID();
         defaultPage = new PageImpl<>(List.of(), PageRequest.of(1, 5), 2);
 
-        when(truckRepository.findTruckByUuid(id)).thenReturn(Optional.empty());
+        when(truckJpaRepository.findTruckByUuid(id)).thenReturn(Optional.empty());
         when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
 
         mvc.perform(get("/api/trucks")
@@ -198,7 +198,7 @@ public class TruckControllerTest {
         BigDecimal maxHeight = new BigDecimal("225");
         defaultPage = new PageImpl<>(List.of(mockTruckDto, secondMockTruckDto), PageRequest.of(1, 5), 2);
 
-        when(truckRepository.findAll()).thenReturn(List.of(createLoadedTruck(), createLoadedSecondTruck()));
+        when(truckJpaRepository.findAll()).thenReturn(List.of(createLoadedTruck(), createLoadedSecondTruck()));
         when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
 
 
@@ -218,7 +218,7 @@ public class TruckControllerTest {
         BigDecimal minHeight = new BigDecimal("225");
         defaultPage = new PageImpl<>(List.of(mockTruckDto), PageRequest.of(1, 5), 2);
 
-        when(truckRepository.findAll()).thenReturn(List.of(createLoadedTruck()));
+        when(truckJpaRepository.findAll()).thenReturn(List.of(createLoadedTruck()));
         when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
 
 
@@ -236,7 +236,7 @@ public class TruckControllerTest {
         BigDecimal maxHeight = new BigDecimal("10");
         defaultPage = new PageImpl<>(List.of(), PageRequest.of(1, 5), 2);
 
-        when(truckRepository.findAll()).thenReturn(List.of(createLoadedTruck(), createLoadedSecondTruck()));
+        when(truckJpaRepository.findAll()).thenReturn(List.of(createLoadedTruck(), createLoadedSecondTruck()));
         when(truckService.getTrucks(any(TruckFilterDto.class), eq(1), eq(5))).thenReturn(defaultPage);
 
         mvc.perform(get("/api/trucks")

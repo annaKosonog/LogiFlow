@@ -10,7 +10,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.TruckMapper;
 import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.application.service.CargoSpaceService;
 import com.io.logiflow.packageConsumer.application.service.TruckService;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.*;
 class TruckServiceTest {
 
     @Mock
-    private TruckRepository truckRepository;
+    private TruckJpaRepository truckJpaRepository;
 
 
     @Mock
@@ -74,7 +74,7 @@ class TruckServiceTest {
     @BeforeEach
     void setUp() {
         truck = createLoadedTruck();
-        lenient().when(truckRepository.findTruckByUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))).thenReturn(Optional.of(truck));
+        lenient().when(truckJpaRepository.findTruckByUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))).thenReturn(Optional.of(truck));
         aPackages = new ArrayList<>();
     }
 
@@ -98,7 +98,7 @@ class TruckServiceTest {
 
         TruckDTO dto = new TruckDTO();
 
-        when(truckRepository.findAll(any(Specification.class), any(Pageable.class)))
+        when(truckJpaRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(mockPageFromDb);
 
         when(truckMapper.toDTO(savedTruck)).thenReturn(dto);
@@ -118,7 +118,7 @@ class TruckServiceTest {
 
         Page<Truck> emptyPage = Page.empty();
 
-        when(truckRepository.findAll(any(Specification.class), any(Pageable.class)))
+        when(truckJpaRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(emptyPage);
 
         Page<TruckDTO> resultPage = truckService.getTrucks(null, page, size);
@@ -145,12 +145,12 @@ class TruckServiceTest {
         try (MockedStatic<TruckSpecifications> mockedStatic = mockStatic(TruckSpecifications.class)) {
             mockedStatic.when(() -> TruckSpecifications.buildSpecification(filter))
                     .thenReturn(mockedSpec);
-            when(truckRepository.findAll(eq(mockedSpec), eq(expectedPageable)))
+            when(truckJpaRepository.findAll(eq(mockedSpec), eq(expectedPageable)))
                     .thenReturn(truckPage);
 
             truckService.getTrucks(filter, page, size);
 
-            verify(truckRepository).findAll(mockedSpec, PageRequest.of(2, 5));
+            verify(truckJpaRepository).findAll(mockedSpec, PageRequest.of(2, 5));
         }
     }
 
@@ -169,8 +169,8 @@ class TruckServiceTest {
         CreateTruckDTO createTruck = createSecondTruck();
         String license_plate = "W0 1234";
 
-        when(truckRepository.existsByLicensePlate(license_plate)).thenReturn(false);
-        when(truckRepository.save(any(Truck.class))).thenReturn(createLoadedSecondTruck());
+        when(truckJpaRepository.existsByLicensePlate(license_plate)).thenReturn(false);
+        when(truckJpaRepository.save(any(Truck.class))).thenReturn(createLoadedSecondTruck());
         when(truckMapper.toTruckResponseDTO(any(Truck.class))).thenReturn(secondCreateTruckResponse());
         when(cargoSpaceService.addNewCargoSpaceToTruck(any(Truck.class), any(DimensionsDTO.class))).thenReturn(boxFits());
 
@@ -180,7 +180,7 @@ class TruckServiceTest {
         assertThat(addTruck.uuid())
                 .isEqualTo(UUID.fromString("c771f079-fb74-4811-b491-e78673c41e0d"));
 
-        verify(truckRepository).save(any(Truck.class));
+        verify(truckJpaRepository).save(any(Truck.class));
         verify(cargoSpaceService).addNewCargoSpaceToTruck(any(Truck.class), any(DimensionsDTO.class));
     }
 
@@ -202,7 +202,7 @@ class TruckServiceTest {
     void shouldThrowExceptionWhenLicensePlateIsExists() {
         String license_plate = "WI 1234E";
 
-        when(truckRepository.existsByLicensePlate(license_plate)).thenReturn(true);
+        when(truckJpaRepository.existsByLicensePlate(license_plate)).thenReturn(true);
 
         ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class, () -> truckService.createTruck(createFirstTruck()));
         assertEquals("The truck with license plate WI 1234E already exists", exception.getMessage());

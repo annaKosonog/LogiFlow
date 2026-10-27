@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TruckRepository extends JpaRepository<Truck, Long>, JpaSpecificationExecutor<Truck> {
+public interface TruckJpaRepository extends JpaRepository<Truck, Long>, JpaSpecificationExecutor<Truck> {
 
     @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
     @Query("SELECT t FROM Truck t LEFT JOIN FETCH t.packedPackages WHERE t.uuid = :uuid")

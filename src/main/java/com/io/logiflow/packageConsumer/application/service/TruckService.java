@@ -1,5 +1,6 @@
 package com.io.logiflow.packageConsumer.application.service;
 
+import com.io.logiflow.packageConsumer.domain.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.dao.Truck;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
@@ -8,7 +9,6 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResult
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.response.TruckResponseDTO;
 import com.io.logiflow.packageConsumer.infrastructure.mapper.TruckMapper;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceAlreadyExistsException;
 import com.io.logiflow.packageConsumer.infrastructure.exception.TruckPackingConflictException;
 import com.io.logiflow.packageConsumer.infrastructure.specification.TruckSpecifications;

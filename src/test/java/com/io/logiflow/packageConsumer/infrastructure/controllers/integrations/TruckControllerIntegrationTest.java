@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.CreateTruckDTO;
 import com.io.logiflow.packageConsumer.infrastructure.dto.request.PackingRequestDTO;
 import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,22 +36,22 @@ public class TruckControllerIntegrationTest extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private TruckRepository truckRepository;
+    private TruckJpaRepository truckJpaRepository;
 
     @Autowired
     private PackageJpaRepository packageJpaRepository;
 
     @BeforeEach
     public void setUp() {
-        truckRepository.save(createLoadedTruck());
-        truckRepository.save(createLoadedSecondTruck());
+        truckJpaRepository.save(createLoadedTruck());
+        truckJpaRepository.save(createLoadedSecondTruck());
     }
 
     @AfterEach
     public void cleanUp() {
         try {
             packageJpaRepository.deleteAll();
-            truckRepository.deleteAll();
+            truckJpaRepository.deleteAll();
         } catch (Exception e) {
             throw e;
         }

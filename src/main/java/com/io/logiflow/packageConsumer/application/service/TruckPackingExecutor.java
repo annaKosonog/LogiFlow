@@ -15,7 +15,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResult
 import com.io.logiflow.packageConsumer.infrastructure.mapper.ProcessFailedMapper;
 import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.ProcessFailedRepository;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ import java.util.UUID;
 public class TruckPackingExecutor {
 
 
-    private final TruckRepository truckRepository;
+    private final TruckJpaRepository truckJpaRepository;
     private final PackageJpaRepository packageJpaRepository;
     private final ProcessFailedRepository processFailedRepository;
     private final ProcessFailedMapper processFailedMapper;
@@ -40,7 +40,7 @@ public class TruckPackingExecutor {
 
     @Transactional
     public PackingResultDTO tryAddPackages(PackingRequestDTO packages) {
-        Truck truck = truckRepository.findTruckByUuid(packages.truckId())
+        Truck truck = truckJpaRepository.findTruckByUuid(packages.truckId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "The truck with the id " + packages.truckId() + " does not exist"));
 
@@ -93,7 +93,7 @@ public class TruckPackingExecutor {
 
         packageJpaRepository.saveAll(newPackages);
 
-        truckRepository.save(truck);
+        truckJpaRepository.save(truck);
 
         List<UUID> packedUuids = successfullyPlaced.stream()
                 .map(Package::getUuid)

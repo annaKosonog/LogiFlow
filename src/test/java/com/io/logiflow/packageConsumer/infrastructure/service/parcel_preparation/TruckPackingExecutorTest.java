@@ -14,7 +14,7 @@ import com.io.logiflow.packageConsumer.infrastructure.dto.response.PackingResult
 import com.io.logiflow.packageConsumer.infrastructure.mapper.ProcessFailedMapper;
 import com.io.logiflow.packageConsumer.infrastructure.repository.PackageJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.repository.ProcessFailedRepository;
-import com.io.logiflow.packageConsumer.infrastructure.repository.TruckRepository;
+import com.io.logiflow.packageConsumer.infrastructure.repository.TruckJpaRepository;
 import com.io.logiflow.packageConsumer.infrastructure.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
 class TruckPackingExecutorTest {
 
     @Mock
-    TruckRepository truckRepository;
+    TruckJpaRepository truckJpaRepository;
 
     @Mock
     PackageJpaRepository packageJpaRepository;
@@ -113,7 +113,7 @@ class TruckPackingExecutorTest {
         uuids.add(packageUuid);
         packagesToPack.add(package1);
 
-        when(truckRepository.findTruckByUuid(truckUuid)).thenReturn(Optional.of(truck));
+        when(truckJpaRepository.findTruckByUuid(truckUuid)).thenReturn(Optional.of(truck));
         when(packingRequestValidator.resolveAndValidatePackages(anyList())).thenReturn(List.of(package1));
         when(placementFinder.findFreePosition(
                 any(CargoGrid.class),
@@ -137,7 +137,7 @@ class TruckPackingExecutorTest {
         packagesToPack.add(package1);
         packagesToPack.add(package2);
 
-        when(truckRepository.findTruckByUuid(truckUuid)).thenReturn(Optional.of(loadedTruck));
+        when(truckJpaRepository.findTruckByUuid(truckUuid)).thenReturn(Optional.of(loadedTruck));
         when(packingRequestValidator.resolveAndValidatePackages(anyList())).thenReturn(packagesToPack);
         when(placementFinder.findFreePosition(
                 any(CargoGrid.class),
@@ -169,7 +169,7 @@ class TruckPackingExecutorTest {
         packagesToPack.add(package2);
         packagesToPack.add(package3);
 
-        when(truckRepository.findTruckByUuid(any())).thenReturn(Optional.of(truck));
+        when(truckJpaRepository.findTruckByUuid(any())).thenReturn(Optional.of(truck));
         when(packingRequestValidator.resolveAndValidatePackages(anyList())).thenReturn(packagesToPack);
         when(processFailedMapper.toEntityRequest(any(ProcessFailedRequestDto.class))).thenReturn(onlyOneElementDoNotFits());
 
